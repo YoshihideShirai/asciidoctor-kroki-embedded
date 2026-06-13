@@ -146,6 +146,10 @@ wavedrom::diagrams/timing.wavedrom[]
 
 bytefield::diagrams/register.bytefield[]
 
+== Local Image Boundary
+
+image::images/local-preview.svg[Local preview image]
+
 == Remote Image Boundary
 
 image::https://example.com/should-not-load.png[Remote image should be blocked]

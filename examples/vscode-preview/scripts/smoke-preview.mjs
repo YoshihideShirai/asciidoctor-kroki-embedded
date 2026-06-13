@@ -111,6 +111,8 @@ async function smokeViewport(browser, viewport) {
       images: images.map((image) => ({
         src: image.getAttribute('src'),
         alt: image.getAttribute('alt'),
+        width: image.getBoundingClientRect().width,
+        height: image.getBoundingClientRect().height,
       })),
     }
   })
@@ -172,5 +174,13 @@ function assertViewportResult({ viewport, result, pageErrors, remoteRequests }) 
   }
   if (!result.images.some((image) => image.alt === 'Remote image should be blocked' && image.src.startsWith('data:image/gif;base64,'))) {
     throw new Error(`${prefix} Remote image was not rewritten: ${JSON.stringify(result.images)}`)
+  }
+  if (!result.images.some((image) => (
+    image.alt === 'Local preview image' &&
+    /^file:.*\/fixtures\/images\/local-preview\.svg$/i.test(image.src) &&
+    image.width >= 1 &&
+    image.height >= 1
+  ))) {
+    throw new Error(`${prefix} Local image was not rendered from the fixture: ${JSON.stringify(result.images)}`)
   }
 }
