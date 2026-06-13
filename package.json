@@ -1,0 +1,31 @@
+{
+  "name": "asciidoctor-kroki-embedded",
+  "version": "0.1.0",
+  "description": "Asciidoctor.js extension that emits Kroki-compatible diagrams without contacting a Kroki server.",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./html": "./src/html.js"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "peerDependencies": {
+    "@asciidoctor/core": ">=2 <5"
+  },
+  "keywords": [
+    "asciidoctor",
+    "kroki",
+    "diagram",
+    "embedded",
+    "offline"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  }
+}
