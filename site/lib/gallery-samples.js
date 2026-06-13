@@ -8,6 +8,101 @@ User -> Doc: write diagram block
 Doc -> Renderer: embedded target
 Renderer --> User: SVG preview
 @enduml` },
+  { type: 'plantuml', title: 'ユースケース', description: '利用者とシステムの境界、主要な機能、外部サービスとの関係を整理できます。', source: `@startuml
+skinparam backgroundColor transparent
+left to right direction
+actor Author
+actor Reviewer
+rectangle "Documentation site" {
+  usecase "Write AsciiDoc" as Write
+  usecase "Preview diagrams" as Preview
+  usecase "Publish pages" as Publish
+}
+Author --> Write
+Author --> Preview
+Reviewer --> Preview
+Preview ..> Publish : approve
+@enduml` },
+  { type: 'plantuml', title: 'クラス', description: 'クラスやインターフェイスの責務、属性、メソッド、関連を設計メモに残せます。', source: `@startuml
+skinparam backgroundColor transparent
+interface DiagramRenderer {
+  +render(source)
+}
+class PlantUmlRenderer {
+  +render(source)
+}
+class GalleryCard {
+  +type
+  +source
+  +hydrate()
+}
+DiagramRenderer <|.. PlantUmlRenderer
+GalleryCard --> DiagramRenderer
+@enduml` },
+  { type: 'plantuml', title: 'アクティビティ', description: '処理手順、分岐、並列作業をフローチャートとして表現できます。', source: `@startuml
+skinparam backgroundColor transparent
+start
+:Load AsciiDoc block;
+if (diagram type supported?) then (yes)
+  :Render SVG locally;
+  :Insert preview;
+else (no)
+  :Show readable error;
+endif
+stop
+@enduml` },
+  { type: 'plantuml', title: '状態遷移', description: '画面、ジョブ、接続などの状態とイベントによる遷移を確認できます。', source: `@startuml
+skinparam backgroundColor transparent
+[*] --> Editing
+Editing --> Previewing : save
+Previewing --> Editing : fix source
+Previewing --> Published : approve
+Published --> Editing : revise
+Published --> [*]
+@enduml` },
+  { type: 'plantuml', title: 'コンポーネント', description: 'モジュール間の依存や提供インターフェイスを俯瞰できます。', source: `@startuml
+skinparam backgroundColor transparent
+package "Browser preview" {
+  [AsciiDoc parser] --> [Embedded diagram]
+  [Embedded diagram] --> [Hydrator]
+  [Hydrator] --> [PlantUML core]
+}
+[PlantUML core] --> [SVG output]
+@enduml` },
+  { type: 'plantuml', title: '配置', description: 'ノード、実行環境、成果物の配置関係をインフラ説明に使えます。', source: `@startuml
+skinparam backgroundColor transparent
+node "Developer browser" {
+  artifact "gallery page"
+  component "local renderer"
+}
+node "GitHub Pages" {
+  artifact "static assets"
+}
+"gallery page" --> "local renderer"
+"static assets" --> "gallery page"
+@enduml` },
+  { type: 'plantuml', title: 'マインドマップ', description: 'アイデア、要件、章立てをツリー状に広げて整理できます。', source: `@startmindmap
+skinparam backgroundColor transparent
+* PlantUML
+** UML
+*** Sequence
+*** Class
+*** State
+** Planning
+*** Mind map
+*** Gantt
+** Operations
+*** Deployment
+*** Component
+@endmindmap` },
+  { type: 'plantuml', title: 'ガントチャート', description: 'リリース作業やレビュー工程の日程、依存関係を簡潔に示せます。', source: `@startgantt
+skinparam backgroundColor transparent
+project starts 2026-06-01
+[Collect examples] lasts 3 days
+[Render gallery] starts at [Collect examples]'s end and lasts 4 days
+[Review diagrams] starts at [Render gallery]'s end and lasts 2 days
+[Publish] happens at [Review diagrams]'s end
+@endgantt` },
   { type: 'mermaid', title: 'フロー', description: '分岐、パイプライン、状態の流れを短い記法で表現できます。', source: `flowchart LR
   Idea[Idea] --> Draft[AsciiDoc]
   Draft --> Preview{Preview OK?}
