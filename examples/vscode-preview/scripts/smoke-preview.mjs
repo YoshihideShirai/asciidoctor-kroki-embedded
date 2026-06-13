@@ -137,10 +137,13 @@ async function smokeViewport(browser, viewport) {
   }
 }
 
-function assertViewportResult({ viewport, result, pageErrors, remoteRequests }) {
+function assertViewportResult({ viewport, result, consoleMessages, pageErrors, remoteRequests }) {
   const prefix = `[${viewport.name}]`
   if (pageErrors.length > 0) {
     throw new Error(`${prefix} Page errors:\n${pageErrors.join('\n')}`)
+  }
+  if (consoleMessages.length > 0) {
+    throw new Error(`${prefix} Console warnings/errors:\n${consoleMessages.join('\n')}`)
   }
   if (remoteRequests.length > 0) {
     throw new Error(`${prefix} Remote network requests:\n${remoteRequests.join('\n')}`)
