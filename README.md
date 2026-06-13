@@ -98,6 +98,20 @@ import 'asciidoctor-kroki-embedded/style.css'
 
 Use it as a starting point for hiding source payloads, sizing SVG output, and presenting renderer errors.
 
+## VS Code Validation Harness
+
+This repository includes a sample VS Code extension under `examples/vscode-preview`.
+It converts `fixtures/sample.adoc` with this package and hydrates Mermaid, PlantUML, Nomnoml, Vega, Vega-Lite, WaveDrom, and Bytefield diagrams in a Webview using bundled local libraries.
+
+```sh
+cd examples/vscode-preview
+npm install
+npm run build
+code .
+```
+
+Then launch the extension development host, open `fixtures/sample.adoc`, and run `AsciiDoc: Open Kroki Embedded Preview`.
+
 ## Security Boundary
 
 Block macros such as `plantuml::diagram.puml[]` read local relative files under the AsciiDoc document base directory. Remote URLs, absolute paths, and path traversal outside the document directory are rejected.
