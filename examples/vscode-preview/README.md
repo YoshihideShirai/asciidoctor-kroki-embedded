@@ -21,7 +21,7 @@ In the Extension Development Host, run:
 AsciiDoc: Open Kroki Embedded Preview
 ```
 
-The preview should render Mermaid, PlantUML, Nomnoml, Vega, Vega-Lite, WaveDrom, and Bytefield without using a Kroki server. Edits to the active fixture refresh the preview automatically; `AsciiDoc: Refresh Kroki Embedded Preview` forces a redraw.
+The preview should render Mermaid, PlantUML, Nomnoml, Vega, Vega-Lite, WaveDrom, and Bytefield without using a Kroki server. The fixture covers both inline diagram blocks and local diagram macros such as `mermaid::diagrams/macro.mmd[]`. Edits to the active fixture refresh the preview automatically; `AsciiDoc: Refresh Kroki Embedded Preview` forces a redraw.
 
 For an automated browser smoke check of the same Webview bundle:
 

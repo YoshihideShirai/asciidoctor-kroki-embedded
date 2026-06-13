@@ -95,6 +95,33 @@ test('converts a Kroki-compatible block macro from a local file', () => {
   assert.match(html, /A --&gt; B/)
 })
 
+test('converts multiple Kroki-compatible block macros from local files', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kroki-embedded-asciidoctor-'))
+  fs.mkdirSync(path.join(tmpDir, 'diagrams'))
+  fs.writeFileSync(path.join(tmpDir, 'diagrams', 'sequence.puml'), 'Alice -> Bob\n')
+  fs.writeFileSync(path.join(tmpDir, 'diagrams', 'model.nomnoml'), '[A] -> [B]\n')
+  fs.writeFileSync(path.join(tmpDir, 'diagrams', 'register.bytefield'), '{ reg: [{ bits: 8, name: "opcode" }] }\n')
+
+  const html = convert(`
+plantuml::diagrams/sequence.puml[]
+
+nomnoml::diagrams/model.nomnoml[]
+
+bytefield::diagrams/register.bytefield[]
+`, {
+    convertOptions: {
+      base_dir: tmpDir,
+    },
+  })
+
+  assert.match(html, /data-diagram-type="plantuml"/)
+  assert.match(html, /data-diagram-type="nomnoml"/)
+  assert.match(html, /data-diagram-type="bytefield"/)
+  assert.match(html, /Alice -&gt; Bob/)
+  assert.match(html, /\[A\] -&gt; \[B\]/)
+  assert.match(html, /opcode/)
+})
+
 test('renders a local file boundary error for unsafe block macro targets', () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kroki-embedded-asciidoctor-'))
 

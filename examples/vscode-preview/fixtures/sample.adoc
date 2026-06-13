@@ -129,3 +129,13 @@ Bob --> Alice: SVG
   ]
 }
 ----
+
+== Local Diagram Macros
+
+mermaid::diagrams/macro.mmd[]
+
+plantuml::diagrams/sequence.puml[]
+
+nomnoml::diagrams/model.nomnoml[]
+
+bytefield::diagrams/register.bytefield[]

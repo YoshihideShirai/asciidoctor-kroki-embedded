@@ -1,0 +1,7 @@
+{
+  reg: [
+    { bits: 4, name: "type" },
+    { bits: 12, name: "length" },
+    { bits: 16, name: "checksum" }
+  ]
+}

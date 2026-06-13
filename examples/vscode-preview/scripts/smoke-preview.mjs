@@ -6,6 +6,7 @@ import { chromium } from 'playwright'
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const previewPath = path.join(rootDir, 'dist', 'standalone-preview.html')
 const screenshotPath = path.join(rootDir, 'dist', 'standalone-preview.png')
+const expectedDiagramCount = 11
 
 if (!fs.existsSync(previewPath)) {
   throw new Error(`Preview HTML does not exist: ${previewPath}`)
@@ -37,11 +38,11 @@ page.on('request', (request) => {
 })
 
 await page.goto(pathToFileURL(previewPath).href)
-await page.waitForFunction(() => {
+await page.waitForFunction((count) => {
   const diagrams = Array.from(document.querySelectorAll('.kroki-embedded[data-diagram-type]'))
-  return diagrams.length === 7 && diagrams.every((diagram) =>
+  return diagrams.length === count && diagrams.every((diagram) =>
     diagram.dataset.rendered === 'true' || diagram.classList.contains('kroki-embedded-failed'))
-}, { timeout: 30000 })
+}, expectedDiagramCount, { timeout: 30000 })
 
 const result = await page.evaluate(() => {
   const diagrams = Array.from(document.querySelectorAll('.kroki-embedded[data-diagram-type]'))
@@ -55,6 +56,10 @@ const result = await page.evaluate(() => {
         message: diagram.querySelector('.kroki-embedded-output')?.textContent || '',
       })),
     svgCount: document.querySelectorAll('.kroki-embedded-output svg, .mermaid svg').length,
+    byType: diagrams.reduce((counts, diagram) => {
+      counts[diagram.dataset.diagramType] = (counts[diagram.dataset.diagramType] || 0) + 1
+      return counts
+    }, {}),
   }
 })
 
@@ -70,7 +75,7 @@ if (remoteRequests.length > 0) {
 if (result.failed.length > 0) {
   throw new Error(`Renderer failures:\n${JSON.stringify(result.failed, null, 2)}`)
 }
-if (result.total !== 7 || result.rendered !== 7 || result.svgCount < 7) {
+if (result.total !== expectedDiagramCount || result.rendered !== expectedDiagramCount || result.svgCount < expectedDiagramCount) {
   throw new Error(`Unexpected render result: ${JSON.stringify(result)}`)
 }
 
