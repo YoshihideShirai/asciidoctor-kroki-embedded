@@ -1,0 +1,775 @@
+---
+import '../../src/style.css'
+
+const {
+  lang,
+  description,
+  alternateHref,
+  alternateLabel,
+  lead,
+  primaryAction,
+  heroVisualPolicy,
+  valueAria,
+  valueProps,
+  playgroundTitle,
+  playgroundBody,
+  details,
+} = Astro.props
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content={description}
+    />
+    <title>asciidoctor-kroki-embedded</title>
+  </head>
+  <body>
+    <main>
+      <nav class="language-nav" aria-label="Language">
+        <a href={alternateHref}>{alternateLabel}</a>
+      </nav>
+
+      <section class="hero" aria-labelledby="title">
+        <div class="hero-copy">
+          <p class="eyebrow">Kroki-compatible local rendering</p>
+          <h1 id="title">asciidoctor-kroki-embedded</h1>
+          <p class="lead">{lead}</p>
+          <div class="hero-actions" aria-label="Primary actions">
+            <a href="#playground">{primaryAction}</a>
+            <code>npm install asciidoctor-kroki-embedded</code>
+          </div>
+        </div>
+
+        <div class="hero-visual" aria-label="Rendering flow">
+          <div>
+            <span>AsciiDoc</span>
+            <pre>[plantuml]
+----
+Alice -> Bob: hello
+----</pre>
+          </div>
+          <div>
+            <span>Embedded target</span>
+            <pre>&lt;figure data-diagram-type="plantuml"&gt;
+  &lt;pre&gt;Alice -> Bob...&lt;/pre&gt;
+  &lt;div class="kroki-embedded-output"&gt;&lt;/div&gt;
+&lt;/figure&gt;</pre>
+          </div>
+          <div>
+            <span>Local hydration</span>
+            <p>{heroVisualPolicy}</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="value-props" aria-label={valueAria}>
+        {valueProps.map((item) => (
+          <article>
+            <h2>{item.title}</h2>
+            <p set:html={item.body} />
+          </article>
+        ))}
+      </section>
+
+      <section id="playground" class="playground-section" aria-labelledby="playground-title">
+        <div class="section-heading">
+          <p class="eyebrow">Try the embedded renderers</p>
+          <h2 id="playground-title">{playgroundTitle}</h2>
+          <p>{playgroundBody}</p>
+        </div>
+
+        <div class="playground" aria-label="Renderer playground">
+          <form class="controls">
+            <label>
+              <span>Renderer</span>
+              <select id="diagram-type" name="diagram-type">
+                <option value="plantuml">PlantUML</option>
+                <option value="mermaid">Mermaid</option>
+                <option value="nomnoml">Nomnoml</option>
+                <option value="vegalite">Vega-Lite</option>
+                <option value="vega">Vega</option>
+                <option value="wavedrom">WaveDrom</option>
+                <option value="bytefield">Bytefield</option>
+              </select>
+            </label>
+            <button id="render-button" type="submit">Render</button>
+          </form>
+
+          <div class="workbench">
+            <label class="editor-pane">
+              <span>Source</span>
+              <textarea id="diagram-source" spellcheck="false"></textarea>
+            </label>
+            <section class="preview-pane" aria-live="polite" aria-label="Preview">
+              <div class="preview-heading">
+                <span>Preview</span>
+                <output id="render-status">ready</output>
+              </div>
+              <div id="preview-output" class="preview-output"></div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <section class="details" aria-label="Project details">
+        {details.map((item) => (
+          <div>
+            <h2>{item.title}</h2>
+            <p set:html={item.body} />
+          </div>
+        ))}
+      </section>
+    </main>
+
+    <script>
+      import asciidoctorFactory from '@asciidoctor/core'
+      import { renderToString } from '@plantuml/core'
+      import bitfield from 'bit-field'
+      import JSON5 from 'json5'
+      import mermaid from 'mermaid'
+      import nomnoml from 'nomnoml'
+      import * as vega from 'vega'
+      import * as vegaInterpreter from 'vega-interpreter'
+      import * as vegaLite from 'vega-lite'
+      import WaveDrom from 'wavedrom'
+      import waveSkin from 'wavedrom/skins/default.js'
+      import { hydrateEmbeddedDiagrams, installNetworkGuards } from '../../src/browser.js'
+      import { registerBrowserDiagrams } from '../lib/browser-kroki.js'
+
+      const samples = {
+        plantuml: `@startuml
+skinparam backgroundColor transparent
+actor Writer
+participant "AsciiDoc" as Doc
+participant "Embedded target" as Target
+participant "Local renderer" as Renderer
+
+Writer -> Doc: diagram block
+Doc -> Target: inert HTML
+Target -> Renderer: hydrate in browser
+Renderer --> Writer: SVG preview
+@enduml`,
+        mermaid: `flowchart LR
+  A[AsciiDoc source] --> B{Kroki block?}
+  B -->|yes| C[Embedded HTML target]
+  C --> D[Local renderer]
+  D --> E[SVG in host page]`,
+        nomnoml: `[Source] -> [Embedded target]
+[Embedded target] -> [Hydration]
+[Hydration] -> [Local SVG]`,
+        vegalite: `{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "description": "Renderer confidence by diagram type.",
+  "data": {
+    "values": [
+      { "type": "Mermaid", "score": 7 },
+      { "type": "PlantUML", "score": 8 },
+      { "type": "Vega-Lite", "score": 6 },
+      { "type": "WaveDrom", "score": 5 }
+    ]
+  },
+  "mark": { "type": "bar", "cornerRadiusEnd": 3 },
+  "encoding": {
+    "x": { "field": "score", "type": "quantitative" },
+    "y": { "field": "type", "type": "nominal", "sort": "-x" },
+    "color": { "value": "#0f766e" }
+  }
+}`,
+        vega: `{
+  "$schema": "https://vega.github.io/schema/vega/v6.json",
+  "width": 300,
+  "height": 120,
+  "padding": 8,
+  "data": [
+    {
+      "name": "table",
+      "values": [
+        { "x": 0, "y": 28 },
+        { "x": 1, "y": 55 },
+        { "x": 2, "y": 43 },
+        { "x": 3, "y": 81 }
+      ]
+    }
+  ],
+  "scales": [
+    { "name": "x", "type": "point", "domain": { "data": "table", "field": "x" }, "range": "width" },
+    { "name": "y", "type": "linear", "domain": { "data": "table", "field": "y" }, "range": "height", "nice": true }
+  ],
+  "marks": [
+    {
+      "type": "line",
+      "from": { "data": "table" },
+      "encode": {
+        "enter": {
+          "x": { "scale": "x", "field": "x" },
+          "y": { "scale": "y", "field": "y" },
+          "stroke": { "value": "#0f766e" },
+          "strokeWidth": { "value": 3 }
+        }
+      }
+    }
+  ]
+}`,
+        wavedrom: `{ signal: [
+  { name: "clk", wave: "p....." },
+  { name: "req", wave: "01.0.." },
+  { name: "ack", wave: "0.10.." },
+  { name: "bus", wave: "x.345x", data: ["A", "B", "C"] }
+]}`,
+        bytefield: `{
+  reg: [
+    { bits: 7, name: "opcode" },
+    { bits: 5, name: "rd" },
+    { bits: 5, name: "rs1" },
+    { bits: 3, name: "funct3" },
+    { bits: 12, name: "imm" }
+  ]
+}`,
+      }
+
+      const diagramType = document.querySelector('#diagram-type')
+      const source = document.querySelector('#diagram-source')
+      const preview = document.querySelector('#preview-output')
+      const status = document.querySelector('#render-status')
+      const form = document.querySelector('.controls')
+      const asciidoctor = asciidoctorFactory()
+
+      globalThis.WaveSkin = waveSkin
+      installNetworkGuards(globalThis)
+      mermaid.initialize({
+        startOnLoad: false,
+        securityLevel: 'strict',
+        theme: 'default',
+      })
+
+      function renderPlantUml(sourceText) {
+        return new Promise((resolve, reject) => {
+          try {
+            renderToString(
+              sourceText.split(/\r\n|\r|\n/),
+              (svg) => resolve(svg),
+              (message) => reject(new Error(String(message || 'PlantUML rendering failed'))),
+            )
+          } catch (error) {
+            reject(error)
+          }
+        })
+      }
+
+      function createAsciiDoc(type, sourceText) {
+        return `[${type}]
+----
+${sourceText}
+----`
+      }
+
+      async function renderPreview() {
+        const type = diagramType.value
+        status.value = 'rendering'
+        preview.textContent = ''
+
+        try {
+          const registry = asciidoctor.Extensions.create()
+          registerBrowserDiagrams(registry, {
+            defaultFormat: 'svg',
+            diagramNames: Object.keys(samples),
+          })
+
+          preview.innerHTML = String(asciidoctor.convert(createAsciiDoc(type, source.value), {
+            safe: 'safe',
+            backend: 'html5',
+            standalone: false,
+            extension_registry: registry,
+            attributes: {
+              'allow-uri-read': false,
+            },
+          }))
+
+          const results = await hydrateEmbeddedDiagrams(preview, {
+            libraries: {
+              mermaid,
+              nomnoml,
+              vega,
+              vegaLite,
+              vegaInterpreter,
+              WaveDrom,
+              JSON5,
+              bitfield,
+            },
+            renderers: {
+              plantuml: async ({ source: sourceText, output }) => {
+                output.innerHTML = await renderPlantUml(sourceText)
+              },
+            },
+          })
+          const failed = results.find((result) => !result.ok)
+          status.value = failed || results.length === 0 ? 'failed' : 'rendered'
+        } catch (error) {
+          preview.innerHTML = `<pre class="site-error"></pre>`
+          preview.querySelector('.site-error').textContent =
+            error instanceof Error ? error.message : String(error)
+          status.value = 'failed'
+        }
+      }
+
+      diagramType.addEventListener('change', () => {
+        source.value = samples[diagramType.value]
+        renderPreview()
+      })
+
+      form.addEventListener('submit', (event) => {
+        event.preventDefault()
+        renderPreview()
+      })
+
+      source.value = samples[diagramType.value]
+      renderPreview()
+    </script>
+  </body>
+</html>
+
+<style>
+  :root {
+    color-scheme: light;
+    --ink: #14211f;
+    --muted: #5a6865;
+    --paper: #f7f5ef;
+    --surface: #ffffff;
+    --line: #cfd8d4;
+    --accent: #0f766e;
+    --accent-strong: #115e59;
+    --warm: #b45309;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    color: var(--ink);
+    background:
+      linear-gradient(180deg, rgba(15, 118, 110, 0.08), transparent 34rem),
+      var(--paper);
+    font-family:
+      Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+      sans-serif;
+    line-height: 1.55;
+  }
+
+  main {
+    width: min(1180px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: 28px 0 48px;
+  }
+
+  .language-nav {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .language-nav a {
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 7px 10px;
+    color: var(--accent-strong);
+    background: rgba(255, 255, 255, 0.82);
+    font-size: 0.88rem;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .language-nav a:hover,
+  .language-nav a:focus-visible {
+    border-color: var(--accent);
+    background: rgba(15, 118, 110, 0.08);
+  }
+
+  .hero {
+    min-height: min(760px, calc(100svh - 32px));
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+    gap: 24px;
+    align-items: center;
+    padding: clamp(28px, 6vw, 72px) 0 36px;
+  }
+
+  .hero-visual,
+  .value-props > article,
+  .playground,
+  .details > div {
+    min-width: 0;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.88);
+    box-shadow: 0 18px 48px rgba(20, 33, 31, 0.08);
+  }
+
+  .hero-copy {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .eyebrow {
+    margin: 0 0 16px;
+    color: var(--accent-strong);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  h1,
+  h2,
+  p {
+    overflow-wrap: anywhere;
+  }
+
+  h1 {
+    margin: 0;
+    max-width: 13ch;
+    font-size: clamp(2.4rem, 6vw, 5.4rem);
+    line-height: 0.96;
+    letter-spacing: 0;
+  }
+
+  .lead {
+    margin: 24px 0 0;
+    color: var(--muted);
+    font-size: clamp(1.02rem, 2vw, 1.22rem);
+    max-width: 680px;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-top: 28px;
+  }
+
+  .hero-actions a,
+  .hero-actions code {
+    border: 1px solid rgba(15, 118, 110, 0.28);
+    border-radius: 6px;
+    padding: 10px 12px;
+    text-decoration: none;
+  }
+
+  .hero-actions a {
+    color: white;
+    background: var(--accent);
+    border-color: var(--accent);
+    font-weight: 800;
+  }
+
+  .hero-actions a:hover,
+  .hero-actions a:focus-visible {
+    background: var(--accent-strong);
+  }
+
+  .hero-actions code {
+    color: var(--accent-strong);
+    background: rgba(15, 118, 110, 0.08);
+    font-size: 0.88rem;
+    overflow-wrap: anywhere;
+  }
+
+  .hero-visual {
+    display: grid;
+    gap: 12px;
+    padding: 16px;
+    background: #fbfaf6;
+  }
+
+  .hero-visual > div {
+    min-width: 0;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 14px;
+    background: white;
+  }
+
+  .hero-visual span {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--accent-strong);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  .hero-visual pre,
+  .hero-visual p {
+    margin: 0;
+  }
+
+  .hero-visual pre {
+    max-width: 100%;
+    overflow: auto;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    font-size: 0.78rem;
+    line-height: 1.45;
+    white-space: pre;
+  }
+
+  .hero-visual p {
+    color: var(--muted);
+    font-weight: 700;
+  }
+
+  .value-props {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 42px;
+  }
+
+  .value-props > article {
+    padding: 20px;
+  }
+
+  .section-heading {
+    max-width: 760px;
+    margin-bottom: 16px;
+  }
+
+  .section-heading h2 {
+    margin: 0;
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+  }
+
+  .section-heading p:not(.eyebrow) {
+    margin: 12px 0 0;
+    color: var(--muted);
+    font-size: 1rem;
+  }
+
+  .playground {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .controls {
+    min-height: 68px;
+    display: flex;
+    gap: 12px;
+    align-items: end;
+    padding: 16px;
+    border-bottom: 1px solid var(--line);
+    background: #fbfaf6;
+  }
+
+  label {
+    min-width: 0;
+  }
+
+  label > span,
+  .preview-heading span {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  .controls label {
+    flex: 1;
+  }
+
+  select,
+  button,
+  textarea {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--ink);
+    background: var(--surface);
+    font: inherit;
+  }
+
+  select,
+  button {
+    min-height: 42px;
+  }
+
+  select {
+    padding: 0 12px;
+  }
+
+  button {
+    width: auto;
+    min-width: 112px;
+    padding: 0 18px;
+    border-color: var(--accent);
+    color: white;
+    background: var(--accent);
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  button:hover,
+  button:focus-visible {
+    background: var(--accent-strong);
+  }
+
+  .workbench {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .editor-pane,
+  .preview-pane {
+    min-width: 0;
+    min-height: 0;
+    padding: 16px;
+  }
+
+  .editor-pane {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--line);
+  }
+
+  textarea {
+    flex: 1;
+    min-height: 480px;
+    resize: none;
+    padding: 14px;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    font-size: 0.9rem;
+    line-height: 1.45;
+  }
+
+  .preview-pane {
+    display: flex;
+    flex-direction: column;
+    background: #fbfaf6;
+  }
+
+  .preview-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  output {
+    color: var(--warm);
+    font-size: 0.82rem;
+    font-weight: 800;
+  }
+
+  .preview-output {
+    flex: 1;
+    min-height: 480px;
+    overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 16px;
+    background: white;
+  }
+
+  .preview-output .kroki-embedded {
+    margin: 0;
+  }
+
+  .site-error {
+    margin: 0;
+    white-space: pre-wrap;
+    color: #b00020;
+  }
+
+  .details {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 24px;
+  }
+
+  .details > div {
+    padding: 20px;
+  }
+
+  h2 {
+    margin: 0 0 10px;
+    font-size: 1rem;
+    letter-spacing: 0;
+  }
+
+  .value-props p,
+  .details p {
+    margin: 0;
+    color: var(--muted);
+  }
+
+  code {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    font-size: 0.92em;
+  }
+
+  @media (max-width: 960px) {
+    .hero,
+    .value-props,
+    .details {
+      grid-template-columns: 1fr;
+    }
+
+    .hero {
+      min-height: 0;
+      padding-top: 26px;
+    }
+
+    h1 {
+      max-width: none;
+      font-size: 2.5rem;
+    }
+  }
+
+  @media (max-width: 720px) {
+    main {
+      width: min(100% - 20px, 1180px);
+      padding-top: 10px;
+    }
+
+    .hero-actions a,
+    .hero-actions code {
+      width: 100%;
+    }
+
+    .controls,
+    .workbench,
+    .preview-heading {
+      display: flex;
+      flex-direction: column;
+    }
+
+    button {
+      width: 100%;
+    }
+
+    .editor-pane {
+      border-right: 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    textarea,
+    .preview-output {
+      min-height: 340px;
+    }
+  }
+</style>

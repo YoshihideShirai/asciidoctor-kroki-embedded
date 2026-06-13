@@ -1,3 +1,5 @@
 node_modules/
+.astro/
 *.tgz
 /examples/vscode-preview/dist
+/dist/

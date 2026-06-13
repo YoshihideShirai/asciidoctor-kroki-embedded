@@ -1,0 +1,28 @@
+---
+const base = import.meta.env.BASE_URL
+const normalizedBase = base.endsWith('/') ? base.slice(0, -1) : base
+const fallbackPath = `${normalizedBase}/en/`
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="refresh" content={`0; url=${fallbackPath}`} />
+    <title>asciidoctor-kroki-embedded</title>
+    <script define:vars={{ normalizedBase }}>
+      const languages = navigator.languages && navigator.languages.length > 0
+        ? navigator.languages
+        : [navigator.language || 'en']
+      const isJapanese = languages.some((language) => String(language).toLowerCase().startsWith('ja'))
+      location.replace(`${normalizedBase}/${isJapanese ? 'ja' : 'en'}/`)
+    </script>
+  </head>
+  <body>
+    <main>
+      <p>Redirecting to the localized site.</p>
+      <p><a href={`${normalizedBase}/en/`}>English</a> / <a href={`${normalizedBase}/ja/`}>日本語</a></p>
+    </main>
+  </body>
+</html>

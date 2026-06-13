@@ -1,0 +1,46 @@
+---
+import SitePage from '../../components/SitePage.astro'
+
+const copy = {
+  lang: 'ja',
+  description: 'asciidoctor-kroki-embedded は Kroki サーバーへ接続せず、Asciidoctor.js の図ブロックをブラウザー内のローカルレンダラーで表示する拡張です。',
+  alternateHref: '../en/',
+  alternateLabel: 'English',
+  lead: 'Asciidoctor.js の図ブロックを、Kroki サーバーへ送らずに埋め込み HTML へ変換します。ホストアプリケーションは生成されたターゲットをローカルレンダラーでハイドレートできるため、プレビューの速さ、再現性、ネットワーク境界を自分で保てます。',
+  primaryAction: 'レンダラーを試す',
+  heroVisualPolicy: 'No Kroki server. No remote fallback. The host chooses the renderer and policy.',
+  valueAria: 'asciidoctor-kroki-embedded の良さ',
+  valueProps: [
+    {
+      title: 'サーバーへ送らない',
+      body: '図のソースを Kroki サーバーへ送信せず、HTML 内の静的ターゲットとして保持します。社内文書やローカルプレビューでも扱いやすい境界を作れます。',
+    },
+    {
+      title: 'ホストが制御できる',
+      body: 'レンダリングは VS Code Webview やブラウザーなど、埋め込み先が読み込んだライブラリで実行します。CSP、ネットワーク遮断、ローカルリソース許可をホスト側の設計に合わせられます。',
+    },
+    {
+      title: 'Kroki 記法に寄り添う',
+      body: '<code>asciidoctor/asciidoctor-kroki</code> に近い登録形状で、Mermaid、PlantUML、Vega などの図ブロックを認識します。既存の AsciiDoc ワークフローへ段階的に差し込めます。',
+    },
+  ],
+  playgroundTitle: 'ブラウザー上でレンダラーを試す',
+  playgroundBody: '下のエディターは、この拡張が出力する埋め込みターゲットを実際に生成し、同じページ内のローカルレンダラーで SVG へハイドレートします。',
+  details: [
+    {
+      title: 'Extension Boundary',
+      body: '拡張は図ソースを <code>&lt;figure class="kroki-embedded"&gt;</code> のような静的ターゲットに変換します。描画はホストアプリケーションが読み込んだローカルライブラリで行うため、ネットワークポリシーをホスト側で閉じられます。',
+    },
+    {
+      title: 'Bundled Hydration Targets',
+      body: 'Mermaid、Nomnoml、Vega、Vega-Lite、WaveDrom、Bytefield は標準のハイドレーションで描画できます。PlantUML と C4PlantUML は、このサイトと VS Code 検証ハーネスのようにレンダラーを注入します。',
+    },
+    {
+      title: 'GitHub Pages Ready',
+      body: 'Astro は静的 HTML と JavaScript として出力されます。GitHub Actions の Pages workflow で <code>dist</code> を公開するだけで、試用ページとして配布できます。',
+    },
+  ],
+}
+---
+
+<SitePage {...copy} />
