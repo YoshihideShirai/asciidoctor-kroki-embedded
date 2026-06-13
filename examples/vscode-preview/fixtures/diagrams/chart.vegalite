@@ -1,0 +1,16 @@
+{
+  "width": 260,
+  "height": 90,
+  "data": {
+    "values": [
+      { "category": "macro", "amount": 21 },
+      { "category": "local", "amount": 48 },
+      { "category": "svg", "amount": 37 }
+    ]
+  },
+  "mark": "bar",
+  "encoding": {
+    "x": { "field": "category", "type": "nominal" },
+    "y": { "field": "amount", "type": "quantitative" }
+  }
+}

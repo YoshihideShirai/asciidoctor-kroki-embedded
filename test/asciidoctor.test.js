@@ -100,12 +100,21 @@ test('converts multiple Kroki-compatible block macros from local files', () => {
   fs.mkdirSync(path.join(tmpDir, 'diagrams'))
   fs.writeFileSync(path.join(tmpDir, 'diagrams', 'sequence.puml'), 'Alice -> Bob\n')
   fs.writeFileSync(path.join(tmpDir, 'diagrams', 'model.nomnoml'), '[A] -> [B]\n')
+  fs.writeFileSync(path.join(tmpDir, 'diagrams', 'chart.vega'), '{"width":100,"height":40,"marks":[]}\n')
+  fs.writeFileSync(path.join(tmpDir, 'diagrams', 'chart.vegalite'), '{"mark":"bar","data":{"values":[]},"encoding":{}}\n')
+  fs.writeFileSync(path.join(tmpDir, 'diagrams', 'timing.wavedrom'), '{ signal: [{ name: "clk", wave: "p." }] }\n')
   fs.writeFileSync(path.join(tmpDir, 'diagrams', 'register.bytefield'), '{ reg: [{ bits: 8, name: "opcode" }] }\n')
 
   const html = convert(`
 plantuml::diagrams/sequence.puml[]
 
 nomnoml::diagrams/model.nomnoml[]
+
+vega::diagrams/chart.vega[]
+
+vegalite::diagrams/chart.vegalite[]
+
+wavedrom::diagrams/timing.wavedrom[]
 
 bytefield::diagrams/register.bytefield[]
 `, {
@@ -116,9 +125,14 @@ bytefield::diagrams/register.bytefield[]
 
   assert.match(html, /data-diagram-type="plantuml"/)
   assert.match(html, /data-diagram-type="nomnoml"/)
+  assert.match(html, /data-diagram-type="vega"/)
+  assert.match(html, /data-diagram-type="vegalite"/)
+  assert.match(html, /data-diagram-type="wavedrom"/)
   assert.match(html, /data-diagram-type="bytefield"/)
   assert.match(html, /Alice -&gt; Bob/)
   assert.match(html, /\[A\] -&gt; \[B\]/)
+  assert.match(html, /&quot;width&quot;:100/)
+  assert.match(html, /clk/)
   assert.match(html, /opcode/)
 })
 

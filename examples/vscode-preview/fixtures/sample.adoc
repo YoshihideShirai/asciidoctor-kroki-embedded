@@ -138,6 +138,12 @@ plantuml::diagrams/sequence.puml[]
 
 nomnoml::diagrams/model.nomnoml[]
 
+vega::diagrams/chart.vega[]
+
+vegalite::diagrams/chart.vegalite[]
+
+wavedrom::diagrams/timing.wavedrom[]
+
 bytefield::diagrams/register.bytefield[]
 
 == Remote Image Boundary

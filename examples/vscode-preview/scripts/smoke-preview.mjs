@@ -5,7 +5,16 @@ import { chromium } from 'playwright'
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const previewPath = path.join(rootDir, 'dist', 'standalone-preview.html')
-const expectedDiagramCount = 11
+const expectedByType = {
+  mermaid: 2,
+  plantuml: 2,
+  nomnoml: 2,
+  vega: 2,
+  vegalite: 2,
+  wavedrom: 2,
+  bytefield: 2,
+}
+const expectedDiagramCount = Object.values(expectedByType).reduce((total, count) => total + count, 0)
 const viewports = [
   {
     name: 'desktop',
@@ -153,6 +162,9 @@ function assertViewportResult({ viewport, result, pageErrors, remoteRequests }) 
   }
   if (result.total !== expectedDiagramCount || result.rendered !== expectedDiagramCount || result.svgCount < expectedDiagramCount) {
     throw new Error(`${prefix} Unexpected render result: ${JSON.stringify(result)}`)
+  }
+  if (JSON.stringify(result.byType) !== JSON.stringify(expectedByType)) {
+    throw new Error(`${prefix} Unexpected diagram type counts: ${JSON.stringify(result.byType)}`)
   }
   const emptyVisuals = result.visualBoxes.filter((box) => box.width < 1 || box.height < 1)
   if (emptyVisuals.length > 0) {
