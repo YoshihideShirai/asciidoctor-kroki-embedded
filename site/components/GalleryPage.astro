@@ -69,6 +69,7 @@ ${sample.source}
 
       const asciidoctor = asciidoctorFactory()
       const graphviz = createGraphviz()
+      const pikchr = loadPikchr()
       const diagramNames = [...document.querySelectorAll('.gallery-card')].map((card) => card.dataset.diagramType)
 
       globalThis.WaveSkin = waveSkin
@@ -110,7 +111,7 @@ ${sample.source}
 
       async function hydratePreview(container) {
         return hydrateEmbeddedDiagrams(container, {
-          libraries: { mermaid, nomnoml, vega, vegaLite, vegaInterpreter, WaveDrom, JSON5, bitfield, svgbob: renderTextDiagramSvg, loadPikchr, graphviz: renderGraphviz },
+          libraries: { mermaid, nomnoml, vega, vegaLite, vegaInterpreter, WaveDrom, JSON5, bitfield, svgbob: renderTextDiagramSvg, pikchr: await pikchr, graphviz: renderGraphviz },
           renderers: { plantuml: async ({ source: sourceText, output }) => { output.innerHTML = await renderPlantUml(sourceText) } },
         })
       }
