@@ -8,11 +8,16 @@ const {
   alternateLabel,
   lead,
   primaryAction,
+  sections,
   heroVisualPolicy,
   valueAria,
   valueProps,
   playgroundTitle,
   playgroundBody,
+  asciidoctorPreviewTitle,
+  asciidoctorPreviewBody,
+  asciidoctorSourceLabel,
+  asciidoctorPreviewLabel,
   details,
 } = Astro.props
 ---
@@ -34,7 +39,13 @@ const {
         <a href={alternateHref}>{alternateLabel}</a>
       </nav>
 
-      <section class="hero" aria-labelledby="title">
+      <nav class="page-nav" aria-label="Page sections">
+        <a href="#overview">{sections.overview}</a>
+        <a href="#playground">{sections.renderer}</a>
+        <a href="#asciidoctor-preview">{sections.asciidoctor}</a>
+      </nav>
+
+      <section id="overview" class="hero page-panel" aria-labelledby="title">
         <div class="hero-copy">
           <p class="eyebrow">Kroki-compatible local rendering</p>
           <h1 id="title">asciidoctor-kroki-embedded</h1>
@@ -76,7 +87,7 @@ Alice -> Bob: hello
         ))}
       </section>
 
-      <section id="playground" class="playground-section" aria-labelledby="playground-title">
+      <section id="playground" class="playground-section page-panel" aria-labelledby="playground-title">
         <div class="section-heading">
           <p class="eyebrow">Try the embedded renderers</p>
           <h2 id="playground-title">{playgroundTitle}</h2>
@@ -116,6 +127,28 @@ Alice -> Bob: hello
               <div id="preview-output" class="preview-output"></div>
             </section>
           </div>
+        </div>
+      </section>
+
+      <section id="asciidoctor-preview" class="asciidoctor-preview-section page-panel" aria-labelledby="asciidoctor-preview-title">
+        <div class="section-heading">
+          <p class="eyebrow">Asciidoctor.js</p>
+          <h2 id="asciidoctor-preview-title">{asciidoctorPreviewTitle}</h2>
+          <p>{asciidoctorPreviewBody}</p>
+        </div>
+
+        <div class="document-preview" aria-label="Asciidoctor.js document preview">
+          <label class="document-source-pane">
+            <span>{asciidoctorSourceLabel}</span>
+            <textarea id="asciidoc-source" spellcheck="false"></textarea>
+          </label>
+          <section class="document-output-pane" aria-live="polite" aria-label={asciidoctorPreviewLabel}>
+            <div class="preview-heading">
+              <span>{asciidoctorPreviewLabel}</span>
+              <output id="asciidoc-status">ready</output>
+            </div>
+            <article id="asciidoc-preview-output" class="asciidoc-preview-output"></article>
+          </section>
         </div>
       </section>
 
@@ -250,11 +283,34 @@ box "Local SVG" fit`,
 }`,
       }
 
+      const documentSample = `= Local diagram preview
+:toc:
+
+This page converts the whole document with Asciidoctor.js and then hydrates Kroki-compatible diagram blocks locally.
+
+[mermaid]
+----
+flowchart LR
+  Source[AsciiDoc source] --> Asciidoctor[Asciidoctor.js]
+  Asciidoctor --> Target[Embedded diagram target]
+  Target --> Hydrator[Browser hydrator]
+  Hydrator --> Preview[Rendered preview]
+----
+
+== Why it matters
+
+* The AsciiDoc source stays on the page.
+* The diagram block is rendered without a Kroki server.
+* The preview uses the same extension boundary as host applications.`
+
       const diagramType = document.querySelector('#diagram-type')
       const source = document.querySelector('#diagram-source')
       const preview = document.querySelector('#preview-output')
       const status = document.querySelector('#render-status')
       const form = document.querySelector('.controls')
+      const asciidocSource = document.querySelector('#asciidoc-source')
+      const asciidocPreview = document.querySelector('#asciidoc-preview-output')
+      const asciidocStatus = document.querySelector('#asciidoc-status')
       const asciidoctor = asciidoctorFactory()
       const graphviz = createGraphviz()
 
@@ -310,48 +366,55 @@ ${sourceText}
 ----`
       }
 
+      function createRegistry() {
+        const registry = asciidoctor.Extensions.create()
+        registerBrowserDiagrams(registry, {
+          defaultFormat: 'svg',
+          diagramNames: Object.keys(samples),
+        })
+        return registry
+      }
+
+      async function hydratePreview(container) {
+        return hydrateEmbeddedDiagrams(container, {
+          libraries: {
+            mermaid,
+            nomnoml,
+            vega,
+            vegaLite,
+            vegaInterpreter,
+            WaveDrom,
+            JSON5,
+            bitfield,
+            svgbob: renderTextDiagramSvg,
+            loadPikchr,
+            graphviz: renderGraphviz,
+          },
+          renderers: {
+            plantuml: async ({ source: sourceText, output }) => {
+              output.innerHTML = await renderPlantUml(sourceText)
+            },
+          },
+        })
+      }
+
       async function renderPreview() {
         const type = diagramType.value
         status.value = 'rendering'
         preview.textContent = ''
 
         try {
-          const registry = asciidoctor.Extensions.create()
-          registerBrowserDiagrams(registry, {
-            defaultFormat: 'svg',
-            diagramNames: Object.keys(samples),
-          })
-
           preview.innerHTML = String(asciidoctor.convert(createAsciiDoc(type, source.value), {
             safe: 'safe',
             backend: 'html5',
             standalone: false,
-            extension_registry: registry,
+            extension_registry: createRegistry(),
             attributes: {
               'allow-uri-read': false,
             },
           }))
 
-          const results = await hydrateEmbeddedDiagrams(preview, {
-            libraries: {
-              mermaid,
-              nomnoml,
-              vega,
-              vegaLite,
-              vegaInterpreter,
-              WaveDrom,
-              JSON5,
-              bitfield,
-              svgbob: renderTextDiagramSvg,
-              loadPikchr,
-              graphviz: renderGraphviz,
-            },
-            renderers: {
-              plantuml: async ({ source: sourceText, output }) => {
-                output.innerHTML = await renderPlantUml(sourceText)
-              },
-            },
-          })
+          const results = await hydratePreview(preview)
           const failed = results.find((result) => !result.ok)
           status.value = failed || results.length === 0 ? 'failed' : 'rendered'
         } catch (error) {
@@ -359,6 +422,32 @@ ${sourceText}
           preview.querySelector('.site-error').textContent =
             error instanceof Error ? error.message : String(error)
           status.value = 'failed'
+        }
+      }
+
+      async function renderDocumentPreview() {
+        asciidocStatus.value = 'rendering'
+        asciidocPreview.textContent = ''
+
+        try {
+          asciidocPreview.innerHTML = String(asciidoctor.convert(asciidocSource.value, {
+            safe: 'safe',
+            backend: 'html5',
+            standalone: false,
+            extension_registry: createRegistry(),
+            attributes: {
+              'allow-uri-read': false,
+            },
+          }))
+
+          const results = await hydratePreview(asciidocPreview)
+          const failed = results.find((result) => !result.ok)
+          asciidocStatus.value = failed || results.length === 0 ? 'failed' : 'rendered'
+        } catch (error) {
+          asciidocPreview.innerHTML = `<pre class="site-error"></pre>`
+          asciidocPreview.querySelector('.site-error').textContent =
+            error instanceof Error ? error.message : String(error)
+          asciidocStatus.value = 'failed'
         }
       }
 
@@ -372,8 +461,14 @@ ${sourceText}
         renderPreview()
       })
 
+      asciidocSource.addEventListener('input', () => {
+        renderDocumentPreview()
+      })
+
       source.value = samples[diagramType.value]
+      asciidocSource.value = documentSample
       renderPreview()
+      renderDocumentPreview()
     </script>
   </body>
 </html>
@@ -419,6 +514,39 @@ ${sourceText}
     justify-content: flex-end;
   }
 
+  .page-nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: rgba(247, 245, 239, 0.92);
+    backdrop-filter: blur(12px);
+  }
+
+  .page-nav a {
+    border-radius: 999px;
+    padding: 8px 12px;
+    color: var(--accent-strong);
+    font-size: 0.86rem;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .page-nav a:hover,
+  .page-nav a:focus-visible {
+    background: rgba(15, 118, 110, 0.1);
+  }
+
+  .page-panel {
+    scroll-margin-top: 78px;
+  }
+
   .language-nav a {
     border: 1px solid var(--line);
     border-radius: 6px;
@@ -448,6 +576,7 @@ ${sourceText}
   .hero-visual,
   .value-props > article,
   .playground,
+  .document-preview,
   .details > div {
     min-width: 0;
     border: 1px solid var(--line);
@@ -739,6 +868,64 @@ ${sourceText}
     color: #b00020;
   }
 
+  .asciidoctor-preview-section {
+    margin-top: 42px;
+  }
+
+  .document-preview {
+    display: grid;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    overflow: hidden;
+  }
+
+  .document-source-pane,
+  .document-output-pane {
+    min-width: 0;
+    padding: 16px;
+  }
+
+  .document-source-pane {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--line);
+  }
+
+  .document-output-pane {
+    display: flex;
+    flex-direction: column;
+    background: #fbfaf6;
+  }
+
+  .asciidoc-preview-output {
+    flex: 1;
+    min-height: 520px;
+    overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 20px;
+    background: white;
+  }
+
+  .asciidoc-preview-output h1,
+  .asciidoc-preview-output h2 {
+    max-width: none;
+    margin: 0 0 0.7rem;
+    line-height: 1.2;
+  }
+
+  .asciidoc-preview-output h1 {
+    font-size: 2rem;
+  }
+
+  .asciidoc-preview-output h2 {
+    margin-top: 1.2rem;
+    font-size: 1.25rem;
+  }
+
+  .asciidoc-preview-output .kroki-embedded {
+    margin: 1rem 0;
+  }
+
   .details {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -798,6 +985,7 @@ ${sourceText}
 
     .controls,
     .workbench,
+    .document-preview,
     .preview-heading {
       display: flex;
       flex-direction: column;
@@ -807,13 +995,15 @@ ${sourceText}
       width: 100%;
     }
 
-    .editor-pane {
+    .editor-pane,
+    .document-source-pane {
       border-right: 0;
       border-bottom: 1px solid var(--line);
     }
 
     textarea,
-    .preview-output {
+    .preview-output,
+    .asciidoc-preview-output {
       min-height: 340px;
     }
   }
