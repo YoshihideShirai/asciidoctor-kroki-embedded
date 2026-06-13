@@ -2,6 +2,7 @@ import path from 'node:path'
 import * as vscode from 'vscode'
 import asciidoctorFactory from '@asciidoctor/core'
 import krokiEmbedded from 'asciidoctor-kroki-embedded'
+import { rewriteRemoteImages } from './preview-html.js'
 
 let panel
 let activeDocument
@@ -108,7 +109,7 @@ function isAsciiDoc(document) {
 
 function renderPreview(context, webview, document) {
   const nonce = createNonce()
-  const html = convertAsciiDoc(document)
+  const html = rewriteRemoteImages(convertAsciiDoc(document))
   const webviewScript = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'dist', 'webview.js'))
   const cspSource = webview.cspSource
 

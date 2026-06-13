@@ -139,3 +139,7 @@ plantuml::diagrams/sequence.puml[]
 nomnoml::diagrams/model.nomnoml[]
 
 bytefield::diagrams/register.bytefield[]
+
+== Remote Image Boundary
+
+image::https://example.com/should-not-load.png[Remote image should be blocked]

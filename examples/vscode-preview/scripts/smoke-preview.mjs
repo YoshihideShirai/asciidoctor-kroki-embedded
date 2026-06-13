@@ -46,6 +46,7 @@ await page.waitForFunction((count) => {
 
 const result = await page.evaluate(() => {
   const diagrams = Array.from(document.querySelectorAll('.kroki-embedded[data-diagram-type]'))
+  const images = Array.from(document.querySelectorAll('img'))
   return {
     total: diagrams.length,
     rendered: diagrams.filter((diagram) => diagram.dataset.rendered === 'true').length,
@@ -60,6 +61,10 @@ const result = await page.evaluate(() => {
       counts[diagram.dataset.diagramType] = (counts[diagram.dataset.diagramType] || 0) + 1
       return counts
     }, {}),
+    images: images.map((image) => ({
+      src: image.getAttribute('src'),
+      alt: image.getAttribute('alt'),
+    })),
   }
 })
 
@@ -77,6 +82,9 @@ if (result.failed.length > 0) {
 }
 if (result.total !== expectedDiagramCount || result.rendered !== expectedDiagramCount || result.svgCount < expectedDiagramCount) {
   throw new Error(`Unexpected render result: ${JSON.stringify(result)}`)
+}
+if (!result.images.some((image) => image.alt === 'Remote image should be blocked' && image.src.startsWith('data:image/gif;base64,'))) {
+  throw new Error(`Remote image was not rewritten: ${JSON.stringify(result.images)}`)
 }
 
 console.log(JSON.stringify({

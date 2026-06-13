@@ -3,6 +3,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import asciidoctorFactory from '@asciidoctor/core'
 import krokiEmbedded from 'asciidoctor-kroki-embedded'
+import { rewriteRemoteImages } from '../src/preview-html.js'
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const repoRoot = path.resolve(rootDir, '..', '..')
@@ -19,7 +20,7 @@ krokiEmbedded.register(registry, {
   diagramNames: ['mermaid', 'plantuml', 'nomnoml', 'vega', 'vegalite', 'wavedrom', 'bytefield'],
 })
 
-const body = String(asciidoctor.convert(fs.readFileSync(fixturePath, 'utf8'), {
+const body = rewriteRemoteImages(String(asciidoctor.convert(fs.readFileSync(fixturePath, 'utf8'), {
   safe: 'safe',
   backend: 'html5',
   standalone: false,
@@ -29,7 +30,7 @@ const body = String(asciidoctor.convert(fs.readFileSync(fixturePath, 'utf8'), {
     showtitle: true,
   },
   extension_registry: registry,
-}))
+})))
 const packageStyle = fs.readFileSync(path.join(repoRoot, 'src', 'style.css'), 'utf8')
 
 fs.writeFileSync(outputPath, `<!doctype html>
