@@ -47,6 +47,15 @@ await page.waitForFunction((count) => {
 const result = await page.evaluate(() => {
   const diagrams = Array.from(document.querySelectorAll('.kroki-embedded[data-diagram-type]'))
   const images = Array.from(document.querySelectorAll('img'))
+  const visualBoxes = diagrams.map((diagram) => {
+    const rendered = diagram.querySelector('.kroki-embedded-output svg, .mermaid svg')
+    const rect = rendered?.getBoundingClientRect()
+    return {
+      type: diagram.dataset.diagramType,
+      width: rect?.width || 0,
+      height: rect?.height || 0,
+    }
+  })
   return {
     total: diagrams.length,
     rendered: diagrams.filter((diagram) => diagram.dataset.rendered === 'true').length,
@@ -57,6 +66,7 @@ const result = await page.evaluate(() => {
         message: diagram.querySelector('.kroki-embedded-output')?.textContent || '',
       })),
     svgCount: document.querySelectorAll('.kroki-embedded-output svg, .mermaid svg').length,
+    visualBoxes,
     byType: diagrams.reduce((counts, diagram) => {
       counts[diagram.dataset.diagramType] = (counts[diagram.dataset.diagramType] || 0) + 1
       return counts
@@ -82,6 +92,10 @@ if (result.failed.length > 0) {
 }
 if (result.total !== expectedDiagramCount || result.rendered !== expectedDiagramCount || result.svgCount < expectedDiagramCount) {
   throw new Error(`Unexpected render result: ${JSON.stringify(result)}`)
+}
+const emptyVisuals = result.visualBoxes.filter((box) => box.width < 1 || box.height < 1)
+if (emptyVisuals.length > 0) {
+  throw new Error(`Rendered diagrams have empty visual boxes: ${JSON.stringify(emptyVisuals)}`)
 }
 if (!result.images.some((image) => image.alt === 'Remote image should be blocked' && image.src.startsWith('data:image/gif;base64,'))) {
   throw new Error(`Remote image was not rewritten: ${JSON.stringify(result.images)}`)
