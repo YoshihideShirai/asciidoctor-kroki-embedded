@@ -1,0 +1,18 @@
+---
+import GalleryPage from '../../../components/GalleryPage.astro'
+import { samples } from '../../../lib/gallery-samples.js'
+---
+
+<GalleryPage
+  lang="ja"
+  homeHref="../"
+  homeLabel="トップページ"
+  alternateHref="../../en/gallery/"
+  alternateLabel="English"
+  title="ダイアグラムギャラリー"
+  lead="AsciiDoc で書いた図が、GitHub Pages 上でどんな見た目になるかを一気に眺められるギャラリーです。"
+  intro="各カードは実際の AsciiDoc ブロックからローカルレンダラーで描画しています。コピーして README や設計メモに貼り付けられます。"
+  copyLabel="コピー"
+  copiedLabel="コピーしました"
+  samples={samples}
+/>
