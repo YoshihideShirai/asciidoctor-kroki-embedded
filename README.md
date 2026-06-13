@@ -18,9 +18,13 @@ import krokiEmbedded from 'asciidoctor-kroki-embedded'
 
 const asciidoctor = asciidoctorFactory()
 const registry = asciidoctor.Extensions.create()
-krokiEmbedded.register(registry)
+krokiEmbedded.register(registry, {
+  defaultFormat: 'svg',
+})
 
 const html = asciidoctor.convert(`
+:kroki-default-format: svg
+
 [mermaid]
 ----
 graph TD
@@ -85,6 +89,14 @@ await hydrateEmbeddedDiagrams(document, {
 ```
 
 Built-in hydration support covers Mermaid, Nomnoml, Vega, Vega-Lite, WaveDrom, and Bytefield when those libraries are already loaded by the host page. PlantUML and C4PlantUML use an injected renderer because browser PlantUML implementations expose different APIs.
+
+The package includes a small optional stylesheet:
+
+```js
+import 'asciidoctor-kroki-embedded/style.css'
+```
+
+Use it as a starting point for hiding source payloads, sizing SVG output, and presenting renderer errors.
 
 ## Security Boundary
 

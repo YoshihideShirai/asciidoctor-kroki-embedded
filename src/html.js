@@ -53,6 +53,12 @@ function dataAttribute(name, value) {
     : ` ${name}="${escapeHtml(value)}"`
 }
 
+function getDocumentAttribute(document, name) {
+  return document && typeof document.getAttribute === 'function'
+    ? document.getAttribute(name)
+    : undefined
+}
+
 export function normalizePlantUmlSource(diagramType, source) {
   if (diagramType !== 'plantuml' && diagramType !== 'c4plantuml') {
     return source
@@ -64,11 +70,15 @@ export function normalizePlantUmlSource(diagramType, source) {
   return `@startuml\n${source}\n@enduml`
 }
 
-export function defaultRenderer({ diagramType, source, attrs }) {
-  const format = attrs.format || 'svg'
-  const options = collectDiagramOptions(attrs)
-  const optionsJson = Object.keys(options).length > 0
-    ? JSON.stringify(options)
+export function defaultRenderer({ diagramType, source, attrs, document, options = {} }) {
+  const format =
+    attrs.format ||
+    getDocumentAttribute(document, 'kroki-default-format') ||
+    options.defaultFormat ||
+    'svg'
+  const diagramOptions = collectDiagramOptions(attrs)
+  const optionsJson = Object.keys(diagramOptions).length > 0
+    ? JSON.stringify(diagramOptions)
     : undefined
   const title = attrs.title
     ? `<figcaption>${escapeHtml(attrs.title)}</figcaption>`

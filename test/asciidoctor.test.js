@@ -36,6 +36,51 @@ graph TD
   assert.doesNotMatch(html, /kroki\.io/)
 })
 
+test('converts a Kroki-compatible literal block to an embedded target', () => {
+  const html = convert(`
+[plantuml]
+....
+Alice -> Bob
+....
+`)
+
+  assert.match(html, /data-diagram-type="plantuml"/)
+  assert.match(html, /@startuml/)
+  assert.match(html, /Alice -&gt; Bob/)
+})
+
+test('uses kroki-default-format document attribute', () => {
+  const html = convert(`
+:kroki-default-format: png
+
+[mermaid]
+----
+graph TD
+  A --> B
+----
+`)
+
+  assert.match(html, /data-diagram-format="png"/)
+  assert.match(html, /kroki-format-png/)
+})
+
+test('uses extension defaultFormat when no document attribute is set', () => {
+  const html = convert(`
+[mermaid]
+----
+graph TD
+  A --> B
+----
+`, {
+    extensionOptions: {
+      defaultFormat: 'png',
+    },
+  })
+
+  assert.match(html, /data-diagram-format="png"/)
+  assert.match(html, /kroki-format-png/)
+})
+
 test('converts a Kroki-compatible block macro from a local file', () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kroki-embedded-asciidoctor-'))
   fs.writeFileSync(path.join(tmpDir, 'diagram.mmd'), 'graph TD\n  A --> B\n')

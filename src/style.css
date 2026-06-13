@@ -1,0 +1,30 @@
+.kroki-embedded {
+  display: block;
+  margin: 1rem 0;
+}
+
+.kroki-embedded-source {
+  display: none;
+}
+
+.kroki-embedded-output {
+  overflow: auto;
+}
+
+.kroki-embedded-output svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.kroki-embedded > figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.875em;
+  text-align: center;
+}
+
+.kroki-embedded-error,
+.kroki-embedded-failed .kroki-embedded-output {
+  white-space: pre-wrap;
+  color: #b00020;
+}

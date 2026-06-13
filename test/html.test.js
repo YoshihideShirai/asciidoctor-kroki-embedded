@@ -41,6 +41,36 @@ test('collectDiagramOptions keeps Kroki options and maps view alias', () => {
   )
 })
 
+test('default renderer reads format from document attributes', () => {
+  const html = defaultRenderer({
+    diagramType: 'mermaid',
+    source: 'graph TD\nA --> B',
+    attrs: {},
+    document: {
+      getAttribute(name) {
+        return name === 'kroki-default-format' ? 'png' : undefined
+      },
+    },
+  })
+
+  assert.match(html, /data-diagram-format="png"/)
+  assert.match(html, /kroki-format-png/)
+})
+
+test('default renderer uses extension defaultFormat as fallback', () => {
+  const html = defaultRenderer({
+    diagramType: 'mermaid',
+    source: 'graph TD\nA --> B',
+    attrs: {},
+    options: {
+      defaultFormat: 'png',
+    },
+  })
+
+  assert.match(html, /data-diagram-format="png"/)
+  assert.match(html, /kroki-format-png/)
+})
+
 test('plantuml source is wrapped when start marker is missing', () => {
   assert.equal(
     normalizePlantUmlSource('plantuml', 'Alice -> Bob'),

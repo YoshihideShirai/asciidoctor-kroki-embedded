@@ -7,7 +7,8 @@
   "exports": {
     ".": "./src/index.js",
     "./browser": "./src/browser.js",
-    "./html": "./src/html.js"
+    "./html": "./src/html.js",
+    "./style.css": "./src/style.css"
   },
   "files": [
     "src"

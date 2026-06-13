@@ -34,33 +34,34 @@ export function normalizeMacroTarget(parent, target) {
   return resolvedTarget
 }
 
-function renderPass(processor, parent, diagramType, source, attrs, renderer) {
+function renderPass(processor, parent, diagramType, source, attrs, renderer, options) {
   const html = renderer({
     diagramType,
     source: applySubs(parent, source, attrs.subs),
     attrs,
     document: parent.getDocument(),
+    options,
   })
   return processor.createBlock(parent, 'pass', html, attrs)
 }
 
-function registerDiagramBlock(registry, diagramType, renderer) {
+function registerDiagramBlock(registry, diagramType, renderer, options) {
   registry.block(diagramType, function () {
     this.onContext(['listing', 'literal'])
     this.positionalAttributes(['target', 'format'])
     this.process(function (parent, reader, attrs) {
-      return renderPass(this, parent, diagramType, reader.read(), attrs, renderer)
+      return renderPass(this, parent, diagramType, reader.read(), attrs, renderer, options)
     })
   })
 }
 
-function registerDiagramMacro(registry, diagramType, renderer) {
+function registerDiagramMacro(registry, diagramType, renderer, options) {
   registry.blockMacro(diagramType, function () {
     this.positionalAttributes(['format'])
     this.process(function (parent, target, attrs) {
       try {
         const source = fs.readFileSync(normalizeMacroTarget(parent, target), 'utf8')
-        return renderPass(this, parent, diagramType, source, attrs, renderer)
+        return renderPass(this, parent, diagramType, source, attrs, renderer, options)
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error)
         return this.createBlock(
@@ -79,8 +80,8 @@ export function register(registry, options = {}) {
   const renderer = options.renderer || defaultRenderer
 
   for (const diagramType of diagramNames) {
-    registerDiagramBlock(registry, diagramType, renderer)
-    registerDiagramMacro(registry, diagramType, renderer)
+    registerDiagramBlock(registry, diagramType, renderer, options)
+    registerDiagramMacro(registry, diagramType, renderer, options)
   }
 
   return registry
