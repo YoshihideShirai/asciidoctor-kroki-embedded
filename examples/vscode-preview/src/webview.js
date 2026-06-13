@@ -1,4 +1,4 @@
-import { hydrateEmbeddedDiagrams } from 'asciidoctor-kroki-embedded/browser'
+import { hydrateEmbeddedDiagrams, installNetworkGuards } from 'asciidoctor-kroki-embedded/browser'
 import { renderToString } from '@plantuml/core'
 import mermaid from 'mermaid'
 import nomnoml from 'nomnoml'
@@ -11,6 +11,7 @@ import waveSkin from 'wavedrom/skins/default.js'
 import bitfield from 'bit-field'
 
 globalThis.WaveSkin = waveSkin
+installNetworkGuards(globalThis)
 
 mermaid.initialize({
   startOnLoad: false,

@@ -20,6 +20,7 @@ const page = await browser.newPage({
 })
 const consoleMessages = []
 const pageErrors = []
+const remoteRequests = []
 
 page.on('console', (message) => {
   if (message.type() === 'error' || message.type() === 'warning') {
@@ -28,6 +29,11 @@ page.on('console', (message) => {
 })
 page.on('pageerror', (error) => {
   pageErrors.push(error.message)
+})
+page.on('request', (request) => {
+  if (/^https?:/i.test(request.url())) {
+    remoteRequests.push(request.url())
+  }
 })
 
 await page.goto(pathToFileURL(previewPath).href)
@@ -58,6 +64,9 @@ await browser.close()
 if (pageErrors.length > 0) {
   throw new Error(`Page errors:\n${pageErrors.join('\n')}`)
 }
+if (remoteRequests.length > 0) {
+  throw new Error(`Remote network requests:\n${remoteRequests.join('\n')}`)
+}
 if (result.failed.length > 0) {
   throw new Error(`Renderer failures:\n${JSON.stringify(result.failed, null, 2)}`)
 }
@@ -68,5 +77,6 @@ if (result.total !== 7 || result.rendered !== 7 || result.svgCount < 7) {
 console.log(JSON.stringify({
   ...result,
   consoleMessages,
+  remoteRequests,
   screenshotPath,
 }, null, 2))

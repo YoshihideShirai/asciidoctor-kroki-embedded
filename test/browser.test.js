@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { hydrateEmbeddedDiagrams } from '../src/browser.js'
+import { hydrateEmbeddedDiagrams, installNetworkGuards } from '../src/browser.js'
 
 class FakeClassList {
   constructor() {
@@ -201,4 +201,17 @@ test('hydrateEmbeddedDiagrams reports renderer failures in the output node', asy
   assert.equal(results[0].ok, false)
   assert.equal(plantuml.outputElement.textContent, 'renderer exploded')
   assert.equal(plantuml.element.classList.has('kroki-embedded-failed'), true)
+})
+
+test('installNetworkGuards disables browser network APIs', () => {
+  const target = {
+    navigator: {},
+  }
+
+  installNetworkGuards(target)
+
+  for (const name of ['fetch', 'XMLHttpRequest', 'WebSocket', 'EventSource']) {
+    assert.throws(() => target[name](), /disabled/)
+  }
+  assert.throws(() => target.navigator.sendBeacon(), /disabled/)
 })

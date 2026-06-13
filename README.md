@@ -68,7 +68,9 @@ The package also exposes a browser-side helper that renders generated diagram ta
 
 ```js
 import { hydrateEmbeddedDiagrams } from 'asciidoctor-kroki-embedded/browser'
+import { installNetworkGuards } from 'asciidoctor-kroki-embedded/browser'
 
+installNetworkGuards(globalThis)
 await hydrateEmbeddedDiagrams(document, {
   libraries: {
     mermaid: window.mermaid,

@@ -1,4 +1,5 @@
 const DEFAULT_SELECTOR = '.kroki-embedded[data-diagram-type]'
+const NETWORK_API_NAMES = ['fetch', 'XMLHttpRequest', 'WebSocket', 'EventSource']
 
 function getGlobal(name) {
   return typeof globalThis !== 'undefined' ? globalThis[name] : undefined
@@ -39,6 +40,43 @@ function markError(diagram, output, error) {
   diagram.classList?.add('kroki-embedded-failed')
   output.classList?.add('kroki-embedded-error')
   output.textContent = message
+}
+
+function blockedNetworkApi(name) {
+  return () => {
+    throw new Error(`${name} is disabled for local Kroki embedded rendering.`)
+  }
+}
+
+export function installNetworkGuards(target = globalThis) {
+  if (!target || typeof target !== 'object') {
+    throw new Error('A global object is required.')
+  }
+
+  for (const name of NETWORK_API_NAMES) {
+    try {
+      Object.defineProperty(target, name, {
+        value: blockedNetworkApi(name),
+        configurable: false,
+        writable: false,
+      })
+    } catch {
+      target[name] = blockedNetworkApi(name)
+    }
+  }
+
+  const navigator = target.navigator
+  if (navigator && typeof navigator === 'object') {
+    try {
+      Object.defineProperty(navigator, 'sendBeacon', {
+        value: blockedNetworkApi('sendBeacon'),
+        configurable: false,
+        writable: false,
+      })
+    } catch {
+      navigator.sendBeacon = blockedNetworkApi('sendBeacon')
+    }
+  }
 }
 
 function parseLooseJson(value, json5 = getGlobal('JSON5')) {
