@@ -104,6 +104,7 @@ Use it as a starting point for hiding source payloads, sizing SVG output, and pr
 
 This repository includes a sample VS Code extension under `examples/vscode-preview`.
 It converts `fixtures/sample.adoc` with this package and hydrates Mermaid, PlantUML, Nomnoml, Vega, Vega-Lite, WaveDrom, and Bytefield diagrams in a Webview using bundled local libraries.
+The fixture covers inline blocks and local diagram macros for every bundled renderer, plus local image rendering and blocked remote images.
 
 ```sh
 cd examples/vscode-preview
@@ -114,8 +115,19 @@ code .
 
 Then launch the extension development host, open `fixtures/sample.adoc`, and run `AsciiDoc: Open Kroki Embedded Preview`.
 
+For repeatable verification without opening VS Code manually:
+
+```sh
+cd examples/vscode-preview
+npm run verify
+```
+
+The verify command runs a source no-network audit, builds the extension and Webview bundles, generates a standalone preview, and opens it in Playwright Chromium at desktop and narrow viewports. It fails if renderer summaries disagree with the DOM, any diagram fails or renders with an empty visual box, a local image fails to render, a remote image is not replaced with a data placeholder, the pre-bundle network guards are inactive, browser warnings/errors are logged, or any `http`/`https` request is observed.
+
 ## Security Boundary
 
 Block macros such as `plantuml::diagram.puml[]` read local relative files under the AsciiDoc document base directory. Remote URLs, absolute paths, and path traversal outside the document directory are rejected.
 
-The extension itself does not include browser renderer libraries and does not use `fetch`, `http`, `https`, or a Kroki server. Rendering is deliberately left to the embedding application so it can enforce its own CSP and local-resource policy.
+The package itself does not include browser renderer libraries and does not use `fetch`, `http`, `https`, or a Kroki server. Rendering is deliberately left to the embedding application so it can enforce its own CSP and local-resource policy.
+
+The VS Code validation harness demonstrates one such host boundary: Asciidoctor conversion runs with `safe: 'safe'` and `'allow-uri-read': false`, Webview CSP starts from `default-src 'none'`, browser network APIs are guarded before renderer bundles load, local resource roots are limited to the extension, workspace folders, and current document directory, and remote preview images are replaced by default unless an exact host/scheme allowlist entry is configured.
