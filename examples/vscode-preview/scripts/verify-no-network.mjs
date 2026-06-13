@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url'
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const scanTargets = [
   'src',
+  'scripts',
   'package.json',
 ]
 
@@ -65,6 +66,16 @@ const expectedText = [
     file: 'src/extension.js',
     text: "safe: 'safe'",
     message: 'Asciidoctor conversion must run in safe mode or stricter.',
+  },
+  {
+    file: 'scripts/generate-standalone-preview.mjs',
+    text: "'allow-uri-read': false",
+    message: 'Standalone preview generation must explicitly disable allow-uri-read.',
+  },
+  {
+    file: 'scripts/generate-standalone-preview.mjs',
+    text: "safe: 'safe'",
+    message: 'Standalone preview generation must run in safe mode or stricter.',
   },
   {
     file: 'src/extension.js',
@@ -135,7 +146,9 @@ function listFiles(targets) {
         files.push(...listFiles([path.join(target, entry)]))
       }
     } else if (/\.(?:js|json|mjs|cjs)$/i.test(absolute)) {
-      files.push(absolute)
+      if (path.relative(rootDir, absolute) !== 'scripts/verify-no-network.mjs') {
+        files.push(absolute)
+      }
     }
   }
 
