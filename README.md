@@ -100,6 +100,53 @@ import 'asciidoctor-kroki-embedded/style.css'
 
 Use it as a starting point for hiding source payloads, sizing SVG output, and presenting renderer errors.
 
+## Support Compared With Kroki
+
+Kroki server support is based on the official Kroki project README and documentation:
+
+- <https://github.com/yuzutech/kroki>
+- <https://docs.kroki.io/kroki/diagram-types/>
+
+`asciidoctor-kroki-embedded` has two levels of support:
+
+- `Embedded target`: the Asciidoctor.js extension recognizes the diagram block or block macro and emits inert HTML for a host application to render locally.
+- `Built-in hydration`: the browser helper can render the embedded target when the host loads the matching local renderer libraries. PlantUML and C4PlantUML require an injected renderer.
+
+| Diagram type | Kroki server | Embedded target | Built-in hydration | VS Code harness verified |
+| --- | --- | --- | --- | --- |
+| ActDiag | Yes | Yes | No | No |
+| BlockDiag | Yes | Yes | No | No |
+| BPMN | Yes | Yes | No | No |
+| Bytefield | Yes | Yes | Yes | Yes |
+| C4PlantUML | Yes | Yes | Injected PlantUML renderer | No |
+| D2 | Yes | Yes | No | No |
+| DBML | Yes | Yes | No | No |
+| diagrams.net | Yes | Yes | No | No |
+| Ditaa | Yes | Yes | No | No |
+| Erd | Yes | Yes | No | No |
+| Excalidraw | Yes | Yes | No | No |
+| GoAT | Yes | No | No | No |
+| GraphViz | Yes | Yes | No | No |
+| Mermaid | Yes | Yes | Yes | Yes |
+| Nomnoml | Yes | Yes | Yes | Yes |
+| NwDiag | Yes | Yes | No | No |
+| PacketDiag | Yes | Yes | No | No |
+| Pikchr | Yes | Yes | No | No |
+| PlantUML | Yes | Yes | Injected renderer | Yes |
+| RackDiag | Yes | Yes | No | No |
+| SeqDiag | Yes | Yes | No | No |
+| Structurizr | Yes | Yes | No | No |
+| SvgBob | Yes | Yes | No | No |
+| Symbolator | Yes | Yes | No | No |
+| TikZ | Yes | Yes | No | No |
+| UMLet | Yes | Yes | No | No |
+| Vega | Yes | Yes | Yes | Yes |
+| Vega-Lite | Yes | Yes | Yes | Yes |
+| WaveDrom | Yes | Yes | Yes | Yes |
+| WireViz | Yes | Yes | No | No |
+
+This package never falls back to the Kroki server for unsupported local renderers. Hosts that need local rendering for additional diagram types should load their own renderer and pass a custom `renderer` during registration or a custom browser renderer during hydration.
+
 ## VS Code Validation Harness
 
 This repository includes a sample VS Code extension under `examples/vscode-preview`.
