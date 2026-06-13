@@ -8,6 +8,8 @@ const {
   alternateLabel,
   lead,
   primaryAction,
+  galleryHref,
+  galleryAction,
   sections,
   heroVisualPolicy,
   valueAria,
@@ -52,6 +54,7 @@ const {
           <p class="lead">{lead}</p>
           <div class="hero-actions" aria-label="Primary actions">
             <a href="#playground">{primaryAction}</a>
+            <a class="secondary-action" href={galleryHref}>{galleryAction}</a>
             <code>npm install asciidoctor-kroki-embedded</code>
           </div>
         </div>
@@ -648,6 +651,13 @@ ${sourceText}
   .hero-actions a:hover,
   .hero-actions a:focus-visible {
     background: var(--accent-strong);
+  }
+
+  .hero-actions .secondary-action {
+    color: var(--accent-strong);
+    background: rgba(255, 255, 255, 0.82);
+    border-color: rgba(15, 118, 110, 0.28);
+    font-weight: 800;
   }
 
   .hero-actions code {

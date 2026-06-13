@@ -1,0 +1,36 @@
+---
+import GalleryPage from '../../../components/GalleryPage.astro'
+import { samples as jaSamples } from '../../../lib/gallery-samples.js'
+
+const labels = [
+  ['Sequence', 'Show conversations and processing order in a diagram that is easy to review.'],
+  ['Flow', 'Describe branches, pipelines, and state transitions with concise syntax.'],
+  ['Dependencies', 'Arrange relationships and dependency direction with the DOT layout engine.'],
+  ['Small chart', 'Visualize metrics and comparisons in documents with declarative JSON.'],
+  ['Timing', 'Draw hardware or protocol signal timing compactly.'],
+  ['Bit field', 'Present register and packet formats with a specification-friendly look.'],
+  ['Class sketch', 'Sketch conceptual models and responsibility boundaries with lightweight text.'],
+  ['Block diagram', 'Create simple box-and-arrow diagrams that fit well in README files.'],
+  ['ASCII art', 'Render existing text diagrams as readable SVG in HTML.'],
+  ['Vega', 'Handle lower-level visualization specifications with local rendering.'],
+]
+const samples = jaSamples.map((sample, index) => ({
+  ...sample,
+  title: labels[index][0],
+  description: labels[index][1],
+}))
+---
+
+<GalleryPage
+  lang="en"
+  homeHref="../"
+  homeLabel="Home"
+  alternateHref="../../ja/gallery/"
+  alternateLabel="日本語"
+  title="Diagram gallery"
+  lead="A separate GitHub Pages gallery that shows what AsciiDoc diagram blocks can express and how they look after local rendering."
+  intro="Every card is rendered from a real AsciiDoc block. Use the copy button to reuse the example in a README or design note."
+  copyLabel="Copy"
+  copiedLabel="Copied"
+  samples={samples}
+/>
