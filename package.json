@@ -6,6 +6,7 @@
   "main": "src/index.js",
   "exports": {
     ".": "./src/index.js",
+    "./browser": "./src/browser.js",
     "./html": "./src/html.js"
   },
   "files": [
@@ -27,5 +28,8 @@
   "license": "MIT",
   "engines": {
     "node": ">=18"
+  },
+  "devDependencies": {
+    "@asciidoctor/core": "^3.0.4"
   }
 }

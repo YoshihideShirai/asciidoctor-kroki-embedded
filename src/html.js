@@ -1,3 +1,23 @@
+const BUILTIN_ATTRIBUTES = [
+  'target',
+  'width',
+  'height',
+  'format',
+  'fallback',
+  'link',
+  'float',
+  'align',
+  'role',
+  'title',
+  'caption',
+  'cloaked-context',
+  '$positional',
+  'subs',
+  'opts',
+  'id',
+  'view',
+]
+
 export function escapeHtml(value) {
   return String(value)
     .replace(/&/g, '&amp;')
@@ -5,6 +25,32 @@ export function escapeHtml(value) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;')
+}
+
+function isNumeric(value) {
+  return /^\d+$/.test(value)
+}
+
+export function collectDiagramOptions(attrs = {}) {
+  const options = Object.fromEntries(
+    Object.entries(attrs).filter(([key]) =>
+      !key.endsWith('-option') &&
+      !BUILTIN_ATTRIBUTES.includes(key) &&
+      !isNumeric(key),
+    ),
+  )
+
+  if ('view' in attrs && !('view-key' in options)) {
+    options['view-key'] = attrs.view
+  }
+
+  return options
+}
+
+function dataAttribute(name, value) {
+  return value === undefined || value === null || value === ''
+    ? ''
+    : ` ${name}="${escapeHtml(value)}"`
 }
 
 export function normalizePlantUmlSource(diagramType, source) {
@@ -20,14 +66,18 @@ export function normalizePlantUmlSource(diagramType, source) {
 
 export function defaultRenderer({ diagramType, source, attrs }) {
   const format = attrs.format || 'svg'
-  const target = attrs.target ? ` data-target="${escapeHtml(attrs.target)}"` : ''
+  const options = collectDiagramOptions(attrs)
+  const optionsJson = Object.keys(options).length > 0
+    ? JSON.stringify(options)
+    : undefined
   const title = attrs.title
     ? `<figcaption>${escapeHtml(attrs.title)}</figcaption>`
     : ''
-  const className = `kroki-embedded kroki-embedded-${diagramType} kroki-format-${format}`
+  const role = attrs.role ? ` ${attrs.role}` : ''
+  const className = `kroki-embedded kroki-embedded-${diagramType} kroki-format-${format}${role}`
   const normalizedSource = normalizePlantUmlSource(diagramType, source)
 
-  return `<figure class="${escapeHtml(className)}" data-diagram-type="${escapeHtml(diagramType)}" data-diagram-format="${escapeHtml(format)}"${target}><pre class="kroki-embedded-source">${escapeHtml(normalizedSource)}</pre><div class="kroki-embedded-output"></div>${title}</figure>`
+  return `<figure${dataAttribute('id', attrs.id)} class="${escapeHtml(className)}" data-diagram-type="${escapeHtml(diagramType)}" data-diagram-format="${escapeHtml(format)}"${dataAttribute('data-target', attrs.target)}${dataAttribute('data-width', attrs.width)}${dataAttribute('data-height', attrs.height)}${dataAttribute('data-diagram-options', optionsJson)}><pre class="kroki-embedded-source">${escapeHtml(normalizedSource)}</pre><div class="kroki-embedded-output"></div>${title}</figure>`
 }
 
 export function errorRenderer({ diagramType, message }) {

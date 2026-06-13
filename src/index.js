@@ -4,14 +4,16 @@ import { DEFAULT_DIAGRAM_NAMES } from './diagram-names.js'
 import { defaultRenderer, errorRenderer } from './html.js'
 
 function applySubs(parent, value, subs) {
-  if (!subs) {
+  if (!subs || typeof parent.applySubs !== 'function') {
     return value
   }
   return parent.applySubs(value, parent.resolveSubs(subs))
 }
 
 export function normalizeMacroTarget(parent, target) {
-  const substituted = parent.applySubs(target, ['attributes'])
+  const substituted = typeof parent.applySubs === 'function'
+    ? parent.applySubs(target, ['attributes'])
+    : target
   if (/^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(substituted)) {
     throw new Error(`Remote diagram macro targets are disabled: ${substituted}`)
   }

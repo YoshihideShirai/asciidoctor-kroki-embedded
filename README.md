@@ -58,6 +58,34 @@ krokiEmbedded.register(registry, {
 })
 ```
 
+## Browser Hydration
+
+The package also exposes a browser-side helper that renders generated diagram targets with locally loaded libraries.
+
+```js
+import { hydrateEmbeddedDiagrams } from 'asciidoctor-kroki-embedded/browser'
+
+await hydrateEmbeddedDiagrams(document, {
+  libraries: {
+    mermaid: window.mermaid,
+    nomnoml: window.nomnoml,
+    vega: window.vega,
+    vegaLite: window.vegaLite,
+    vegaInterpreter: window.vegaInterpreter,
+    WaveDrom: window.WaveDrom,
+    bitfield: window.bitfield,
+    JSON5: window.JSON5,
+  },
+  renderers: {
+    async plantuml({ source, output }) {
+      output.innerHTML = await renderPlantUmlToSvg(source)
+    },
+  },
+})
+```
+
+Built-in hydration support covers Mermaid, Nomnoml, Vega, Vega-Lite, WaveDrom, and Bytefield when those libraries are already loaded by the host page. PlantUML and C4PlantUML use an injected renderer because browser PlantUML implementations expose different APIs.
+
 ## Security Boundary
 
 Block macros such as `plantuml::diagram.puml[]` read local relative files under the AsciiDoc document base directory. Remote URLs, absolute paths, and path traversal outside the document directory are rejected.
