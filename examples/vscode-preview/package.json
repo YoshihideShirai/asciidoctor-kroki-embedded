@@ -10,13 +10,19 @@
     "vscode": "^1.90.0"
   },
   "activationEvents": [
-    "onCommand:asciidoctor-kroki-embedded.preview"
+    "onCommand:asciidoctor-kroki-embedded.preview",
+    "onCommand:asciidoctor-kroki-embedded.refresh"
   ],
   "contributes": {
     "commands": [
       {
         "command": "asciidoctor-kroki-embedded.preview",
         "title": "Open Kroki Embedded Preview",
+        "category": "AsciiDoc"
+      },
+      {
+        "command": "asciidoctor-kroki-embedded.refresh",
+        "title": "Refresh Kroki Embedded Preview",
         "category": "AsciiDoc"
       }
     ]

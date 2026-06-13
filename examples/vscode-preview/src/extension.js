@@ -4,16 +4,31 @@ import asciidoctorFactory from '@asciidoctor/core'
 import krokiEmbedded from 'asciidoctor-kroki-embedded'
 
 let panel
+let activeDocument
+let outputChannel
+let pendingUpdate
+const livePreviewDelayMs = 150
 
 export function activate(context) {
+  outputChannel = vscode.window.createOutputChannel('Kroki Embedded Preview')
   context.subscriptions.push(
+    outputChannel,
     vscode.commands.registerCommand('asciidoctor-kroki-embedded.preview', () => openPreview(context)),
+    vscode.commands.registerCommand('asciidoctor-kroki-embedded.refresh', () => refreshPreview(context)),
+    vscode.workspace.onDidChangeTextDocument((event) => {
+      if (!activeDocument || event.document.uri.toString() !== activeDocument.uri.toString()) {
+        return
+      }
+      schedulePreviewUpdate(context, event.document)
+    }),
   )
 }
 
 export function deactivate() {
+  clearPendingUpdate()
   panel?.dispose()
   panel = undefined
+  activeDocument = undefined
 }
 
 function openPreview(context) {
@@ -37,14 +52,54 @@ function openPreview(context) {
         retainContextWhenHidden: true,
       },
     )
+    panel.webview.onDidReceiveMessage((message) => {
+      if (message?.type === 'render-result') {
+        outputChannel?.appendLine(`[${new Date().toISOString()}] render-result ${JSON.stringify(message.result)}`)
+      }
+    })
     panel.onDidDispose(() => {
+      clearPendingUpdate()
       panel = undefined
+      activeDocument = undefined
     })
   }
 
-  panel.title = `Preview: ${path.basename(editor.document.fileName)}`
-  panel.webview.html = renderPreview(context, panel.webview, editor.document)
+  updatePreview(context, editor.document)
   panel.reveal(vscode.ViewColumn.Beside)
+}
+
+function refreshPreview(context) {
+  if (activeDocument) {
+    updatePreview(context, activeDocument)
+    return
+  }
+  openPreview(context)
+}
+
+function schedulePreviewUpdate(context, document) {
+  activeDocument = document
+  clearPendingUpdate()
+  pendingUpdate = setTimeout(() => {
+    pendingUpdate = undefined
+    updatePreview(context, document)
+  }, livePreviewDelayMs)
+}
+
+function updatePreview(context, document) {
+  if (!panel) {
+    return
+  }
+
+  activeDocument = document
+  panel.title = `Preview: ${path.basename(document.fileName)}`
+  panel.webview.html = renderPreview(context, panel.webview, document)
+}
+
+function clearPendingUpdate() {
+  if (pendingUpdate) {
+    clearTimeout(pendingUpdate)
+    pendingUpdate = undefined
+  }
 }
 
 function isAsciiDoc(document) {

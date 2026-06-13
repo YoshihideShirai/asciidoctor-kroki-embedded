@@ -13,13 +13,15 @@ npm run build
 code .
 ```
 
-In the Extension Development Host, open `fixtures/sample.adoc` and run:
+Use the `Run Kroki Embedded Preview` launch configuration. It builds the harness and opens an Extension Development Host with `fixtures/sample.adoc`.
+
+In the Extension Development Host, run:
 
 ```text
 AsciiDoc: Open Kroki Embedded Preview
 ```
 
-The preview should render Mermaid, PlantUML, Nomnoml, Vega, Vega-Lite, WaveDrom, and Bytefield without using a Kroki server.
+The preview should render Mermaid, PlantUML, Nomnoml, Vega, Vega-Lite, WaveDrom, and Bytefield without using a Kroki server. Edits to the active fixture refresh the preview automatically; `AsciiDoc: Refresh Kroki Embedded Preview` forces a redraw.
 
 For an automated browser smoke check of the same Webview bundle:
 
