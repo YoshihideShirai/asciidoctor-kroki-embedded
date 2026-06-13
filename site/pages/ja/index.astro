@@ -8,6 +8,11 @@ const copy = {
   alternateLabel: 'English',
   lead: 'Asciidoctor.js の図ブロックを、Kroki サーバーへ送らずに埋め込み HTML へ変換します。ホストアプリケーションは生成されたターゲットをローカルレンダラーでハイドレートできるため、プレビューの速さ、再現性、ネットワーク境界を自分で保てます。',
   primaryAction: 'レンダラーを試す',
+  sections: {
+    overview: '概要',
+    renderer: 'レンダラー',
+    asciidoctor: 'AsciiDoc プレビュー',
+  },
   heroVisualPolicy: 'No Kroki server. No remote fallback. The host chooses the renderer and policy.',
   valueAria: 'asciidoctor-kroki-embedded の良さ',
   valueProps: [
@@ -26,6 +31,10 @@ const copy = {
   ],
   playgroundTitle: 'ブラウザー上でレンダラーを試す',
   playgroundBody: '下のエディターは、この拡張が出力する埋め込みターゲットを実際に生成し、同じページ内のローカルレンダラーで SVG へハイドレートします。',
+  asciidoctorPreviewTitle: 'Asciidoctor.js 組み込みプレビュー',
+  asciidoctorPreviewBody: 'AsciiDoc 文書全体を Asciidoctor.js で変換し、生成された埋め込みターゲットを同じブラウザー内レンダラーでハイドレートします。左に入力した AsciiDoc ソース、右にプレビューを並べて確認できます。',
+  asciidoctorSourceLabel: 'AsciiDoc ソース',
+  asciidoctorPreviewLabel: 'HTML プレビュー',
   details: [
     {
       title: 'Extension Boundary',

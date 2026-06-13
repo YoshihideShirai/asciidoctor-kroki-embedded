@@ -8,6 +8,11 @@ const copy = {
   alternateLabel: '日本語',
   lead: 'Convert Asciidoctor.js diagram blocks into embedded HTML targets without sending source to a Kroki server. Host applications can hydrate those targets with local renderers, keeping previews fast, reproducible, and under their own network boundary.',
   primaryAction: 'Try the renderers',
+  sections: {
+    overview: 'Overview',
+    renderer: 'Renderers',
+    asciidoctor: 'AsciiDoc preview',
+  },
   heroVisualPolicy: 'No Kroki server. No remote fallback. The host chooses the renderer and policy.',
   valueAria: 'Why asciidoctor-kroki-embedded is useful',
   valueProps: [
@@ -26,6 +31,10 @@ const copy = {
   ],
   playgroundTitle: 'Try the renderers in your browser',
   playgroundBody: 'The editor below generates the same embedded targets this extension emits, then hydrates them into SVG with local renderers loaded on this page.',
+  asciidoctorPreviewTitle: 'Asciidoctor.js embedded preview',
+  asciidoctorPreviewBody: 'Convert a complete AsciiDoc document with Asciidoctor.js, then hydrate the emitted embedded diagram target with the same in-browser renderers. The AsciiDoc source stays visible beside the rendered preview.',
+  asciidoctorSourceLabel: 'AsciiDoc source',
+  asciidoctorPreviewLabel: 'HTML preview',
   details: [
     {
       title: 'Extension Boundary',
