@@ -52,10 +52,7 @@ function openPreview(context) {
       vscode.ViewColumn.Beside,
       {
         enableScripts: true,
-        localResourceRoots: [
-          context.extensionUri,
-          vscode.Uri.file(path.dirname(editor.document.uri.fsPath)),
-        ],
+        localResourceRoots: getLocalResourceRoots(context.extensionUri, editor.document),
         retainContextWhenHidden: true,
       },
     )
@@ -116,12 +113,13 @@ function isAsciiDoc(document) {
 function renderPreview(context, webview, document) {
   const nonce = createNonce()
   const allowedPreviewHosts = getAllowedPreviewHosts()
+  const baseDir = getBaseDir(document)
   const html = rewritePreviewImages(convertAsciiDoc(document), {
     allowedPreviewHosts,
-    localImageResolver: (src) => rewriteLocalImageSrc(src, path.dirname(document.fileName), (imagePath, baseDir) => {
+    localImageResolver: baseDir ? (src) => rewriteLocalImageSrc(src, baseDir, (imagePath, rootDir) => {
       const decodedPath = decodeURIComponent(imagePath)
-      return webview.asWebviewUri(vscode.Uri.file(path.resolve(baseDir, decodedPath))).toString()
-    }),
+      return webview.asWebviewUri(vscode.Uri.file(path.resolve(rootDir, decodedPath))).toString()
+    }) : undefined,
   })
   const webviewScript = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'dist', 'webview.js'))
   const cspSource = webview.cspSource
@@ -199,6 +197,41 @@ function getAllowedPreviewHosts() {
     .get(allowedPreviewHostsSetting, [])
 }
 
+function getBaseDir(document) {
+  if (document.uri.scheme !== 'file') {
+    return undefined
+  }
+
+  return path.dirname(document.uri.fsPath)
+}
+
+function getLocalResourceRoots(extensionUri, document) {
+  const roots = [
+    extensionUri,
+    ...(vscode.workspace.workspaceFolders?.map((folder) => folder.uri) || []),
+  ]
+
+  const baseDir = getBaseDir(document)
+  if (baseDir) {
+    roots.push(vscode.Uri.file(baseDir))
+  }
+
+  return uniqueUris(roots)
+}
+
+function uniqueUris(uris) {
+  const seen = new Set()
+  return uris.filter((uri) => {
+    const key = uri.toString()
+    if (seen.has(key)) {
+      return false
+    }
+
+    seen.add(key)
+    return true
+  })
+}
+
 function convertAsciiDoc(document) {
   const asciidoctor = asciidoctorFactory()
   const registry = asciidoctor.Extensions.create()
@@ -211,7 +244,7 @@ function convertAsciiDoc(document) {
     safe: 'safe',
     backend: 'html5',
     standalone: false,
-    base_dir: path.dirname(document.fileName),
+    base_dir: getBaseDir(document),
     attributes: {
       'allow-uri-read': false,
       showtitle: true,
