@@ -87,6 +87,16 @@ const expectedText = [
     text: 'installNetworkGuards(globalThis)',
     message: 'Webview must install network guards before hydrating diagrams.',
   },
+  {
+    file: 'src/extension.js',
+    text: '<script nonce="${nonce}">${networkGuardScript}</script>',
+    message: 'VS Code preview HTML must install network guards before loading the Webview bundle.',
+  },
+  {
+    file: 'scripts/generate-standalone-preview.mjs',
+    text: '<script>${networkGuardScript}</script>',
+    message: 'Standalone preview HTML must install network guards before loading the Webview bundle.',
+  },
 ]
 
 const failures = []

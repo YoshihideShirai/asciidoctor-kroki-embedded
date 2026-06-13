@@ -2,6 +2,7 @@ import path from 'node:path'
 import * as vscode from 'vscode'
 import asciidoctorFactory from '@asciidoctor/core'
 import krokiEmbedded from 'asciidoctor-kroki-embedded'
+import { networkGuardScript } from './network-guard-html.js'
 import {
   getPreviewImageCspSources,
   rewriteLocalImageSrc,
@@ -186,6 +187,7 @@ function renderPreview(context, webview, document) {
 </head>
 <body>
   <main>${html}</main>
+  <script nonce="${nonce}">${networkGuardScript}</script>
   <script nonce="${nonce}" src="${webviewScript}"></script>
 </body>
 </html>`

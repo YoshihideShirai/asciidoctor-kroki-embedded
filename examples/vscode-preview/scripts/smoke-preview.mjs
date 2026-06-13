@@ -83,6 +83,16 @@ async function smokeViewport(browser, viewport) {
   const result = await page.evaluate(() => {
     const diagrams = Array.from(document.querySelectorAll('.kroki-embedded[data-diagram-type]'))
     const images = Array.from(document.querySelectorAll('img'))
+    const guardedApis = ['fetch', 'XMLHttpRequest', 'WebSocket', 'EventSource', 'sendBeacon']
+    const networkGuards = guardedApis.map((name) => {
+      try {
+        const target = name === 'sendBeacon' ? navigator : globalThis
+        target[name]()
+        return { name, ok: false, message: 'did not throw' }
+      } catch (error) {
+        return { name, ok: /disabled for local Kroki embedded rendering/.test(String(error?.message || error)) }
+      }
+    })
     const visualBoxes = diagrams.map((diagram) => {
       const rendered = diagram.querySelector('.kroki-embedded-output svg, .mermaid svg')
       const rect = rendered?.getBoundingClientRect()
@@ -94,6 +104,7 @@ async function smokeViewport(browser, viewport) {
     })
     return {
       summary: globalThis.__krokiEmbeddedPreviewResult || null,
+      networkGuards,
       total: diagrams.length,
       rendered: diagrams.filter((diagram) => diagram.dataset.rendered === 'true').length,
       failed: diagrams
@@ -147,6 +158,9 @@ function assertViewportResult({ viewport, result, consoleMessages, pageErrors, r
   }
   if (remoteRequests.length > 0) {
     throw new Error(`${prefix} Remote network requests:\n${remoteRequests.join('\n')}`)
+  }
+  if (!result.networkGuards.every((guard) => guard.ok)) {
+    throw new Error(`${prefix} Network guards are not active: ${JSON.stringify(result.networkGuards)}`)
   }
   if (result.failed.length > 0) {
     throw new Error(`${prefix} Renderer failures:\n${JSON.stringify(result.failed, null, 2)}`)

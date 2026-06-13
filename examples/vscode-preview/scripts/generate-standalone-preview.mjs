@@ -3,6 +3,7 @@ import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import asciidoctorFactory from '@asciidoctor/core'
 import krokiEmbedded from 'asciidoctor-kroki-embedded'
+import { networkGuardScript } from '../src/network-guard-html.js'
 import { rewriteLocalImageSrc, rewritePreviewImages } from '../src/preview-html.js'
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
@@ -66,6 +67,7 @@ fs.writeFileSync(outputPath, `<!doctype html>
 </head>
 <body>
   <main>${body}</main>
+  <script>${networkGuardScript}</script>
   <script src="./webview.js"></script>
 </body>
 </html>
