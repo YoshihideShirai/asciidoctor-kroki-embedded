@@ -1,4 +1,5 @@
 const DEFAULT_SELECTOR = '.kroki-embedded[data-diagram-type]'
+const NETWORK_API_NAMES = ['fetch', 'XMLHttpRequest', 'WebSocket', 'EventSource']
 
 function getGlobal(name) {
   return typeof globalThis !== 'undefined' ? globalThis[name] : undefined
@@ -39,6 +40,43 @@ function markError(diagram, output, error) {
   diagram.classList?.add('kroki-embedded-failed')
   output.classList?.add('kroki-embedded-error')
   output.textContent = message
+}
+
+function blockedNetworkApi(name) {
+  return () => {
+    throw new Error(`${name} is disabled for local Kroki embedded rendering.`)
+  }
+}
+
+export function installNetworkGuards(target = globalThis) {
+  if (!target || typeof target !== 'object') {
+    throw new Error('A global object is required.')
+  }
+
+  for (const name of NETWORK_API_NAMES) {
+    try {
+      Object.defineProperty(target, name, {
+        value: blockedNetworkApi(name),
+        configurable: false,
+        writable: false,
+      })
+    } catch {
+      target[name] = blockedNetworkApi(name)
+    }
+  }
+
+  const navigator = target.navigator
+  if (navigator && typeof navigator === 'object') {
+    try {
+      Object.defineProperty(navigator, 'sendBeacon', {
+        value: blockedNetworkApi('sendBeacon'),
+        configurable: false,
+        writable: false,
+      })
+    } catch {
+      navigator.sendBeacon = blockedNetworkApi('sendBeacon')
+    }
+  }
 }
 
 function parseLooseJson(value, json5 = getGlobal('JSON5')) {
@@ -142,14 +180,15 @@ async function renderVega({ diagramType, source, output, libraries }) {
 
 function renderWaveDrom({ source, output, libraries, index }) {
   const waveDrom = libraries.WaveDrom || getGlobal('WaveDrom')
-  if (!waveDrom || typeof waveDrom.RenderWaveForm !== 'function') {
+  const renderWaveForm = waveDrom?.RenderWaveForm || waveDrom?.renderWaveForm
+  if (typeof renderWaveForm !== 'function') {
     throw new Error('WaveDrom renderer is not available.')
   }
 
   const spec = parseLooseJson(source, libraries.JSON5)
   const prefix = 'WaveDrom_Display_'
   output.id = `${prefix}${index}`
-  waveDrom.RenderWaveForm(index, spec, prefix, false)
+  renderWaveForm(index, spec, prefix, false)
 }
 
 function renderBytefield({ source, output, libraries }) {

@@ -68,7 +68,9 @@ The package also exposes a browser-side helper that renders generated diagram ta
 
 ```js
 import { hydrateEmbeddedDiagrams } from 'asciidoctor-kroki-embedded/browser'
+import { installNetworkGuards } from 'asciidoctor-kroki-embedded/browser'
 
+installNetworkGuards(globalThis)
 await hydrateEmbeddedDiagrams(document, {
   libraries: {
     mermaid: window.mermaid,
@@ -98,8 +100,81 @@ import 'asciidoctor-kroki-embedded/style.css'
 
 Use it as a starting point for hiding source payloads, sizing SVG output, and presenting renderer errors.
 
+## Support Compared With Kroki
+
+Kroki server support is based on the official Kroki project README and documentation:
+
+- <https://github.com/yuzutech/kroki>
+- <https://docs.kroki.io/kroki/diagram-types/>
+
+`asciidoctor-kroki-embedded` has two levels of support:
+
+- `Embedded target`: the Asciidoctor.js extension recognizes the diagram block or block macro and emits inert HTML for a host application to render locally.
+- `Built-in hydration`: the browser helper can render the embedded target when the host loads the matching local renderer libraries. PlantUML and C4PlantUML require an injected renderer.
+
+| Diagram type | Kroki server | Embedded target | Built-in hydration | VS Code harness verified |
+| --- | --- | --- | --- | --- |
+| ActDiag | Yes | Yes | No | No |
+| BlockDiag | Yes | Yes | No | No |
+| BPMN | Yes | Yes | No | No |
+| Bytefield | Yes | Yes | Yes | Yes |
+| C4PlantUML | Yes | Yes | Injected PlantUML renderer | No |
+| D2 | Yes | Yes | No | No |
+| DBML | Yes | Yes | No | No |
+| diagrams.net | Yes | Yes | No | No |
+| Ditaa | Yes | Yes | No | No |
+| Erd | Yes | Yes | No | No |
+| Excalidraw | Yes | Yes | No | No |
+| GoAT | Yes | No | No | No |
+| GraphViz | Yes | Yes | No | No |
+| Mermaid | Yes | Yes | Yes | Yes |
+| Nomnoml | Yes | Yes | Yes | Yes |
+| NwDiag | Yes | Yes | No | No |
+| PacketDiag | Yes | Yes | No | No |
+| Pikchr | Yes | Yes | No | No |
+| PlantUML | Yes | Yes | Injected renderer | Yes |
+| RackDiag | Yes | Yes | No | No |
+| SeqDiag | Yes | Yes | No | No |
+| Structurizr | Yes | Yes | No | No |
+| SvgBob | Yes | Yes | No | No |
+| Symbolator | Yes | Yes | No | No |
+| TikZ | Yes | Yes | No | No |
+| UMLet | Yes | Yes | No | No |
+| Vega | Yes | Yes | Yes | Yes |
+| Vega-Lite | Yes | Yes | Yes | Yes |
+| WaveDrom | Yes | Yes | Yes | Yes |
+| WireViz | Yes | Yes | No | No |
+
+This package never falls back to the Kroki server for unsupported local renderers. Hosts that need local rendering for additional diagram types should load their own renderer and pass a custom `renderer` during registration or a custom browser renderer during hydration.
+
+## VS Code Validation Harness
+
+This repository includes a sample VS Code extension under `examples/vscode-preview`.
+It converts `fixtures/sample.adoc` with this package and hydrates Mermaid, PlantUML, Nomnoml, Vega, Vega-Lite, WaveDrom, and Bytefield diagrams in a Webview using bundled local libraries.
+The fixture covers inline blocks and local diagram macros for every bundled renderer, plus local image rendering and blocked remote images.
+
+```sh
+cd examples/vscode-preview
+npm install
+npm run build
+code .
+```
+
+Then launch the extension development host, open `fixtures/sample.adoc`, and run `AsciiDoc: Open Kroki Embedded Preview`.
+
+For repeatable verification without opening VS Code manually:
+
+```sh
+cd examples/vscode-preview
+npm run verify
+```
+
+The verify command runs a source no-network audit, builds the extension and Webview bundles, generates a standalone preview, and opens it in Playwright Chromium at desktop and narrow viewports. It fails if renderer summaries disagree with the DOM, any diagram fails or renders with an empty visual box, a local image fails to render, a remote image is not replaced with a data placeholder, the pre-bundle network guards are inactive, browser warnings/errors are logged, or any `http`/`https` request is observed.
+
 ## Security Boundary
 
 Block macros such as `plantuml::diagram.puml[]` read local relative files under the AsciiDoc document base directory. Remote URLs, absolute paths, and path traversal outside the document directory are rejected.
 
-The extension itself does not include browser renderer libraries and does not use `fetch`, `http`, `https`, or a Kroki server. Rendering is deliberately left to the embedding application so it can enforce its own CSP and local-resource policy.
+The package itself does not include browser renderer libraries and does not use `fetch`, `http`, `https`, or a Kroki server. Rendering is deliberately left to the embedding application so it can enforce its own CSP and local-resource policy.
+
+The VS Code validation harness demonstrates one such host boundary: Asciidoctor conversion runs with `safe: 'safe'` and `'allow-uri-read': false`, Webview CSP starts from `default-src 'none'`, browser network APIs are guarded before renderer bundles load, local resource roots are limited to the extension, workspace folders, and current document directory, and remote preview images are replaced by default unless an exact host/scheme allowlist entry is configured.
