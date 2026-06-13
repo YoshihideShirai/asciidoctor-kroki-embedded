@@ -239,7 +239,18 @@ function convertAsciiDoc(document) {
   const registry = asciidoctor.Extensions.create()
   krokiEmbedded.register(registry, {
     defaultFormat: 'svg',
-    diagramNames: ['mermaid', 'plantuml', 'nomnoml', 'vega', 'vegalite', 'wavedrom', 'bytefield'],
+    diagramNames: [
+      'mermaid',
+      'plantuml',
+      'nomnoml',
+      'vega',
+      'vegalite',
+      'wavedrom',
+      'bytefield',
+      'svgbob',
+      'pikchr',
+      'graphviz',
+    ],
   })
 
   return String(asciidoctor.convert(document.getText(), {

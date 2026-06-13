@@ -207,6 +207,67 @@ function renderBytefield({ source, output, libraries }) {
   output.replaceChildren(createSvgNode(output.ownerDocument, bitfield.render(fields, options)))
 }
 
+function getSvgString(result, rendererName) {
+  if (typeof result === 'string') {
+    return result
+  }
+  if (result && typeof result.svg === 'string') {
+    return result.svg
+  }
+  throw new Error(`${rendererName} renderer did not return SVG output.`)
+}
+
+async function renderSvgBob({ source, output, libraries }) {
+  const svgBob = libraries.svgbob || libraries.svgBob || getGlobal('svgbob') || getGlobal('svgBob')
+  const render = typeof svgBob === 'function' ? svgBob : svgBob?.render
+  if (typeof render !== 'function') {
+    throw new Error('SvgBob renderer is not available.')
+  }
+
+  output.innerHTML = getSvgString(await render(source), 'SvgBob')
+}
+
+async function renderPikchr({ source, output, libraries }) {
+  let pikchr =
+    libraries.pikchr ||
+    libraries.Pikchr ||
+    getGlobal('pikchr') ||
+    getGlobal('Pikchr')
+  const loadPikchr = libraries.loadPikchr || getGlobal('loadPikchr')
+
+  if (!pikchr && typeof loadPikchr === 'function') {
+    pikchr = await loadPikchr()
+  }
+
+  const render = typeof pikchr === 'function' ? pikchr : pikchr?.render
+  if (typeof render !== 'function') {
+    throw new Error('Pikchr renderer is not available.')
+  }
+
+  output.innerHTML = getSvgString(await render(source), 'Pikchr')
+}
+
+async function renderGraphviz({ source, output, libraries }) {
+  const graphviz =
+    libraries.graphviz ||
+    libraries.Graphviz ||
+    libraries.viz ||
+    libraries.Viz ||
+    getGlobal('graphviz') ||
+    getGlobal('Graphviz') ||
+    getGlobal('viz') ||
+    getGlobal('Viz')
+  const render =
+    typeof graphviz === 'function'
+      ? graphviz
+      : graphviz?.renderString || graphviz?.renderSvg || graphviz?.renderSVG
+  if (typeof render !== 'function') {
+    throw new Error('GraphViz renderer is not available.')
+  }
+
+  output.innerHTML = getSvgString(await render.call(graphviz, source, { format: 'svg' }), 'GraphViz')
+}
+
 const DEFAULT_RENDERERS = {
   mermaid: renderMermaid,
   plantuml: renderPlantUml,
@@ -216,6 +277,9 @@ const DEFAULT_RENDERERS = {
   vegalite: renderVega,
   wavedrom: renderWaveDrom,
   bytefield: renderBytefield,
+  svgbob: renderSvgBob,
+  pikchr: renderPikchr,
+  graphviz: renderGraphviz,
 }
 
 export async function hydrateEmbeddedDiagrams(root = globalThis.document, options = {}) {

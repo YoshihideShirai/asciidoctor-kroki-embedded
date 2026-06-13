@@ -128,17 +128,17 @@ Kroki server support is based on the official Kroki project README and documenta
 | Erd | Yes | Yes | No | No |
 | Excalidraw | Yes | Yes | No | No |
 | GoAT | Yes | No | No | No |
-| GraphViz | Yes | Yes | No | No |
+| GraphViz | Yes | Yes | Yes | Yes |
 | Mermaid | Yes | Yes | Yes | Yes |
 | Nomnoml | Yes | Yes | Yes | Yes |
 | NwDiag | Yes | Yes | No | No |
 | PacketDiag | Yes | Yes | No | No |
-| Pikchr | Yes | Yes | No | No |
+| Pikchr | Yes | Yes | Yes | Yes |
 | PlantUML | Yes | Yes | Injected renderer | Yes |
 | RackDiag | Yes | Yes | No | No |
 | SeqDiag | Yes | Yes | No | No |
 | Structurizr | Yes | Yes | No | No |
-| SvgBob | Yes | Yes | No | No |
+| SvgBob | Yes | Yes | Yes | Yes |
 | Symbolator | Yes | Yes | No | No |
 | TikZ | Yes | Yes | No | No |
 | UMLet | Yes | Yes | No | No |
@@ -148,6 +148,7 @@ Kroki server support is based on the official Kroki project README and documenta
 | WireViz | Yes | Yes | No | No |
 
 This package never falls back to the Kroki server for unsupported local renderers. Hosts that need local rendering for additional diagram types should load their own renderer and pass a custom `renderer` during registration or a custom browser renderer during hydration.
+D2 remains an embedded-target-only diagram type for now because the browser WASM package is significantly larger and needs a separate initialization review.
 
 ## VS Code Validation Harness
 

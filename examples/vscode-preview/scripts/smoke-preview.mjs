@@ -13,6 +13,9 @@ const expectedByType = {
   vegalite: 2,
   wavedrom: 2,
   bytefield: 2,
+  svgbob: 2,
+  pikchr: 2,
+  graphviz: 2,
 }
 const expectedDiagramCount = Object.values(expectedByType).reduce((total, count) => total + count, 0)
 const viewports = [

@@ -14,11 +14,13 @@ const scanTargets = [
 const allowedRuntimeDependencies = new Set([
   '@asciidoctor/core',
   '@plantuml/core',
+  '@viz-js/viz',
   'asciidoctor-kroki-embedded',
   'bit-field',
   'json5',
   'mermaid',
   'nomnoml',
+  'pikchr-js',
   'vega',
   'vega-interpreter',
   'vega-lite',

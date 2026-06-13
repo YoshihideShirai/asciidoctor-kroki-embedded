@@ -18,7 +18,18 @@ const asciidoctor = asciidoctorFactory()
 const registry = asciidoctor.Extensions.create()
 krokiEmbedded.register(registry, {
   defaultFormat: 'svg',
-  diagramNames: ['mermaid', 'plantuml', 'nomnoml', 'vega', 'vegalite', 'wavedrom', 'bytefield'],
+  diagramNames: [
+    'mermaid',
+    'plantuml',
+    'nomnoml',
+    'vega',
+    'vegalite',
+    'wavedrom',
+    'bytefield',
+    'svgbob',
+    'pikchr',
+    'graphviz',
+  ],
 })
 
 const body = rewritePreviewImages(String(asciidoctor.convert(fs.readFileSync(fixturePath, 'utf8'), {

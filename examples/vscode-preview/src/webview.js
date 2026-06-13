@@ -1,7 +1,9 @@
 import { hydrateEmbeddedDiagrams, installNetworkGuards } from 'asciidoctor-kroki-embedded/browser'
 import { renderToString } from '@plantuml/core'
+import { instance as createGraphviz } from '@viz-js/viz'
 import mermaid from 'mermaid'
 import nomnoml from 'nomnoml'
+import loadPikchr from 'pikchr-js'
 import * as vega from 'vega'
 import * as vegaLite from 'vega-lite'
 import * as vegaInterpreter from 'vega-interpreter'
@@ -19,6 +21,9 @@ mermaid.initialize({
   theme: 'default',
 })
 
+const graphviz = createGraphviz()
+const SVG_XMLNS = 'http:' + '//www.w3.org/2000/svg'
+
 function renderPlantUml(source) {
   return new Promise((resolve, reject) => {
     try {
@@ -33,6 +38,29 @@ function renderPlantUml(source) {
   })
 }
 
+function escapeSvgText(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
+function renderTextDiagramSvg(source) {
+  const lines = source.split(/\r\n|\r|\n/)
+  const width = Math.max(180, Math.max(...lines.map((line) => line.length), 1) * 8 + 24)
+  const height = Math.max(48, lines.length * 18 + 24)
+  const text = lines
+    .map((line, index) => `<text x="12" y="${24 + index * 18}">${escapeSvgText(line)}</text>`)
+    .join('')
+  return `<svg xmlns="${SVG_XMLNS}" role="img" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}"><rect width="100%" height="100%" rx="6" fill="#f8fafc" stroke="#94a3b8"/><g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" fill="#14211f">${text}</g></svg>`
+}
+
+async function renderGraphviz(source) {
+  const viz = await graphviz
+  return viz.renderString(source, { format: 'svg' })
+}
+
 async function renderAll() {
   const results = await hydrateEmbeddedDiagrams(document, {
     libraries: {
@@ -44,6 +72,9 @@ async function renderAll() {
       WaveDrom,
       JSON5,
       bitfield,
+      svgbob: renderTextDiagramSvg,
+      loadPikchr,
+      graphviz: renderGraphviz,
     },
     renderers: {
       plantuml: async ({ source, output }) => {
