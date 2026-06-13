@@ -1,0 +1,46 @@
+---
+import SitePage from '../../components/SitePage.astro'
+
+const copy = {
+  lang: 'en',
+  description: 'asciidoctor-kroki-embedded is an Asciidoctor.js extension that renders Kroki-compatible diagram blocks locally in the browser without contacting a Kroki server.',
+  alternateHref: '../ja/',
+  alternateLabel: '日本語',
+  lead: 'Convert Asciidoctor.js diagram blocks into embedded HTML targets without sending source to a Kroki server. Host applications can hydrate those targets with local renderers, keeping previews fast, reproducible, and under their own network boundary.',
+  primaryAction: 'Try the renderers',
+  heroVisualPolicy: 'No Kroki server. No remote fallback. The host chooses the renderer and policy.',
+  valueAria: 'Why asciidoctor-kroki-embedded is useful',
+  valueProps: [
+    {
+      title: 'Keep diagram source local',
+      body: 'Diagram source is kept as an inert HTML target instead of being sent to a Kroki server. That makes internal documents and local preview flows easier to reason about.',
+    },
+    {
+      title: 'Let the host own policy',
+      body: 'Rendering happens through libraries loaded by the host, such as a VS Code Webview or browser page. CSP, network guards, and local resource access stay in the host application’s control.',
+    },
+    {
+      title: 'Stay close to Kroki syntax',
+      body: 'The extension follows a registration shape similar to <code>asciidoctor/asciidoctor-kroki</code> and recognizes diagram blocks for Mermaid, PlantUML, Vega, and more.',
+    },
+  ],
+  playgroundTitle: 'Try the renderers in your browser',
+  playgroundBody: 'The editor below generates the same embedded targets this extension emits, then hydrates them into SVG with local renderers loaded on this page.',
+  details: [
+    {
+      title: 'Extension Boundary',
+      body: 'The extension turns diagram source into a static target such as <code>&lt;figure class="kroki-embedded"&gt;</code>. Rendering is delegated to local libraries loaded by the host, so the host can keep its own network policy closed.',
+    },
+    {
+      title: 'Bundled Hydration Targets',
+      body: 'Mermaid, Nomnoml, Vega, Vega-Lite, WaveDrom, and Bytefield can render through the built-in hydration helper. PlantUML and C4PlantUML use an injected renderer, as shown by this site and the VS Code validation harness.',
+    },
+    {
+      title: 'GitHub Pages Ready',
+      body: 'Astro builds the site as static HTML and JavaScript. The Pages workflow can publish <code>dist</code> directly as a live project site.',
+    },
+  ],
+}
+---
+
+<SitePage {...copy} />
