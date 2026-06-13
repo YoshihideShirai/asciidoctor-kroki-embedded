@@ -128,17 +128,17 @@ Kroki サーバーのサポート状況は、公式 Kroki プロジェクトの 
 | Erd | Yes | Yes | No | No |
 | Excalidraw | Yes | Yes | No | No |
 | GoAT | Yes | No | No | No |
-| GraphViz | Yes | Yes | No | No |
+| GraphViz | Yes | Yes | Yes | Yes |
 | Mermaid | Yes | Yes | Yes | Yes |
 | Nomnoml | Yes | Yes | Yes | Yes |
 | NwDiag | Yes | Yes | No | No |
 | PacketDiag | Yes | Yes | No | No |
-| Pikchr | Yes | Yes | No | No |
+| Pikchr | Yes | Yes | Yes | Yes |
 | PlantUML | Yes | Yes | Injected renderer | Yes |
 | RackDiag | Yes | Yes | No | No |
 | SeqDiag | Yes | Yes | No | No |
 | Structurizr | Yes | Yes | No | No |
-| SvgBob | Yes | Yes | No | No |
+| SvgBob | Yes | Yes | Yes | Yes |
 | Symbolator | Yes | Yes | No | No |
 | TikZ | Yes | Yes | No | No |
 | UMLet | Yes | Yes | No | No |
@@ -148,6 +148,7 @@ Kroki サーバーのサポート状況は、公式 Kroki プロジェクトの 
 | WireViz | Yes | Yes | No | No |
 
 このパッケージは、ローカルレンダラーが未対応の場合でも Kroki サーバーへフォールバックしません。追加の図種別をローカルレンダリングしたいホストは、独自のレンダラーを読み込み、登録時のカスタム `renderer` またはハイドレーション時のカスタムブラウザーレンダラーとして渡してください。
+D2 は、ブラウザー向け WASM パッケージが大きく初期化方式の追加検証が必要なため、現時点では埋め込みターゲットのみの対応です。
 
 ## VS Code 検証ハーネス
 

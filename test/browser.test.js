@@ -181,6 +181,70 @@ test('hydrateEmbeddedDiagrams supports npm WaveDrom renderWaveForm API', async (
   assert.equal(calls[0][2], 'WaveDrom_Display_')
 })
 
+test('hydrateEmbeddedDiagrams supports SvgBob render API', async () => {
+  const svgbob = diagram('svgbob', 'A -> B')
+  const root = {
+    querySelectorAll() {
+      return [svgbob.element]
+    },
+  }
+
+  const results = await hydrateEmbeddedDiagrams(root, {
+    libraries: {
+      svgbob: {
+        render(source) {
+          return `<svg data-source="${source}"></svg>`
+        },
+      },
+    },
+  })
+
+  assert.equal(results[0].ok, true)
+  assert.equal(svgbob.outputElement.innerHTML, '<svg data-source="A -> B"></svg>')
+})
+
+test('hydrateEmbeddedDiagrams supports Pikchr loaded function API', async () => {
+  const pikchr = diagram('pikchr', 'box')
+  const root = {
+    querySelectorAll() {
+      return [pikchr.element]
+    },
+  }
+
+  const results = await hydrateEmbeddedDiagrams(root, {
+    libraries: {
+      loadPikchr() {
+        return (source) => `<svg data-source="${source}"></svg>`
+      },
+    },
+  })
+
+  assert.equal(results[0].ok, true)
+  assert.equal(pikchr.outputElement.innerHTML, '<svg data-source="box"></svg>')
+})
+
+test('hydrateEmbeddedDiagrams supports GraphViz renderString API', async () => {
+  const graphviz = diagram('graphviz', 'digraph { A -> B }')
+  const root = {
+    querySelectorAll() {
+      return [graphviz.element]
+    },
+  }
+
+  const results = await hydrateEmbeddedDiagrams(root, {
+    libraries: {
+      graphviz: {
+        renderString(source) {
+          return `<svg data-source="${source}"></svg>`
+        },
+      },
+    },
+  })
+
+  assert.equal(results[0].ok, true)
+  assert.equal(graphviz.outputElement.innerHTML, '<svg data-source="digraph { A -> B }"></svg>')
+})
+
 test('hydrateEmbeddedDiagrams reports renderer failures in the output node', async () => {
   const plantuml = diagram('plantuml', 'Alice -> Bob')
   const root = {
@@ -201,6 +265,27 @@ test('hydrateEmbeddedDiagrams reports renderer failures in the output node', asy
   assert.equal(results[0].ok, false)
   assert.equal(plantuml.outputElement.textContent, 'renderer exploded')
   assert.equal(plantuml.element.classList.has('kroki-embedded-failed'), true)
+})
+
+test('hydrateEmbeddedDiagrams reports missing built-in renderer libraries', async () => {
+  const diagrams = [
+    diagram('svgbob', 'A -> B'),
+    diagram('pikchr', 'box'),
+    diagram('graphviz', 'digraph { A -> B }'),
+  ]
+  const root = {
+    querySelectorAll() {
+      return diagrams.map(({ element }) => element)
+    },
+  }
+
+  const results = await hydrateEmbeddedDiagrams(root)
+
+  assert.equal(results.length, 3)
+  assert.deepEqual(results.map((result) => result.ok), [false, false, false])
+  assert.match(diagrams[0].outputElement.textContent, /SvgBob renderer is not available/)
+  assert.match(diagrams[1].outputElement.textContent, /Pikchr renderer is not available/)
+  assert.match(diagrams[2].outputElement.textContent, /GraphViz renderer is not available/)
 })
 
 test('installNetworkGuards disables browser network APIs', () => {

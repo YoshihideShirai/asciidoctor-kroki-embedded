@@ -130,6 +130,37 @@ Bob --> Alice: SVG
 }
 ----
 
+== SvgBob
+
+[svgbob]
+----
+       .--.
+AsciiDoc --> Kroki
+       `--'
+----
+
+== Pikchr
+
+[pikchr]
+----
+box "AsciiDoc" fit
+arrow
+box "Embedded target" fit
+arrow
+box "Local SVG" fit
+----
+
+== GraphViz
+
+[graphviz]
+----
+digraph {
+  rankdir=LR
+  node [shape=box]
+  AsciiDoc -> EmbeddedTarget -> LocalRenderer -> SVG
+}
+----
+
 == Local Diagram Macros
 
 mermaid::diagrams/macro.mmd[]
@@ -145,6 +176,12 @@ vegalite::diagrams/chart.vegalite[]
 wavedrom::diagrams/timing.wavedrom[]
 
 bytefield::diagrams/register.bytefield[]
+
+svgbob::diagrams/flow.svgbob[]
+
+pikchr::diagrams/flow.pikchr[]
+
+graphviz::diagrams/flow.dot[]
 
 == Local Image Boundary
 
