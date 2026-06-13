@@ -316,6 +316,7 @@ flowchart LR
       const asciidocStatus = document.querySelector('#asciidoc-status')
       const asciidoctor = asciidoctorFactory()
       const graphviz = createGraphviz()
+      const pikchr = loadPikchr()
 
       globalThis.WaveSkin = waveSkin
       installNetworkGuards(globalThis)
@@ -390,7 +391,7 @@ ${sourceText}
             JSON5,
             bitfield,
             svgbob: renderTextDiagramSvg,
-            loadPikchr,
+            pikchr: await pikchr,
             graphviz: renderGraphviz,
           },
           renderers: {
