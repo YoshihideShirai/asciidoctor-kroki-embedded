@@ -42,4 +42,4 @@ For an automated browser smoke check of the same Webview bundle:
 npm run verify
 ```
 
-The verify command first runs a no-network audit over the harness source and manifest, then writes `dist/standalone-preview.html` plus desktop/narrow screenshots, opens the preview in Playwright Chromium, and fails if any diagram reports a renderer error, renders with an empty visual box, or any `http`/`https` request is observed.
+The verify command first runs a no-network audit over the harness source and manifest, then writes `dist/standalone-preview.html` plus desktop/narrow screenshots, opens the preview in Playwright Chromium, and fails if the Webview render summary is missing, any diagram reports a renderer error, any diagram renders with an empty visual box, or any `http`/`https` request is observed.

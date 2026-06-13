@@ -84,6 +84,7 @@ async function smokeViewport(browser, viewport) {
       }
     })
     return {
+      summary: globalThis.__krokiEmbeddedPreviewResult || null,
       total: diagrams.length,
       rendered: diagrams.filter((diagram) => diagram.dataset.rendered === 'true').length,
       failed: diagrams
@@ -135,6 +136,20 @@ function assertViewportResult({ viewport, result, pageErrors, remoteRequests }) 
   }
   if (result.failed.length > 0) {
     throw new Error(`${prefix} Renderer failures:\n${JSON.stringify(result.failed, null, 2)}`)
+  }
+  if (!result.summary) {
+    throw new Error(`${prefix} Missing webview render summary.`)
+  }
+  if (
+    result.summary.total !== result.total ||
+    result.summary.rendered !== result.rendered ||
+    result.summary.svgCount !== result.svgCount ||
+    result.summary.failed.length !== result.failed.length
+  ) {
+    throw new Error(`${prefix} Webview render summary does not match DOM result: ${JSON.stringify({
+      summary: result.summary,
+      result,
+    })}`)
   }
   if (result.total !== expectedDiagramCount || result.rendered !== expectedDiagramCount || result.svgCount < expectedDiagramCount) {
     throw new Error(`${prefix} Unexpected render result: ${JSON.stringify(result)}`)
