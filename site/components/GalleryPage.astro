@@ -28,7 +28,7 @@ const { lang, homeHref, homeLabel, alternateHref, alternateLabel, title, lead, i
 
       <section class="gallery-grid" aria-label={title}>
         {samples.map((sample) => (
-          <article class="gallery-card" data-diagram-type={sample.type} data-diagram-source={sample.source}>
+          <article class="gallery-card" data-diagram-type={sample.type}>
             <div class="gallery-card-header">
               <div>
                 <p class="eyebrow">{sample.type}</p>
@@ -40,7 +40,7 @@ const { lang, homeHref, homeLabel, alternateHref, alternateLabel, title, lead, i
             <div class="gallery-preview" aria-live="polite"></div>
             <details>
               <summary>AsciiDoc</summary>
-              <pre><code>{`[${sample.type}]
+              <pre><code class="gallery-asciidoc-source">{`[${sample.type}]
 ----
 ${sample.source}
 ----`}</code></pre>
@@ -118,20 +118,15 @@ ${sample.source}
 
       async function renderCard(card) {
         const type = card.dataset.diagramType
-        const source = card.dataset.diagramSource
+        const source = card.querySelector('.gallery-asciidoc-source').textContent
         const preview = card.querySelector('.gallery-preview')
-        preview.innerHTML = String(asciidoctor.convert(`[${type}]\n----\n${source}\n----`, {
+        preview.innerHTML = String(asciidoctor.convert(source, {
           safe: 'safe', backend: 'html5', standalone: false, extension_registry: createRegistry(), attributes: { 'allow-uri-read': false },
         }))
         await hydratePreview(preview)
       }
 
       document.querySelectorAll('.gallery-card').forEach((card) => {
-        renderCard(card).catch((error) => {
-          card.querySelector('.gallery-preview').innerHTML = `<pre class="site-error"></pre>`
-          card.querySelector('.site-error').textContent = error instanceof Error ? error.message : String(error)
-        })
-
         const button = card.querySelector('.copy-button')
         button.addEventListener('click', async () => {
           await navigator.clipboard.writeText(card.querySelector('code').textContent)
@@ -139,6 +134,15 @@ ${sample.source}
           setTimeout(() => { button.textContent = button.dataset.copyLabel }, 1400)
         })
       })
+
+      for (const card of document.querySelectorAll('.gallery-card')) {
+        try {
+          await renderCard(card)
+        } catch (error) {
+          card.querySelector('.gallery-preview').innerHTML = `<pre class="site-error"></pre>`
+          card.querySelector('.site-error').textContent = error instanceof Error ? error.message : String(error)
+        }
+      }
     </script>
   </body>
 </html>
