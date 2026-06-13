@@ -2,13 +2,19 @@ import path from 'node:path'
 import * as vscode from 'vscode'
 import asciidoctorFactory from '@asciidoctor/core'
 import krokiEmbedded from 'asciidoctor-kroki-embedded'
-import { rewriteRemoteImages } from './preview-html.js'
+import {
+  getPreviewImageCspSources,
+  rewriteLocalImageSrc,
+  rewritePreviewImages,
+} from './preview-html.js'
 
 let panel
 let activeDocument
 let outputChannel
 let pendingUpdate
 const livePreviewDelayMs = 150
+const configurationSection = 'asciidoctor-kroki-embedded'
+const allowedPreviewHostsSetting = 'allowedPreviewHosts'
 
 export function activate(context) {
   outputChannel = vscode.window.createOutputChannel('Kroki Embedded Preview')
@@ -109,16 +115,24 @@ function isAsciiDoc(document) {
 
 function renderPreview(context, webview, document) {
   const nonce = createNonce()
-  const html = rewriteRemoteImages(convertAsciiDoc(document))
+  const allowedPreviewHosts = getAllowedPreviewHosts()
+  const html = rewritePreviewImages(convertAsciiDoc(document), {
+    allowedPreviewHosts,
+    localImageResolver: (src) => rewriteLocalImageSrc(src, path.dirname(document.fileName), (imagePath, baseDir) => {
+      const decodedPath = decodeURIComponent(imagePath)
+      return webview.asWebviewUri(vscode.Uri.file(path.resolve(baseDir, decodedPath))).toString()
+    }),
+  })
   const webviewScript = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'dist', 'webview.js'))
   const cspSource = webview.cspSource
+  const imageSources = getPreviewImageCspSources(cspSource, allowedPreviewHosts).join(' ')
 
   return `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${cspSource} data:; style-src ${cspSource} 'unsafe-inline'; script-src ${cspSource} 'nonce-${nonce}' 'wasm-unsafe-eval';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${imageSources}; style-src ${cspSource} 'unsafe-inline'; script-src ${cspSource} 'nonce-${nonce}' 'wasm-unsafe-eval';">
   <title>${escapeHtml(path.basename(document.fileName))}</title>
   <style>
     body {
@@ -177,6 +191,12 @@ function renderPreview(context, webview, document) {
   <script nonce="${nonce}" src="${webviewScript}"></script>
 </body>
 </html>`
+}
+
+function getAllowedPreviewHosts() {
+  return vscode.workspace
+    .getConfiguration(configurationSection)
+    .get(allowedPreviewHostsSetting, [])
 }
 
 function convertAsciiDoc(document) {

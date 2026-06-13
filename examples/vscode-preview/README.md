@@ -23,6 +23,19 @@ AsciiDoc: Open Kroki Embedded Preview
 
 The preview should render Mermaid, PlantUML, Nomnoml, Vega, Vega-Lite, WaveDrom, and Bytefield without using a Kroki server. The fixture covers both inline diagram blocks and local diagram macros such as `mermaid::diagrams/macro.mmd[]`. Edits to the active fixture refresh the preview automatically; `AsciiDoc: Refresh Kroki Embedded Preview` forces a redraw.
 
+Remote images are blocked by default and replaced with an empty local data image before the Webview renders. To allow specific remote image hosts while testing the Webview CSP path, set:
+
+```json
+{
+  "asciidoctor-kroki-embedded.allowedPreviewHosts": [
+    "example.com",
+    "https://images.example.org"
+  ]
+}
+```
+
+Host-only entries allow both `https` and `http` images for that exact host. Scheme-qualified entries allow only that scheme. Paths, wildcards, credentials, queries, and fragments are ignored as invalid entries.
+
 For an automated browser smoke check of the same Webview bundle:
 
 ```sh
