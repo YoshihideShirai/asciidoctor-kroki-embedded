@@ -142,14 +142,15 @@ async function renderVega({ diagramType, source, output, libraries }) {
 
 function renderWaveDrom({ source, output, libraries, index }) {
   const waveDrom = libraries.WaveDrom || getGlobal('WaveDrom')
-  if (!waveDrom || typeof waveDrom.RenderWaveForm !== 'function') {
+  const renderWaveForm = waveDrom?.RenderWaveForm || waveDrom?.renderWaveForm
+  if (typeof renderWaveForm !== 'function') {
     throw new Error('WaveDrom renderer is not available.')
   }
 
   const spec = parseLooseJson(source, libraries.JSON5)
   const prefix = 'WaveDrom_Display_'
   output.id = `${prefix}${index}`
-  waveDrom.RenderWaveForm(index, spec, prefix, false)
+  renderWaveForm(index, spec, prefix, false)
 }
 
 function renderBytefield({ source, output, libraries }) {

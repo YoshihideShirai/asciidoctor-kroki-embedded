@@ -152,6 +152,35 @@ test('hydrateEmbeddedDiagrams passes parsed diagram options to renderers', async
   assert.equal(vega.outputElement.textContent, 'svg')
 })
 
+test('hydrateEmbeddedDiagrams supports npm WaveDrom renderWaveForm API', async () => {
+  const wavedrom = diagram('wavedrom', '{ signal: [] }')
+  const root = {
+    querySelectorAll() {
+      return [wavedrom.element]
+    },
+  }
+  const calls = []
+
+  const results = await hydrateEmbeddedDiagrams(root, {
+    libraries: {
+      JSON5: {
+        parse() {
+          return { signal: [] }
+        },
+      },
+      WaveDrom: {
+        renderWaveForm(...args) {
+          calls.push(args)
+        },
+      },
+    },
+  })
+
+  assert.equal(results[0].ok, true)
+  assert.equal(calls.length, 1)
+  assert.equal(calls[0][2], 'WaveDrom_Display_')
+})
+
 test('hydrateEmbeddedDiagrams reports renderer failures in the output node', async () => {
   const plantuml = diagram('plantuml', 'Alice -> Bob')
   const root = {

@@ -20,3 +20,11 @@ AsciiDoc: Open Kroki Embedded Preview
 ```
 
 The preview should render Mermaid, PlantUML, Nomnoml, Vega, Vega-Lite, WaveDrom, and Bytefield without using a Kroki server.
+
+For an automated browser smoke check of the same Webview bundle:
+
+```sh
+npm run verify
+```
+
+The smoke check writes `dist/standalone-preview.html` and `dist/standalone-preview.png`, opens the preview in Playwright Chromium, and fails if any diagram reports a renderer error.

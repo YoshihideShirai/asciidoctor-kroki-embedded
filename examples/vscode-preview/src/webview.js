@@ -10,7 +10,7 @@ import WaveDrom from 'wavedrom'
 import waveSkin from 'wavedrom/skins/default.js'
 import bitfield from 'bit-field'
 
-globalThis.waveSkin = waveSkin
+globalThis.WaveSkin = waveSkin
 
 mermaid.initialize({
   startOnLoad: false,

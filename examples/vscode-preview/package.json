@@ -26,7 +26,9 @@
     "bundle:extension": "esbuild src/extension.js --bundle --platform=node --format=cjs --external:vscode --outfile=dist/extension.cjs",
     "bundle:webview": "esbuild src/webview.js --bundle --platform=browser --format=iife --global-name=KrokiEmbeddedPreview --alias:fs=./src/shims/empty.js --alias:path=./src/shims/empty.js --outfile=dist/webview.js",
     "clean": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\"",
-    "verify": "npm run build"
+    "generate:preview": "node scripts/generate-standalone-preview.mjs",
+    "smoke:preview": "node scripts/smoke-preview.mjs",
+    "verify": "npm run build && npm run generate:preview && npm run smoke:preview"
   },
   "dependencies": {
     "@asciidoctor/core": "^3.0.4",
@@ -42,6 +44,7 @@
     "wavedrom": "^3.6.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.57.0",
     "esbuild": "^0.28.1"
   }
 }
