@@ -8,21 +8,18 @@ User -> Doc: write diagram block
 Doc -> Renderer: embedded target
 Renderer --> User: SVG preview
 @enduml` },
-  { type: 'plantuml', title: 'ユースケース', description: '利用者とシステムの境界、主要な機能、外部サービスとの関係を整理できます。', source: `@startuml
-skinparam backgroundColor transparent
-left to right direction
-actor Author
-actor Reviewer
-rectangle "Documentation site" {
-  usecase "Write AsciiDoc" as Write
-  usecase "Preview diagrams" as Preview
-  usecase "Publish pages" as Publish
-}
-Author --> Write
-Author --> Preview
-Reviewer --> Preview
-Preview ..> Publish : approve
-@enduml` },
+  { type: 'mermaid', title: 'ユースケース', description: '利用者とシステムの境界、主要な機能、外部サービスとの関係を整理できます。', source: `flowchart LR
+  Author([Author])
+  Reviewer([Reviewer])
+  subgraph Site[Documentation site]
+    Write([Write AsciiDoc])
+    Preview([Preview diagrams])
+    Publish([Publish pages])
+  end
+  Author --> Write
+  Author --> Preview
+  Reviewer --> Preview
+  Preview -. approve .-> Publish` },
   { type: 'plantuml', title: 'クラス', description: 'クラスやインターフェイスの責務、属性、メソッド、関連を設計メモに残せます。', source: `@startuml
 skinparam backgroundColor transparent
 interface DiagramRenderer {
