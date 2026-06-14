@@ -92,7 +92,7 @@ const serializedAsciidoc = JSON.stringify(asciidoc)
           return Promise.resolve(renderTextDiagramSvg(sourceText))
         }
 
-        const renderTimeoutMs = 3000
+        const renderTimeoutMs = 10000
         let timeoutId
 
         const render = new Promise((resolve, reject) => {
