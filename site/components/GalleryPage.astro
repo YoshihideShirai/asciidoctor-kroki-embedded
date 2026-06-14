@@ -62,6 +62,7 @@ const serializedAsciidoc = JSON.stringify(asciidoc)
       import * as vega from 'vega'
       import * as vegaInterpreter from 'vega-interpreter'
       import * as vegaLite from 'vega-lite'
+      import { D2 } from '@terrastruct/d2'
       import WaveDrom from 'wavedrom'
       import waveSkin from 'wavedrom/skins/default.js'
       import { hydrateEmbeddedDiagrams, installNetworkGuards } from '../../src/browser.js'
@@ -73,6 +74,7 @@ const serializedAsciidoc = JSON.stringify(asciidoc)
       const asciidoctor = asciidoctorFactory()
       const graphviz = createGraphviz()
       const pikchr = loadPikchr()
+      const d2 = new D2()
 
       globalThis.WaveSkin = waveSkin
       installNetworkGuards(globalThis)
@@ -161,6 +163,11 @@ const serializedAsciidoc = JSON.stringify(asciidoc)
         return viz.renderString(sourceText, { format: 'svg' })
       }
 
+      async function renderD2(sourceText, options = {}) {
+        const result = await d2.compile(sourceText, options)
+        return d2.render(result.diagram, result.renderOptions)
+      }
+
       function createRegistry() {
         const registry = asciidoctor.Extensions.create()
         registerBrowserDiagrams(registry, { defaultFormat: 'svg' })
@@ -197,6 +204,7 @@ const serializedAsciidoc = JSON.stringify(asciidoc)
               svgbob: renderTextDiagramSvg,
               pikchr: await pikchr,
               graphviz: renderGraphviz,
+              d2: renderD2,
               plantuml: renderPlantUml,
             },
           })
