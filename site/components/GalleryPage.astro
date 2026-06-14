@@ -1,7 +1,9 @@
 ---
 import '../../src/style.css'
+import { buildGalleryAsciidoc } from '../lib/gallery-asciidoc.js'
 
-const { lang, homeHref, homeLabel, alternateHref, alternateLabel, title, lead, intro, copyLabel, copiedLabel, samples } = Astro.props
+const { lang, homeHref, homeLabel, alternateHref, alternateLabel, title, lead, intro, rawHref, rawLabel, samples } = Astro.props
+const asciidoc = buildGalleryAsciidoc(samples, { title, intro })
 ---
 
 <!doctype html>
@@ -24,144 +26,13 @@ const { lang, homeHref, homeLabel, alternateHref, alternateLabel, title, lead, i
         <h1>{title}</h1>
         <p class="lead">{lead}</p>
         <p>{intro}</p>
+        <p><a class="download-link" href={rawHref}>{rawLabel}</a></p>
       </header>
 
-      <section class="gallery-grid" aria-label={title}>
-        {samples.map((sample) => (
-          <article class="gallery-card" data-diagram-type={sample.type}>
-            <div class="gallery-card-header">
-              <div>
-                <p class="eyebrow">{sample.type}</p>
-                <h2>{sample.title}</h2>
-              </div>
-              <button class="copy-button" type="button" data-copy-label={copyLabel} data-copied-label={copiedLabel}>{copyLabel}</button>
-            </div>
-            <p>{sample.description}</p>
-            <div class="gallery-preview" aria-live="polite"></div>
-            <details>
-              <summary>AsciiDoc</summary>
-              <pre><code class="gallery-asciidoc-source">{`[${sample.type}]
-----
-${sample.source}
-----`}</code></pre>
-            </details>
-          </article>
-        ))}
+      <section class="gallery-document" aria-label={title}>
+        <pre><code>{asciidoc}</code></pre>
       </section>
     </main>
-
-    <script src={`${import.meta.env.BASE_URL}vendor/plantuml-core/viz-global.js`}></script>
-    <script>
-      import asciidoctorFactory from '@asciidoctor/core'
-      import { renderToString } from '@plantuml/core'
-      import bitfield from 'bit-field'
-      import JSON5 from 'json5'
-      import mermaid from 'mermaid'
-      import nomnoml from 'nomnoml'
-      import loadPikchr from 'pikchr-js'
-      import { instance as createGraphviz } from '@viz-js/viz'
-      import * as vega from 'vega'
-      import * as vegaInterpreter from 'vega-interpreter'
-      import * as vegaLite from 'vega-lite'
-      import WaveDrom from 'wavedrom'
-      import waveSkin from 'wavedrom/skins/default.js'
-      import { hydrateEmbeddedDiagrams, installNetworkGuards } from '../../src/browser.js'
-      import { registerBrowserDiagrams } from '../lib/browser-kroki.js'
-
-      const asciidoctor = asciidoctorFactory()
-      const graphviz = createGraphviz()
-      const pikchr = loadPikchr()
-      const diagramNames = [...document.querySelectorAll('.gallery-card')].map((card) => card.dataset.diagramType)
-
-      globalThis.WaveSkin = waveSkin
-      installNetworkGuards(globalThis)
-      mermaid.initialize({ startOnLoad: false, securityLevel: 'strict', theme: 'default' })
-
-      function renderPlantUml(sourceText) {
-        return new Promise((resolve, reject) => {
-          let done = false
-          let timeout
-          const finish = (callback, value) => {
-            if (done) return
-            done = true
-            globalThis.clearTimeout(timeout)
-            globalThis.removeEventListener('error', onError)
-            callback(value)
-          }
-          const onError = (event) => {
-            event.preventDefault()
-            finish(reject, event.error || new Error(event.message || 'PlantUML rendering failed'))
-          }
-          globalThis.addEventListener('error', onError)
-          timeout = globalThis.setTimeout(() => {
-            finish(reject, new Error('PlantUML rendering timed out.'))
-          }, 4000)
-          renderToString(
-            sourceText.split(/\r\n|\r|\n/),
-            (svg) => finish(resolve, svg),
-            (message) => finish(reject, new Error(String(message || 'PlantUML rendering failed'))),
-          )
-        })
-      }
-
-      function escapeSvgText(value) {
-        return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-      }
-
-      function renderTextDiagramSvg(sourceText) {
-        const lines = sourceText.split(/\r\n|\r|\n/)
-        const width = Math.max(180, Math.max(...lines.map((line) => line.length), 1) * 8 + 24)
-        const height = Math.max(48, lines.length * 18 + 24)
-        const text = lines.map((line, index) => `<text x="12" y="${24 + index * 18}">${escapeSvgText(line)}</text>`).join('')
-        return `<svg xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}"><rect width="100%" height="100%" rx="6" fill="#f8fafc" stroke="#94a3b8"/><g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" fill="#14211f">${text}</g></svg>`
-      }
-
-      async function renderGraphviz(sourceText) {
-        const viz = await graphviz
-        return viz.renderString(sourceText, { format: 'svg' })
-      }
-
-      function createRegistry() {
-        const registry = asciidoctor.Extensions.create()
-        registerBrowserDiagrams(registry, { defaultFormat: 'svg', diagramNames })
-        return registry
-      }
-
-      async function hydratePreview(container) {
-        return hydrateEmbeddedDiagrams(container, {
-          libraries: { mermaid, nomnoml, vega, vegaLite, vegaInterpreter, WaveDrom, JSON5, bitfield, svgbob: renderTextDiagramSvg, pikchr: await pikchr, graphviz: renderGraphviz },
-          renderers: { plantuml: async ({ source: sourceText, output }) => { output.innerHTML = await renderPlantUml(sourceText) } },
-        })
-      }
-
-      async function renderCard(card) {
-        const type = card.dataset.diagramType
-        const source = card.querySelector('.gallery-asciidoc-source').textContent
-        const preview = card.querySelector('.gallery-preview')
-        preview.innerHTML = String(asciidoctor.convert(source, {
-          safe: 'safe', backend: 'html5', standalone: false, extension_registry: createRegistry(), attributes: { 'allow-uri-read': false },
-        }))
-        await hydratePreview(preview)
-      }
-
-      document.querySelectorAll('.gallery-card').forEach((card) => {
-        const button = card.querySelector('.copy-button')
-        button.addEventListener('click', async () => {
-          await navigator.clipboard.writeText(card.querySelector('code').textContent)
-          button.textContent = button.dataset.copiedLabel
-          setTimeout(() => { button.textContent = button.dataset.copyLabel }, 1400)
-        })
-      })
-
-      for (const card of document.querySelectorAll('.gallery-card')) {
-        try {
-          await renderCard(card)
-        } catch (error) {
-          card.querySelector('.gallery-preview').innerHTML = `<pre class="site-error"></pre>`
-          card.querySelector('.site-error').textContent = error instanceof Error ? error.message : String(error)
-        }
-      }
-    </script>
   </body>
 </html>
 
@@ -189,7 +60,7 @@ ${sample.source}
   }
 
   .gallery-main {
-    width: min(1280px, calc(100% - 32px));
+    width: min(1080px, calc(100% - 32px));
     margin: 0 auto;
     padding: 28px 0 56px;
   }
@@ -197,7 +68,8 @@ ${sample.source}
   .language-nav { display: flex; justify-content: flex-end; gap: 8px; }
 
   .language-nav a,
-  .copy-button {
+  .download-link {
+    display: inline-flex;
     border: 1px solid var(--line);
     border-radius: 6px;
     padding: 7px 10px;
@@ -207,6 +79,11 @@ ${sample.source}
     font-weight: 800;
     text-decoration: none;
   }
+
+  .language-nav a:hover,
+  .language-nav a:focus-visible,
+  .download-link:hover,
+  .download-link:focus-visible { border-color: var(--accent); background: rgba(15, 118, 110, 0.08); }
 
   .gallery-hero {
     margin: 28px 0 24px;
@@ -227,52 +104,27 @@ ${sample.source}
   }
 
   h1 { margin: 0; max-width: 12ch; font-size: clamp(2.4rem, 6vw, 5rem); line-height: 0.98; }
-  h2 { margin: 0; font-size: 1.05rem; }
   p { overflow-wrap: anywhere; }
 
   .lead { margin: 20px 0 0; max-width: 820px; color: var(--muted); font-size: clamp(1.05rem, 2vw, 1.24rem); }
-  .gallery-hero p:last-child { max-width: 820px; color: var(--muted); }
+  .gallery-hero p:not(.eyebrow) { max-width: 820px; color: var(--muted); }
 
-  .gallery-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
-
-  .gallery-card {
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
+  .gallery-document {
     border: 1px solid var(--line);
     border-radius: 10px;
-    padding: 18px;
     background: rgba(255, 255, 255, 0.9);
     box-shadow: 0 18px 48px rgba(20, 33, 31, 0.08);
+    overflow: hidden;
   }
 
-  .gallery-card-header { display: flex; align-items: start; justify-content: space-between; gap: 12px; }
-  .gallery-card > p { margin: 0; color: var(--muted); }
-
-  .copy-button { width: auto; cursor: pointer; }
-  .copy-button:hover, .copy-button:focus-visible, .language-nav a:hover, .language-nav a:focus-visible { border-color: var(--accent); background: rgba(15, 118, 110, 0.08); }
-
-  .gallery-preview {
-    min-height: 260px;
+  pre {
+    margin: 0;
     overflow: auto;
-    display: grid;
-    place-items: center;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 16px;
-    background: #fbfaf6;
+    padding: 18px;
+    background: white;
   }
 
-  .gallery-preview .kroki-embedded { margin: 0; }
-  .gallery-preview .kroki-embedded-output svg { margin: auto; }
+  code, pre { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size: 0.9rem; line-height: 1.55; }
 
-  details { border: 1px solid var(--line); border-radius: 8px; background: #fbfaf6; }
-  summary { cursor: pointer; padding: 10px 12px; color: var(--accent-strong); font-weight: 800; }
-  pre { margin: 0; max-height: 300px; overflow: auto; border-top: 1px solid var(--line); padding: 12px; background: white; }
-  code, pre { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size: 0.86rem; line-height: 1.45; }
-  .site-error { white-space: pre-wrap; color: #b00020; }
-
-  @media (max-width: 860px) { .gallery-grid { grid-template-columns: 1fr; } h1 { max-width: none; } }
-  @media (max-width: 560px) { .gallery-main { width: min(100% - 20px, 1280px); padding-top: 10px; } .gallery-card-header { flex-direction: column; } .copy-button { width: 100%; } }
+  @media (max-width: 560px) { .gallery-main { width: min(100% - 20px, 1080px); padding-top: 10px; } h1 { max-width: none; } }
 </style>
