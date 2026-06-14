@@ -81,63 +81,7 @@ const serializedAsciidoc = JSON.stringify(asciidoc)
         theme: 'default',
       })
 
-      function canRenderWithPlantUmlCore(sourceText) {
-        return /^@startuml\b/i.test(sourceText.trim()) &&
-          /(?:^|\n)\s*(?:participant|boundary|control|entity|database|collections|queue)\b/i.test(sourceText) &&
-          /(?:--?>|<-?-).*:/m.test(sourceText)
-      }
-
-      function renderPlantUmlFallbackSvg(sourceText) {
-        const bodyLines = sourceText
-          .split(/\r\n|\r|\n/)
-          .map((line) => line.trim())
-          .filter((line) => line && !/^@(?:start|end)/i.test(line) && !/^'/.test(line))
-        const labels = []
-        const relations = []
-        for (const line of bodyLines) {
-          const quoted = [...line.matchAll(/"([^"]+)"/g)].map((match) => match[1])
-          const declaration = line.match(/^(?:actor|usecase|class|interface|component|node|artifact|object|state)\s+(?:"([^"]+)"|([A-Za-z][\w-]*))/i)
-          const mindmap = line.match(/^\*+\s+(.+)/)
-          const gantt = line.match(/^\[([^\]]+)\]/)
-          for (const label of [...quoted, declaration?.[1] || declaration?.[2], mindmap?.[1], gantt?.[1]].filter(Boolean)) {
-            if (!labels.includes(label)) labels.push(label)
-          }
-          const relation = line.match(/(.+?)\s*(?:--?>|<-?-|<\|\.\.|\.\.|\*--|o--|\.down\.)\s*(.+?)(?:\s*:.*)?$/)
-          if (relation) relations.push([relation[1].replace(/["{}\[\]]/g, '').trim(), relation[2].replace(/["{}\[\]]/g, '').trim()])
-        }
-        const nodes = (labels.length ? labels : bodyLines.slice(0, 8)).slice(0, 12)
-        const columns = Math.min(3, Math.max(1, Math.ceil(Math.sqrt(nodes.length || 1))))
-        const cardWidth = 190
-        const cardHeight = 58
-        const gapX = 34
-        const gapY = 34
-        const width = columns * cardWidth + (columns - 1) * gapX + 48
-        const rows = Math.max(1, Math.ceil((nodes.length || 1) / columns))
-        const height = rows * cardHeight + (rows - 1) * gapY + 72
-        const positions = new Map(nodes.map((label, index) => [label, {
-          x: 24 + (index % columns) * (cardWidth + gapX),
-          y: 44 + Math.floor(index / columns) * (cardHeight + gapY),
-        }]))
-        const renderedRelations = relations.slice(0, 8).map(([from, to]) => {
-          const fromKey = nodes.find((label) => from.includes(label) || label.includes(from))
-          const toKey = nodes.find((label) => to.includes(label) || label.includes(to))
-          if (!fromKey || !toKey || fromKey === toKey) return ''
-          const a = positions.get(fromKey)
-          const b = positions.get(toKey)
-          return `<line x1="${a.x + cardWidth / 2}" y1="${a.y + cardHeight / 2}" x2="${b.x + cardWidth / 2}" y2="${b.y + cardHeight / 2}" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"/>`
-        }).join('')
-        const renderedNodes = nodes.map((label) => {
-          const pos = positions.get(label)
-          return `<g><rect x="${pos.x}" y="${pos.y}" width="${cardWidth}" height="${cardHeight}" rx="10" fill="#ecfdf5" stroke="#0f766e" stroke-width="1.5"/><text x="${pos.x + cardWidth / 2}" y="${pos.y + 34}" text-anchor="middle" font-family="Inter, ui-sans-serif, sans-serif" font-size="13" fill="#14211f">${escapeSvgText(label)}</text></g>`
-        }).join('')
-        return `<svg xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}"><defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#0f766e"/></marker></defs><rect width="100%" height="100%" rx="12" fill="#f8fafc" stroke="#cbd5e1"/>${renderedRelations}${renderedNodes}</svg>`
-      }
-
       function renderPlantUml(sourceText) {
-        if (!canRenderWithPlantUmlCore(sourceText)) {
-          return Promise.resolve(renderPlantUmlFallbackSvg(sourceText))
-        }
-
         const renderTimeoutMs = 10000
         let timeoutId
 
@@ -149,9 +93,13 @@ const serializedAsciidoc = JSON.stringify(asciidoc)
                 clearTimeout(timeoutId)
                 resolve(svg)
               },
-              (message) => reject(new Error(String(message || 'PlantUML rendering failed'))),
+              (message) => {
+                clearTimeout(timeoutId)
+                reject(new Error(String(message || 'PlantUML rendering failed')))
+              },
             )
           } catch (error) {
+            clearTimeout(timeoutId)
             reject(error)
           }
         })
