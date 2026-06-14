@@ -1,12 +1,12 @@
 export const samples = [
-  { type: 'mermaid', title: 'シーケンス', description: '登場人物の会話や処理の順序を、レビューで追いやすい図にします。', source: `sequenceDiagram
+  { type: 'mermaid', title: 'Mermaid シーケンス', description: '登場人物の会話や処理の順序を、レビューで追いやすい図にします。', source: `sequenceDiagram
   actor User
   participant Doc as AsciiDoc
   participant Renderer as Local renderer
   User->>Doc: write diagram block
   Doc->>Renderer: embedded target
   Renderer-->>User: SVG preview` },
-  { type: 'mermaid', title: 'ユースケース', description: '利用者とシステムの境界、主要な機能、外部サービスとの関係を整理できます。', source: `flowchart LR
+  { type: 'mermaid', title: 'Mermaid ユースケース', description: '利用者とシステムの境界、主要な機能、外部サービスとの関係を整理できます。', source: `flowchart LR
   Author([Author])
   Reviewer([Reviewer])
   subgraph Site[Documentation site]
@@ -18,7 +18,7 @@ export const samples = [
   Author --> Preview
   Reviewer --> Preview
   Preview -. approve .-> Publish` },
-  { type: 'mermaid', title: 'クラス', description: 'クラスやインターフェイスの責務、属性、メソッド、関連を設計メモに残せます。', source: `classDiagram
+  { type: 'mermaid', title: 'Mermaid クラス', description: 'クラスやインターフェイスの責務、属性、メソッド、関連を設計メモに残せます。', source: `classDiagram
   class DiagramRenderer {
     +render(source)
   }
@@ -32,7 +32,7 @@ export const samples = [
   }
   DiagramRenderer <|.. MermaidRenderer
   GalleryCard --> DiagramRenderer` },
-  { type: 'mermaid', title: 'アクティビティ', description: '処理手順、分岐、並列作業をフローチャートとして表現できます。', source: `flowchart TD
+  { type: 'mermaid', title: 'Mermaid アクティビティ', description: '処理手順、分岐、並列作業をフローチャートとして表現できます。', source: `flowchart TD
   Start([Start]) --> Load[Load AsciiDoc block]
   Load --> Supported{diagram type supported?}
   Supported -->|yes| Render[Render SVG locally]
@@ -40,21 +40,21 @@ export const samples = [
   Supported -->|no| Error[Show readable error]
   Insert --> Stop([Stop])
   Error --> Stop` },
-  { type: 'mermaid', title: '状態遷移', description: '画面、ジョブ、接続などの状態とイベントによる遷移を確認できます。', source: `stateDiagram-v2
+  { type: 'mermaid', title: 'Mermaid 状態遷移', description: '画面、ジョブ、接続などの状態とイベントによる遷移を確認できます。', source: `stateDiagram-v2
   [*] --> Editing
   Editing --> Previewing: save
   Previewing --> Editing: fix source
   Previewing --> Published: approve
   Published --> Editing: revise
   Published --> [*]` },
-  { type: 'mermaid', title: 'コンポーネント', description: 'モジュール間の依存や提供インターフェイスを俯瞰できます。', source: `flowchart LR
+  { type: 'mermaid', title: 'Mermaid コンポーネント', description: 'モジュール間の依存や提供インターフェイスを俯瞰できます。', source: `flowchart LR
   subgraph BrowserPreview[Browser preview]
     Parser[AsciiDoc parser] --> Embedded[Embedded diagram]
     Embedded --> Hydrator[Hydrator]
     Hydrator --> Renderer[Local renderer]
   end
   Renderer --> Svg[SVG output]` },
-  { type: 'mermaid', title: '配置', description: 'ノード、実行環境、成果物の配置関係をインフラ説明に使えます。', source: `flowchart LR
+  { type: 'mermaid', title: 'Mermaid 配置', description: 'ノード、実行環境、成果物の配置関係をインフラ説明に使えます。', source: `flowchart LR
   subgraph Browser["Developer browser"]
     Page[gallery page]
     Renderer[local renderer]
@@ -64,7 +64,7 @@ export const samples = [
   end
   Page --> Renderer
   Assets --> Page` },
-  { type: 'mermaid', title: 'マインドマップ', description: 'アイデア、要件、章立てをツリー状に広げて整理できます。', source: `mindmap
+  { type: 'mermaid', title: 'Mermaid マインドマップ', description: 'アイデア、要件、章立てをツリー状に広げて整理できます。', source: `mindmap
   root((Mermaid))
     UML
       Sequence
@@ -76,7 +76,7 @@ export const samples = [
     Operations
       Deployment
       Component` },
-  { type: 'mermaid', title: 'ガントチャート', description: 'リリース作業やレビュー工程の日程、依存関係を簡潔に示せます。', source: `gantt
+  { type: 'mermaid', title: 'Mermaid ガントチャート', description: 'リリース作業やレビュー工程の日程、依存関係を簡潔に示せます。', source: `gantt
   title Gallery release plan
   dateFormat  YYYY-MM-DD
   section Release
@@ -84,7 +84,7 @@ export const samples = [
   Render gallery   :active, render, after collect, 4d
   Review diagrams  :review, after render, 2d
   Publish          :milestone, after review, 0d` },
-  { type: 'mermaid', title: 'フロー', description: '分岐、パイプライン、状態の流れを短い記法で表現できます。', source: `flowchart LR
+  { type: 'mermaid', title: 'Mermaid フロー', description: '分岐、パイプライン、状態の流れを短い記法で表現できます。', source: `flowchart LR
   Idea[Idea] --> Draft[AsciiDoc]
   Draft --> Preview{Preview OK?}
   Preview -->|yes| Publish[GitHub Pages]
@@ -200,7 +200,7 @@ Project starts 2026-06-01
 [Review diagrams] starts at [Render gallery]'s end and lasts 2 days
 [Publish] happens at [Review diagrams]'s end
 @endgantt` },
-  { type: 'graphviz', title: '依存関係', description: 'ノード間の関係や依存方向を、DOT のレイアウトエンジンで整えます。', source: `digraph G {
+  { type: 'graphviz', title: 'Graphviz 依存関係', description: 'ノード間の関係や依存方向を、DOT のレイアウトエンジンで整えます。', source: `digraph G {
   rankdir=LR
   node [shape=box, style="rounded,filled", fillcolor="#ecfeff"]
   README -> AsciiDoc
@@ -208,7 +208,7 @@ Project starts 2026-06-01
   EmbeddedHTML -> BrowserHydrator
   BrowserHydrator -> SVG
 }` },
-  { type: 'vegalite', title: '小さなチャート', description: '文書中のメトリクスや比較を、宣言的な JSON で可視化します。', source: `{
+  { type: 'vegalite', title: 'Vega-Lite 小さなチャート', description: '文書中のメトリクスや比較を、宣言的な JSON で可視化します。', source: `{
   "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
   "data": { "values": [
     { "diagram": "Mermaid", "uses": 8 },
@@ -222,13 +222,13 @@ Project starts 2026-06-01
     "color": { "value": "#0f766e" }
   }
 }` },
-  { type: 'wavedrom', title: 'タイミング', description: 'ハードウェアやプロトコルの信号タイミングをコンパクトに描けます。', source: `{ signal: [
+  { type: 'wavedrom', title: 'WaveDrom タイミング', description: 'ハードウェアやプロトコルの信号タイミングをコンパクトに描けます。', source: `{ signal: [
   { name: "clk", wave: "p....." },
   { name: "req", wave: "01.0.." },
   { name: "ack", wave: "0.10.." },
   { name: "data", wave: "x.345x", data: ["A", "B", "C"] }
 ]}` },
-  { type: 'bytefield', title: 'ビットフィールド', description: 'レジスタやパケットフォーマットを、仕様書向けの見た目で示します。', source: `{
+  { type: 'bytefield', title: 'Bytefield ビットフィールド', description: 'レジスタやパケットフォーマットを、仕様書向けの見た目で示します。', source: `{
   reg: [
     { bits: 4, name: "version" },
     { bits: 4, name: "flags" },
@@ -236,16 +236,16 @@ Project starts 2026-06-01
     { bits: 16, name: "length" }
   ]
 }` },
-  { type: 'nomnoml', title: 'クラス図', description: '軽量なテキストで概念モデルや責務の境界をスケッチできます。', source: `[Document] -> [Embedded target]
+  { type: 'nomnoml', title: 'Nomnoml クラス図', description: '軽量なテキストで概念モデルや責務の境界をスケッチできます。', source: `[Document] -> [Embedded target]
 [Embedded target] -> [Hydrator]
 [Hydrator] -> [SVG]
 [Host policy] -> [Hydrator]` },
-  { type: 'pikchr', title: 'ブロック図', description: 'README に置きやすい、シンプルな箱と矢印の図を作れます。', source: `box "AsciiDoc" fit
+  { type: 'pikchr', title: 'Pikchr ブロック図', description: 'README に置きやすい、シンプルな箱と矢印の図を作れます。', source: `box "AsciiDoc" fit
 arrow
 box "Embedded" fit
 arrow
 box "Local SVG" fit` },
-  { type: 'svgbob', title: 'ASCII アート', description: '既存のテキスト図を、HTML 上で見やすい SVG として表示できます。', source: `       .------.
+  { type: 'svgbob', title: 'SvgBob ASCII アート', description: '既存のテキスト図を、HTML 上で見やすい SVG として表示できます。', source: `       .------.
 Input -->|local| Render
        '------'` },
   { type: 'vega', title: 'Vega', description: 'より低レベルな指定が必要な可視化も、ローカルレンダラーで扱えます。', source: `{

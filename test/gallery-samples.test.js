@@ -5,16 +5,16 @@ import { samples } from '../site/lib/gallery-samples.js'
 import { buildGalleryAsciidoc } from '../site/lib/gallery-asciidoc.js'
 
 const englishLabels = [
-  ['Sequence', 'Show conversations and processing order in a diagram that is easy to review.'],
-  ['Use case', 'Map actors, system boundaries, core capabilities, and external services.'],
-  ['Class', 'Document responsibilities, attributes, methods, and relationships for design notes.'],
-  ['Activity', 'Show procedures, decisions, and work steps as a flowchart.'],
-  ['State', 'Review states and event-driven transitions for screens, jobs, or connections.'],
-  ['Component', 'Outline module dependencies and provided interfaces at a glance.'],
-  ['Deployment', 'Explain where nodes, runtimes, and artifacts are placed.'],
-  ['Mind map', 'Organize ideas, requirements, or document sections as an expanding tree.'],
-  ['Gantt', 'Summarize release work, review steps, dates, and dependencies.'],
-  ['Flow', 'Describe branches, pipelines, and state transitions with concise syntax.'],
+  ['Mermaid sequence', 'Show conversations and processing order in a diagram that is easy to review.'],
+  ['Mermaid use case', 'Map actors, system boundaries, core capabilities, and external services.'],
+  ['Mermaid class', 'Document responsibilities, attributes, methods, and relationships for design notes.'],
+  ['Mermaid activity', 'Show procedures, decisions, and work steps as a flowchart.'],
+  ['Mermaid state', 'Review states and event-driven transitions for screens, jobs, or connections.'],
+  ['Mermaid component', 'Outline module dependencies and provided interfaces at a glance.'],
+  ['Mermaid deployment', 'Explain where nodes, runtimes, and artifacts are placed.'],
+  ['Mermaid mind map', 'Organize ideas, requirements, or document sections as an expanding tree.'],
+  ['Mermaid Gantt', 'Summarize release work, review steps, dates, and dependencies.'],
+  ['Mermaid flow', 'Describe branches, pipelines, and state transitions with concise syntax.'],
   ['PlantUML sequence', 'Show service requests and responses in order with a PlantUML sequence diagram.'],
   ['PlantUML use case', 'Organize actors, system boundaries, and main actions with a PlantUML use case diagram.'],
   ['PlantUML class', 'Capture classes, interfaces, inheritance, and dependencies with a PlantUML class diagram.'],
@@ -25,13 +25,13 @@ const englishLabels = [
   ['PlantUML object', 'Snapshot runtime instances, values, and references with a PlantUML object diagram.'],
   ['PlantUML mind map', 'Expand requirements or document sections hierarchically with a PlantUML mind map.'],
   ['PlantUML Gantt', 'Show release work, review steps, and publish milestones with a PlantUML Gantt chart.'],
-  ['Dependencies', 'Arrange relationships and dependency direction with the DOT layout engine.'],
-  ['Small chart', 'Visualize metrics and comparisons in documents with declarative JSON.'],
-  ['Timing', 'Draw hardware or protocol signal timing compactly.'],
-  ['Bit field', 'Present register and packet formats with a specification-friendly look.'],
-  ['Class sketch', 'Sketch conceptual models and responsibility boundaries with lightweight text.'],
-  ['Block diagram', 'Create simple box-and-arrow diagrams that fit well in README files.'],
-  ['ASCII art', 'Render existing text diagrams as readable SVG in HTML.'],
+  ['Graphviz dependencies', 'Arrange relationships and dependency direction with the DOT layout engine.'],
+  ['Vega-Lite small chart', 'Visualize metrics and comparisons in documents with declarative JSON.'],
+  ['WaveDrom timing', 'Draw hardware or protocol signal timing compactly.'],
+  ['Bytefield bit field', 'Present register and packet formats with a specification-friendly look.'],
+  ['Nomnoml class sketch', 'Sketch conceptual models and responsibility boundaries with lightweight text.'],
+  ['Pikchr block diagram', 'Create simple box-and-arrow diagrams that fit well in README files.'],
+  ['SvgBob ASCII art', 'Render existing text diagrams as readable SVG in HTML.'],
   ['Vega', 'Handle lower-level visualization specifications with local rendering.'],
 ]
 
@@ -40,6 +40,34 @@ const englishSamples = samples.map((sample, index) => ({
   title: englishLabels[index][0],
   description: englishLabels[index][1],
 }))
+
+const rendererLabels = {
+  bytefield: 'Bytefield',
+  graphviz: 'Graphviz',
+  mermaid: 'Mermaid',
+  nomnoml: 'Nomnoml',
+  pikchr: 'Pikchr',
+  plantuml: 'PlantUML',
+  svgbob: 'SvgBob',
+  vega: 'Vega',
+  vegalite: 'Vega-Lite',
+  wavedrom: 'WaveDrom',
+}
+
+test('gallery sample titles start with their renderer names', () => {
+  for (const sample of samples) {
+    assert.ok(
+      sample.title.startsWith(rendererLabels[sample.type]),
+      `${sample.title} should start with ${rendererLabels[sample.type]}`,
+    )
+  }
+  for (const sample of englishSamples) {
+    assert.ok(
+      sample.title.startsWith(rendererLabels[sample.type]),
+      `${sample.title} should start with ${rendererLabels[sample.type]}`,
+    )
+  }
+})
 
 test('gallery samples include diverse PlantUML browser-rendered examples', () => {
   const plantumlSamples = samples.filter((sample) => sample.type === 'plantuml')
