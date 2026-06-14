@@ -4,7 +4,7 @@
 
 `asciidoctor-kroki-embedded` is an Asciidoctor.js extension for Kroki-compatible diagram syntax that does not contact a Kroki server.
 
-It follows the same registration shape as `asciidoctor/asciidoctor-kroki`, but block and block macro processors emit embedded HTML targets instead of remote image URLs. A host application can then hydrate those targets with local renderers, like the VS Code extension in `YoshihideShirai/asciidoc-local-preview-vscode` does for Mermaid, PlantUML, Nomnoml, Vega, Vega-Lite, WaveDrom, and Bytefield.
+It follows the same registration shape as `asciidoctor/asciidoctor-kroki`, but block and block macro processors emit embedded HTML targets instead of remote image URLs. A host application can then hydrate those targets with local renderers, like the VS Code extension in `YoshihideShirai/asciidoc-local-preview-vscode` does for Mermaid, PlantUML, Nomnoml, Vega, Vega-Lite, WaveDrom, Bytefield, SvgBob, Pikchr, GraphViz, and D2.
 
 ## Install
 
@@ -125,7 +125,7 @@ Kroki server support is based on the official Kroki project README and documenta
 | BPMN | Yes | Yes | No | No |
 | Bytefield | Yes | Yes | Yes | Yes |
 | C4PlantUML | Yes | Yes | Injected PlantUML renderer | No |
-| D2 | Yes | Yes | Yes | No |
+| D2 | Yes | Yes | Yes | Yes |
 | DBML | Yes | Yes | No | No |
 | diagrams.net | Yes | Yes | No | No |
 | Ditaa | Yes | Yes | No | No |
@@ -151,13 +151,13 @@ Kroki server support is based on the official Kroki project README and documenta
 | WaveDrom | Yes | Yes | Yes | Yes |
 | WireViz | Yes | Yes | No | No |
 
-This package never falls back to the Kroki server for unsupported local renderers. Hosts that need local rendering for additional diagram types should load their own renderer and pass a custom `renderer` during registration or a custom browser renderer during hydration. D2 hydration expects the host to provide a local `d2`/`D2` renderer or a `loadD2` lazy loader; the D2 renderer library itself is not bundled with this package.
+This package never falls back to the Kroki server for unsupported local renderers. Hosts that need local rendering for additional diagram types should load their own renderer and pass a custom `renderer` during registration or a custom browser renderer during hydration. D2 hydration expects the host to provide a local `d2`/`D2` renderer or a `loadD2` lazy loader; the VS Code validation harness bundles `@terrastruct/d2` as one example host renderer.
 
 ## VS Code Validation Harness
 
 This repository includes a sample VS Code extension under `examples/vscode-preview`.
-It converts `fixtures/sample.adoc` with this package and hydrates Mermaid, PlantUML, Nomnoml, Vega, Vega-Lite, WaveDrom, Bytefield, SvgBob, Pikchr, and GraphViz diagrams in a Webview using bundled local libraries.
-The fixture covers inline blocks and local diagram macros for every bundled renderer, includes a D2 inline sample for hosts that provide a D2 renderer, and covers local image rendering and blocked remote images.
+It converts `fixtures/sample.adoc` with this package and hydrates Mermaid, PlantUML, Nomnoml, Vega, Vega-Lite, WaveDrom, Bytefield, SvgBob, Pikchr, GraphViz, and D2 diagrams in a Webview using bundled local libraries.
+The fixture covers inline blocks and local diagram macros for every bundled renderer, including D2, and covers local image rendering and blocked remote images.
 
 ```sh
 cd examples/vscode-preview

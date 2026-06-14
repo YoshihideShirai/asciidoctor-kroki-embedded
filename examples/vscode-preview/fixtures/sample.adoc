@@ -169,6 +169,16 @@ direction: right
 AsciiDoc -> Embedded Target -> Local Renderer -> SVG
 ----
 
+The D2 renderer also supports simple containers:
+
+[d2]
+----
+Preview: {
+  AsciiDoc -> Hydration
+  Hydration -> Browser SVG
+}
+----
+
 == Local Diagram Macros
 
 mermaid::diagrams/macro.mmd[]
@@ -190,6 +200,8 @@ svgbob::diagrams/flow.svgbob[]
 pikchr::diagrams/flow.pikchr[]
 
 graphviz::diagrams/flow.dot[]
+
+d2::diagrams/architecture.d2[]
 
 == Local Image Boundary
 

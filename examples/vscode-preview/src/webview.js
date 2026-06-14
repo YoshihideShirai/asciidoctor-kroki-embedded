@@ -11,6 +11,7 @@ import JSON5 from 'json5'
 import WaveDrom from 'wavedrom'
 import waveSkin from 'wavedrom/skins/default.js'
 import bitfield from 'bit-field'
+import { D2 as D2Renderer } from '@terrastruct/d2'
 
 globalThis.WaveSkin = waveSkin
 installNetworkGuards(globalThis)
@@ -22,6 +23,7 @@ mermaid.initialize({
 })
 
 const graphviz = createGraphviz()
+const d2RendererLibrary = D2Renderer
 const SVG_XMLNS = 'http:' + '//www.w3.org/2000/svg'
 
 function renderPlantUml(source) {
@@ -61,6 +63,9 @@ async function renderGraphviz(source) {
   return viz.renderString(source, { format: 'svg' })
 }
 
+async function renderD2(source) {
+  return renderTextDiagramSvg(source)
+}
 async function renderAll() {
   const results = await hydrateEmbeddedDiagrams(document, {
     libraries: {
@@ -75,6 +80,7 @@ async function renderAll() {
       svgbob: renderTextDiagramSvg,
       loadPikchr,
       graphviz: renderGraphviz,
+      D2: d2RendererLibrary,
     },
     renderers: {
       plantuml: async ({ source, output }) => {
@@ -82,6 +88,9 @@ async function renderAll() {
       },
       c4plantuml: async ({ source, output }) => {
         output.innerHTML = await renderPlantUml(source)
+      },
+      d2: async ({ source, output }) => {
+        output.innerHTML = await renderD2(source)
       },
     },
   })

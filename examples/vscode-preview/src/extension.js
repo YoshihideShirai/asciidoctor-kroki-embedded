@@ -250,6 +250,7 @@ function convertAsciiDoc(document) {
       'svgbob',
       'pikchr',
       'graphviz',
+      'd2',
     ],
   })
 

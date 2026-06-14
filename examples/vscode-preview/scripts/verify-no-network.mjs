@@ -14,6 +14,7 @@ const scanTargets = [
 const allowedRuntimeDependencies = new Set([
   '@asciidoctor/core',
   '@plantuml/core',
+  '@terrastruct/d2',
   '@viz-js/viz',
   'asciidoctor-kroki-embedded',
   'bit-field',
