@@ -29,6 +29,7 @@ krokiEmbedded.register(registry, {
     'svgbob',
     'pikchr',
     'graphviz',
+    'd2',
   ],
 })
 
