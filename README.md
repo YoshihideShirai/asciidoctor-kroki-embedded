@@ -9,7 +9,7 @@ It follows the same registration shape as `asciidoctor/asciidoctor-kroki`, but b
 ## Install
 
 ```sh
-npm install asciidoctor-kroki-embedded @asciidoctor/core
+npm install github:YoshihideShirai/asciidoctor-kroki-embedded @asciidoctor/core
 ```
 
 ## Usage
