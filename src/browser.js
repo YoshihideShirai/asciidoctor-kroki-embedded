@@ -79,6 +79,14 @@ export function installNetworkGuards(target = globalThis) {
   }
 }
 
+
+// Built-in browser renderer design notes for future diagram additions:
+// - Resolve renderer libraries from options.libraries before falling back to globalThis.
+// - Keep libraries that perform network access out of built-in hydration; local rendering must stay offline.
+// - Normalize libraries that return SVG strings or { svg } objects through getSvgString before writing output.
+// - Accept loadXxx lazy loaders for WASM or large bundles so callers can defer those costs.
+// - Match missing-renderer errors to the existing "Xxx renderer is not available." wording.
+
 function parseLooseJson(value, json5 = getGlobal('JSON5')) {
   return json5 && typeof json5.parse === 'function'
     ? json5.parse(value)
