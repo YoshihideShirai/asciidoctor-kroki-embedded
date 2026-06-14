@@ -15,6 +15,16 @@ const englishLabels = [
   ['Mind map', 'Organize ideas, requirements, or document sections as an expanding tree.'],
   ['Gantt', 'Summarize release work, review steps, dates, and dependencies.'],
   ['Flow', 'Describe branches, pipelines, and state transitions with concise syntax.'],
+  ['PlantUML sequence', 'Show service requests and responses in order with a PlantUML sequence diagram.'],
+  ['PlantUML use case', 'Organize actors, system boundaries, and main actions with a PlantUML use case diagram.'],
+  ['PlantUML class', 'Capture classes, interfaces, inheritance, and dependencies with a PlantUML class diagram.'],
+  ['PlantUML activity', 'Express procedures, decisions, and exit paths with a PlantUML activity diagram.'],
+  ['PlantUML state', 'Review screen or job states and event-driven transitions with a PlantUML state diagram.'],
+  ['PlantUML component', 'Survey modules, provided interfaces, and dependency direction with a PlantUML component diagram.'],
+  ['PlantUML deployment', 'Explain nodes, runtimes, and static asset placement with a PlantUML deployment diagram.'],
+  ['PlantUML object', 'Snapshot runtime instances, values, and references with a PlantUML object diagram.'],
+  ['PlantUML mind map', 'Expand requirements or document sections hierarchically with a PlantUML mind map.'],
+  ['PlantUML Gantt', 'Show release work, review steps, and publish milestones with a PlantUML Gantt chart.'],
   ['Dependencies', 'Arrange relationships and dependency direction with the DOT layout engine.'],
   ['Small chart', 'Visualize metrics and comparisons in documents with declarative JSON.'],
   ['Timing', 'Draw hardware or protocol signal timing compactly.'],
@@ -31,11 +41,27 @@ const englishSamples = samples.map((sample, index) => ({
   description: englishLabels[index][1],
 }))
 
-test('gallery samples avoid PlantUML browser renderer paths', () => {
-  assert(samples.length > 0)
-  assert.equal(samples.some((sample) => sample.type === 'plantuml'), false)
-  for (const sample of samples) {
-    assert.doesNotMatch(sample.source, /@start(?:uml|mindmap|gantt)/i)
+test('gallery samples include diverse PlantUML browser-rendered examples', () => {
+  const plantumlSamples = samples.filter((sample) => sample.type === 'plantuml')
+  assert.equal(plantumlSamples.length, 10)
+  assert.deepEqual(
+    plantumlSamples.map((sample) => sample.title),
+    [
+      'PlantUML シーケンス',
+      'PlantUML ユースケース',
+      'PlantUML クラス',
+      'PlantUML アクティビティ',
+      'PlantUML 状態遷移',
+      'PlantUML コンポーネント',
+      'PlantUML 配置',
+      'PlantUML オブジェクト',
+      'PlantUML マインドマップ',
+      'PlantUML ガントチャート',
+    ],
+  )
+  for (const sample of plantumlSamples) {
+    assert.match(sample.source, /@start\w*/i)
+    assert.match(sample.source, /@end\w*/i)
   }
 })
 

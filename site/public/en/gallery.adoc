@@ -175,6 +175,196 @@ flowchart LR
   Edit --> Draft
 ----
 
+== PlantUML sequence
+
+Show service requests and responses in order with a PlantUML sequence diagram.
+
+[plantuml]
+----
+@startuml
+actor User
+participant "Docs site" as Site
+participant "Local renderer" as Renderer
+User -> Site: open gallery
+Site -> Renderer: hydrate PlantUML block
+Renderer --> Site: SVG diagram
+Site --> User: rendered preview
+@enduml
+----
+
+== PlantUML use case
+
+Organize actors, system boundaries, and main actions with a PlantUML use case diagram.
+
+[plantuml]
+----
+@startuml
+left to right direction
+actor Author
+actor Reviewer
+rectangle "Documentation site" {
+  usecase "Write AsciiDoc" as Write
+  usecase "Preview diagrams" as Preview
+  usecase "Publish pages" as Publish
+}
+Author --> Write
+Author --> Preview
+Reviewer --> Preview
+Preview --> Publish
+@enduml
+----
+
+== PlantUML class
+
+Capture classes, interfaces, inheritance, and dependencies with a PlantUML class diagram.
+
+[plantuml]
+----
+@startuml
+interface DiagramRenderer {
+  +render(source)
+}
+class PlantUmlRenderer {
+  +render(source)
+}
+class GalleryCard {
+  +type
+  +source
+  +hydrate()
+}
+DiagramRenderer <|.. PlantUmlRenderer
+GalleryCard --> DiagramRenderer
+@enduml
+----
+
+== PlantUML activity
+
+Express procedures, decisions, and exit paths with a PlantUML activity diagram.
+
+[plantuml]
+----
+@startuml
+start
+:Load AsciiDoc block;
+if (diagram type supported?) then (yes)
+  :Render SVG locally;
+  :Insert preview;
+else (no)
+  :Show readable error;
+endif
+stop
+@enduml
+----
+
+== PlantUML state
+
+Review screen or job states and event-driven transitions with a PlantUML state diagram.
+
+[plantuml]
+----
+@startuml
+[*] --> Editing
+Editing --> Previewing : save
+Previewing --> Editing : fix source
+Previewing --> Published : approve
+Published --> Editing : revise
+Published --> [*]
+@enduml
+----
+
+== PlantUML component
+
+Survey modules, provided interfaces, and dependency direction with a PlantUML component diagram.
+
+[plantuml]
+----
+@startuml
+component "AsciiDoc parser" as Parser
+component "Embedded diagram" as Embedded
+component "Hydrator" as Hydrator
+component "Local renderer" as Renderer
+interface "SVG output" as Svg
+Parser --> Embedded
+Embedded --> Hydrator
+Hydrator --> Renderer
+Renderer --> Svg
+@enduml
+----
+
+== PlantUML deployment
+
+Explain nodes, runtimes, and static asset placement with a PlantUML deployment diagram.
+
+[plantuml]
+----
+@startuml
+node "Developer browser" {
+  artifact "gallery page" as Page
+  component "local renderer" as Renderer
+}
+node "GitHub Pages" {
+  artifact "static assets" as Assets
+}
+Page --> Renderer
+Assets --> Page
+@enduml
+----
+
+== PlantUML object
+
+Snapshot runtime instances, values, and references with a PlantUML object diagram.
+
+[plantuml]
+----
+@startuml
+object galleryPage {
+  lang = "ja"
+  status = "rendered"
+}
+object plantumlSample {
+  type = "plantuml"
+  format = "svg"
+}
+galleryPage --> plantumlSample : contains
+@enduml
+----
+
+== PlantUML mind map
+
+Expand requirements or document sections hierarchically with a PlantUML mind map.
+
+[plantuml]
+----
+@startmindmap
+* PlantUML
+** UML
+*** Sequence
+*** Class
+*** State
+** Planning
+*** Mind map
+*** Gantt
+** Operations
+*** Deployment
+*** Component
+@endmindmap
+----
+
+== PlantUML Gantt
+
+Show release work, review steps, and publish milestones with a PlantUML Gantt chart.
+
+[plantuml]
+----
+@startgantt
+Project starts 2026-06-01
+[Collect examples] lasts 3 days
+[Render gallery] starts at [Collect examples]'s end and lasts 4 days
+[Review diagrams] starts at [Render gallery]'s end and lasts 2 days
+[Publish] happens at [Review diagrams]'s end
+@endgantt
+----
+
 == Dependencies
 
 Arrange relationships and dependency direction with the DOT layout engine.
