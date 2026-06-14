@@ -137,3 +137,33 @@ node --input-type=module -e "await import('@excalidraw/excalidraw')"
 - Excalidraw JSON schema documentation: <https://docs.excalidraw.com/docs/codebase/json-schema>
 - Excalidraw Export Utilities documentation: <https://docs.excalidraw.com/docs/%40excalidraw/excalidraw/api/utils/export>
 - npm package inspected: `@excalidraw/excalidraw@0.18.1`
+
+## 未対応 diagram type ごとの実現性表
+
+対象は `src/diagram-names.js` の `DEFAULT_DIAGRAM_NAMES` に含まれる一方で、`src/browser.js` の `DEFAULT_RENDERERS` に未登録の diagram type です。優先度は、このパッケージの built-in hydration が「ネットワークへフォールバックせず、ホストが提供したブラウザー実行可能な renderer を呼ぶ」前提で、実装容易性・bundle 影響・SVG 出力の確実性をもとに A/B/C で付けています。
+
+| diagram type | 候補 npm/browser ライブラリ | ネットワーク不要で動くか | Web Worker / WASM / large bundle の有無 | SVG 出力できるか | built-in hydration / injected renderer 判断 | 優先度 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `actdiag` | `blockdiagjs` 系、または Python `actdiag` を事前変換したホスト提供 renderer | ブラウザー単体で保守された実装が乏しく、純 JS renderer を同梱できる場合のみ可 | 大きな依存は少ない想定だが、実用実装は未成熟 | Kroki / Python 実装は SVG 可。ブラウザー候補は要検証 | injected renderer 推奨。built-in は安定した browser package 確認後 | C |
+| `blockdiag` | `blockdiagjs` 系、または Python `blockdiag` を事前変換したホスト提供 renderer | 同梱 renderer があれば可。ただし browser-ready package の保守状況に注意 | 大きな依存は少ない想定だが、レイアウト品質と互換性は要検証 | SVG 可の実装はあるが、Kroki 互換性は要検証 | injected renderer 推奨 | C |
+| `bpmn` | `bpmn-js`, `bpmn-js/lib/Viewer` | ライブラリ・CSS・font をローカル同梱すれば可 | large bundle 寄り。worker/WASM は通常不要 | DOM/SVG viewer として表示可。SVG 文字列 export は別途 serializer が必要 | injected renderer 推奨。built-in は viewer 初期化や CSS 依存が重い | B |
+| `dbml` | `@dbml/core` + `@softwaretechnik/dbml-renderer` 相当、または DBML parser + custom SVG renderer | parser はオフライン可。ブラウザー SVG renderer は候補精査が必要 | parser/renderer bundle は中程度。worker/WASM は通常不要 | 既製 browser SVG renderer は限定的。ER 図 SVG 生成は自前実装になりがち | injected renderer 推奨 | C |
+| `ditaa` | `ditaa` Java 実装の WASM/サービス wrapper、または ASCII art to SVG custom renderer | Java 版そのものはブラウザー不可。WASM 化や独自 renderer なら可 | WASM または large bundle になりやすい | Kroki は SVG 可。browser 候補は要検証 | injected renderer 推奨 | C |
+| `erd` | `erd` / `erdjs` 系、Graphviz DOT へ変換して既存 `graphviz` renderer に渡す adapter | parser と Graphviz WASM を同梱すれば可 | Graphviz 経由なら WASM/large bundle | Graphviz 経由で SVG 可 | injected renderer 推奨。既存 `graphviz` 連携 adapter なら built-in 候補 | B |
+| `excalidraw` | `@excalidraw/excalidraw` の `exportToSvg` | scene JSON、`files` の `data:` URL、CSS/font assets を同梱すれば可 | React peer dependency と CSS/font assets が重い。worker/WASM は通常不要 | `exportToSvg` で可 | injected renderer から開始。built-in 昇格は `installNetworkGuards` 下の検証後 | B |
+| `nwdiag` | `blockdiagjs` 系、または Python `nwdiag` を事前変換したホスト提供 renderer | 同梱 renderer があれば可。ただし browser-ready package の保守状況に注意 | 大きな依存は少ない想定だが、実用実装は未成熟 | SVG 可の実装はあるが、Kroki 互換性は要検証 | injected renderer 推奨 | C |
+| `packetdiag` | `blockdiagjs` 系、または Python `packetdiag` を事前変換したホスト提供 renderer | 同梱 renderer があれば可。ただし browser-ready package の保守状況に注意 | 大きな依存は少ない想定だが、実用実装は未成熟 | SVG 可の実装はあるが、Kroki 互換性は要検証 | injected renderer 推奨 | C |
+| `rackdiag` | `blockdiagjs` 系、または Python `rackdiag` を事前変換したホスト提供 renderer | 同梱 renderer があれば可。ただし browser-ready package の保守状況に注意 | 大きな依存は少ない想定だが、実用実装は未成熟 | SVG 可の実装はあるが、Kroki 互換性は要検証 | injected renderer 推奨 | C |
+| `seqdiag` | `blockdiagjs` 系、または Python `seqdiag` を事前変換したホスト提供 renderer | 同梱 renderer があれば可。ただし browser-ready package の保守状況に注意 | 大きな依存は少ない想定だが、実用実装は未成熟 | SVG 可の実装はあるが、Kroki 互換性は要検証 | injected renderer 推奨 | C |
+| `symbolator` | VHDL/SystemVerilog parser + custom SVG renderer、または server-side Symbolator の事前変換 | ブラウザー向け既製 renderer が乏しく、完全オフラインは自前実装前提 | HDL parser が large bundle 化する可能性。worker 推奨 | Kroki / Symbolator は SVG 可。browser 自前実装なら可 | injected renderer 推奨 | C |
+| `tikz` | `@mdit/plugin-tex` 系では不足。実用は `latex.js`, `texlive.js`, `tectonic` WASM など | 完全同梱すれば可だが、TeX package/fonts まで含める必要がある | WASM + very large bundle。worker 推奨 | TeX → DVI/PDF/SVG 変換経路で可だが重い | injected renderer 必須。built-in 不向き | C |
+| `umlet` | `umletino` / UMLet XML parser + custom SVG renderer | ライブラリを同梱すれば可。ただし browser API と互換性は要検証 | 中程度。worker/WASM は通常不要 | SVG export 可能な実装はあるが、Kroki 互換性は要検証 | injected renderer 推奨 | C |
+| `structurizr` | `@structurizr/dsl` parser 相当 + Structurizr renderer、または DSL to Mermaid/PlantUML adapter | parser/adapter を同梱すれば可。外部 workspace 解決は禁止する必要あり | parser/renderer は中〜大。worker は複雑な workspace で有効 | 直接 SVG renderer は限定的。Mermaid/PlantUML 変換経由なら可 | injected renderer 推奨。変換 adapter は built-in 候補になり得る | B |
+| `diagramsnet` | `@jgraph/drawio` / diagrams.net viewer assets、mxGraph XML renderer | assets をすべて同梱すれば可。外部 shape/icon URL は拒否が必要 | very large bundle/assets。worker は通常不要だが sandbox iframe 検討 | SVG export は可能だが、viewer 初期化や外部参照処理が重い | injected renderer 必須。built-in 不向き | C |
+| `wireviz` | YAML parser + Graphviz adapter、または server-side WireViz の事前変換 | YAML parser と Graphviz renderer を同梱すれば可 | Graphviz 経由なら WASM/large bundle | Graphviz 経由で SVG 可 | injected renderer 推奨。既存 `graphviz` 連携 adapter なら built-in 候補 | B |
+
+### 優先度の読み方
+
+- A: 既存の built-in renderer と同程度の薄い adapter で追加でき、ネットワーク不要・SVG 出力・bundle 影響が明確なもの。現時点の未対応 type には該当なし。
+- B: ホスト注入を前提にすれば実用化しやすいが、CSS/assets、WASM、既存 renderer への adapter、または sandbox 検証が必要なもの。
+- C: ブラウザー向けの保守された renderer が乏しい、bundle が非常に重い、または Kroki 互換の SVG 出力を実装するには個別調査が大きいもの。
