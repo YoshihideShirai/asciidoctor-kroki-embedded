@@ -4,7 +4,7 @@
 
 AsciiDoc diagram block examples are listed as one standalone AsciiDoc document. Copy the blocks you need into a README or design note.
 
-== Sequence
+== Mermaid sequence
 
 Show conversations and processing order in a diagram that is easy to review.
 
@@ -19,7 +19,7 @@ sequenceDiagram
   Renderer-->>User: SVG preview
 ----
 
-== Use case
+== Mermaid use case
 
 Map actors, system boundaries, core capabilities, and external services.
 
@@ -39,7 +39,7 @@ flowchart LR
   Preview -. approve .-> Publish
 ----
 
-== Class
+== Mermaid class
 
 Document responsibilities, attributes, methods, and relationships for design notes.
 
@@ -61,7 +61,7 @@ classDiagram
   GalleryCard --> DiagramRenderer
 ----
 
-== Activity
+== Mermaid activity
 
 Show procedures, decisions, and work steps as a flowchart.
 
@@ -77,7 +77,7 @@ flowchart TD
   Error --> Stop
 ----
 
-== State
+== Mermaid state
 
 Review states and event-driven transitions for screens, jobs, or connections.
 
@@ -92,7 +92,7 @@ stateDiagram-v2
   Published --> [*]
 ----
 
-== Component
+== Mermaid component
 
 Outline module dependencies and provided interfaces at a glance.
 
@@ -107,7 +107,7 @@ flowchart LR
   Renderer --> Svg[SVG output]
 ----
 
-== Deployment
+== Mermaid deployment
 
 Explain where nodes, runtimes, and artifacts are placed.
 
@@ -125,7 +125,7 @@ flowchart LR
   Assets --> Page
 ----
 
-== Mind map
+== Mermaid mind map
 
 Organize ideas, requirements, or document sections as an expanding tree.
 
@@ -145,7 +145,7 @@ mindmap
       Component
 ----
 
-== Gantt
+== Mermaid Gantt
 
 Summarize release work, review steps, dates, and dependencies.
 
@@ -161,7 +161,7 @@ gantt
   Publish          :milestone, after review, 0d
 ----
 
-== Flow
+== Mermaid flow
 
 Describe branches, pipelines, and state transitions with concise syntax.
 
@@ -365,7 +365,7 @@ Project starts 2026-06-01
 @endgantt
 ----
 
-== Dependencies
+== Graphviz dependencies
 
 Arrange relationships and dependency direction with the DOT layout engine.
 
@@ -381,7 +381,7 @@ digraph G {
 }
 ----
 
-== Small chart
+== Vega-Lite small chart
 
 Visualize metrics and comparisons in documents with declarative JSON.
 
@@ -403,7 +403,7 @@ Visualize metrics and comparisons in documents with declarative JSON.
 }
 ----
 
-== Timing
+== WaveDrom timing
 
 Draw hardware or protocol signal timing compactly.
 
@@ -417,7 +417,7 @@ Draw hardware or protocol signal timing compactly.
 ]}
 ----
 
-== Bit field
+== Bytefield bit field
 
 Present register and packet formats with a specification-friendly look.
 
@@ -433,7 +433,7 @@ Present register and packet formats with a specification-friendly look.
 }
 ----
 
-== Class sketch
+== Nomnoml class sketch
 
 Sketch conceptual models and responsibility boundaries with lightweight text.
 
@@ -445,7 +445,7 @@ Sketch conceptual models and responsibility boundaries with lightweight text.
 [Host policy] -> [Hydrator]
 ----
 
-== Block diagram
+== Pikchr block diagram
 
 Create simple box-and-arrow diagrams that fit well in README files.
 
@@ -458,7 +458,7 @@ arrow
 box "Local SVG" fit
 ----
 
-== ASCII art
+== SvgBob ASCII art
 
 Render existing text diagrams as readable SVG in HTML.
 
