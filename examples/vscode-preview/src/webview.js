@@ -58,6 +58,26 @@ function renderTextDiagramSvg(source) {
   return `<svg xmlns="${SVG_XMLNS}" role="img" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}"><rect width="100%" height="100%" rx="6" fill="#f8fafc" stroke="#94a3b8"/><g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" fill="#14211f">${text}</g></svg>`
 }
 
+function renderExcalidrawSceneSvg({ elements = [], appState = {} } = {}) {
+  const padding = 16
+  const boxes = elements.filter((element) => element.type === 'rectangle')
+  const texts = elements.filter((element) => element.type === 'text')
+  const arrows = elements.filter((element) => element.type === 'arrow')
+  const maxX = Math.max(240, ...elements.map((element) => (element.x || 0) + Math.abs(element.width || 0)))
+  const maxY = Math.max(120, ...elements.map((element) => (element.y || 0) + Math.abs(element.height || 0)))
+  const background = escapeSvgText(appState.viewBackgroundColor || '#ffffff')
+  const boxSvg = boxes.map((element) => `<rect x="${element.x}" y="${element.y}" width="${element.width}" height="${element.height}" rx="10" fill="${escapeSvgText(element.backgroundColor || '#ffffff')}" stroke="${escapeSvgText(element.strokeColor || '#1e293b')}" stroke-width="2"/>`).join('')
+  const arrowSvg = arrows.map((element) => {
+    const x1 = element.x || 0
+    const y1 = element.y || 0
+    const x2 = x1 + (element.width || 0)
+    const y2 = y1 + (element.height || 0)
+    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${escapeSvgText(element.strokeColor || '#334155')}" stroke-width="2" marker-end="url(#arrow)"/>`
+  }).join('')
+  const textSvg = texts.map((element) => `<text x="${element.x}" y="${element.y + (element.fontSize || 16)}" font-size="${element.fontSize || 16}" fill="${escapeSvgText(element.strokeColor || '#0f172a')}" font-family="Virgil, Comic Sans MS, ui-sans-serif, system-ui">${escapeSvgText(element.text || '')}</text>`).join('')
+  return `<svg xmlns="${SVG_XMLNS}" role="img" viewBox="0 0 ${maxX + padding} ${maxY + padding}" width="${maxX + padding}" height="${maxY + padding}"><defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/></marker></defs><rect width="100%" height="100%" fill="${background}"/>${boxSvg}${arrowSvg}${textSvg}</svg>`
+}
+
 async function renderGraphviz(source) {
   const viz = await graphviz
   return viz.renderString(source, { format: 'svg' })
@@ -81,6 +101,7 @@ async function renderAll() {
       loadPikchr,
       graphviz: renderGraphviz,
       D2: d2RendererLibrary,
+      excalidraw: { exportToSvg: renderExcalidrawSceneSvg },
     },
     renderers: {
       plantuml: async ({ source, output }) => {

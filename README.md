@@ -4,7 +4,7 @@
 
 `asciidoctor-kroki-embedded` is an Asciidoctor.js extension for Kroki-compatible diagram syntax that does not contact a Kroki server.
 
-It follows the same registration shape as `asciidoctor/asciidoctor-kroki`, but block and block macro processors emit embedded HTML targets instead of remote image URLs. A host application can then hydrate those targets with local renderers, like the VS Code extension in `YoshihideShirai/asciidoc-local-preview-vscode` does for Mermaid, PlantUML, Nomnoml, Vega, Vega-Lite, WaveDrom, Bytefield, SvgBob, Pikchr, GraphViz, and D2.
+It follows the same registration shape as `asciidoctor/asciidoctor-kroki`, but block and block macro processors emit embedded HTML targets instead of remote image URLs. A host application can then hydrate those targets with local renderers, like the VS Code extension in `YoshihideShirai/asciidoc-local-preview-vscode` does for Mermaid, PlantUML, Nomnoml, Vega, Vega-Lite, WaveDrom, Bytefield, SvgBob, Pikchr, GraphViz, D2, and Excalidraw.
 
 ## Install
 
@@ -86,6 +86,7 @@ await hydrateEmbeddedDiagrams(document, {
     loadPikchr: window.loadPikchr,
     graphviz: window.graphviz,
     loadD2: window.loadD2,
+    excalidraw: window.Excalidraw,
     JSON5: window.JSON5,
   },
   renderers: {
@@ -96,7 +97,7 @@ await hydrateEmbeddedDiagrams(document, {
 })
 ```
 
-Built-in hydration support covers Mermaid, Nomnoml, Vega, Vega-Lite, WaveDrom, Bytefield, SvgBob, Pikchr, GraphViz, and D2 when the host page provides the matching local libraries or lazy loaders. PlantUML and C4PlantUML can use an injected renderer because browser PlantUML implementations expose different APIs.
+Built-in hydration support covers Mermaid, Nomnoml, Vega, Vega-Lite, WaveDrom, Bytefield, SvgBob, Pikchr, GraphViz, D2, and Excalidraw when the host page provides the matching local libraries or lazy loaders. PlantUML and C4PlantUML can use an injected renderer because browser PlantUML implementations expose different APIs.
 
 The package includes a small optional stylesheet:
 
@@ -130,7 +131,7 @@ Kroki server support is based on the official Kroki project README and documenta
 | diagrams.net | Yes | Yes | No | No |
 | Ditaa | Yes | Yes | No | No |
 | Erd | Yes | Yes | No | No |
-| Excalidraw | Yes | Yes | No | No |
+| Excalidraw | Yes | Yes | Yes | No |
 | GoAT | Yes | No | No | No |
 | GraphViz | Yes | Yes | Yes | Yes |
 | Mermaid | Yes | Yes | Yes | Yes |
@@ -156,7 +157,7 @@ This package never falls back to the Kroki server for unsupported local renderer
 ## VS Code Validation Harness
 
 This repository includes a sample VS Code extension under `examples/vscode-preview`.
-It converts `fixtures/sample.adoc` with this package and hydrates Mermaid, PlantUML, Nomnoml, Vega, Vega-Lite, WaveDrom, Bytefield, SvgBob, Pikchr, GraphViz, and D2 diagrams in a Webview using bundled local libraries.
+It converts `fixtures/sample.adoc` with this package and hydrates Mermaid, PlantUML, Nomnoml, Vega, Vega-Lite, WaveDrom, Bytefield, SvgBob, Pikchr, GraphViz, D2, and Excalidraw diagrams in a Webview using bundled local libraries.
 The fixture covers inline blocks and local diagram macros for every bundled renderer, including D2, and covers local image rendering and blocked remote images.
 
 ```sh
