@@ -56,6 +56,7 @@ const serializedAsciidoc = JSON.stringify(asciidoc)
       import mermaid from 'mermaid'
       import nomnoml from 'nomnoml'
       import { renderToString } from '@plantuml/core'
+      import plantUmlVizUrl from '@plantuml/core/viz-global.js?url'
       import loadPikchr from 'pikchr-js'
       import { instance as createGraphviz } from '@viz-js/viz'
       import * as vega from 'vega'
@@ -81,18 +82,32 @@ const serializedAsciidoc = JSON.stringify(asciidoc)
         theme: 'default',
       })
 
-      function canRenderWithPlantUmlCore(sourceText) {
-        return /^@startuml\b/i.test(sourceText.trim()) &&
-          /(?:^|\n)\s*(?:participant|boundary|control|entity|database|collections|queue)\b/i.test(sourceText) &&
-          /(?:--?>|<-?-).*:/m.test(sourceText)
+      function loadClassicScript(src) {
+        return new Promise((resolve, reject) => {
+          const existing = document.querySelector(`script[src="${src}"]`)
+          if (existing?.dataset.loaded === 'true') {
+            resolve()
+            return
+          }
+          const script = existing || document.createElement('script')
+          script.src = src
+          script.dataset.loaded = 'false'
+          script.addEventListener('load', () => {
+            script.dataset.loaded = 'true'
+            resolve()
+          }, { once: true })
+          script.addEventListener('error', () => reject(new Error(`Failed to load ${src}`)), { once: true })
+          if (!existing) document.head.append(script)
+        })
+      }
+
+      function loadPlantUmlGraphviz() {
+        if (globalThis.Viz) return Promise.resolve()
+        return loadClassicScript(plantUmlVizUrl)
       }
 
       function renderPlantUml(sourceText) {
-        if (!canRenderWithPlantUmlCore(sourceText)) {
-          return Promise.resolve(renderTextDiagramSvg(sourceText))
-        }
-
-        const renderTimeoutMs = 3000
+        const renderTimeoutMs = 10000
         let timeoutId
 
         const render = new Promise((resolve, reject) => {
@@ -103,9 +118,13 @@ const serializedAsciidoc = JSON.stringify(asciidoc)
                 clearTimeout(timeoutId)
                 resolve(svg)
               },
-              (message) => reject(new Error(String(message || 'PlantUML rendering failed'))),
+              (message) => {
+                clearTimeout(timeoutId)
+                reject(new Error(String(message || 'PlantUML rendering failed')))
+              },
             )
           } catch (error) {
+            clearTimeout(timeoutId)
             reject(error)
           }
         })
@@ -162,6 +181,8 @@ const serializedAsciidoc = JSON.stringify(asciidoc)
               'allow-uri-read': false,
             },
           }))
+
+          await loadPlantUmlGraphviz()
 
           const results = await hydrateEmbeddedDiagrams(output, {
             libraries: {
