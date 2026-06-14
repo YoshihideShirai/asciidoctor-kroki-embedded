@@ -255,6 +255,30 @@ async function renderPikchr({ source, output, libraries }) {
   output.innerHTML = getSvgString(await render(source), 'Pikchr')
 }
 
+
+async function renderD2({ source, output, libraries, diagramOptions }) {
+  let d2 =
+    libraries.d2 ||
+    libraries.D2 ||
+    getGlobal('d2') ||
+    getGlobal('D2')
+  const loadD2 = libraries.loadD2 || getGlobal('loadD2')
+
+  if (!d2 && typeof loadD2 === 'function') {
+    d2 = await loadD2()
+  }
+
+  const render =
+    typeof d2 === 'function'
+      ? d2
+      : d2?.render || d2?.renderSvg || d2?.renderSVG || d2?.renderString
+  if (typeof render !== 'function') {
+    throw new Error('D2 renderer is not available.')
+  }
+
+  output.innerHTML = getSvgString(await render.call(d2, source, diagramOptions), 'D2')
+}
+
 async function renderGraphviz({ source, output, libraries }) {
   const graphviz =
     libraries.graphviz ||
@@ -288,6 +312,7 @@ const DEFAULT_RENDERERS = {
   svgbob: renderSvgBob,
   pikchr: renderPikchr,
   graphviz: renderGraphviz,
+  d2: renderD2,
 }
 
 export async function hydrateEmbeddedDiagrams(root = globalThis.document, options = {}) {
