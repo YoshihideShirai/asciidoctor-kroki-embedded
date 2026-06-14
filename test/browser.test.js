@@ -245,6 +245,95 @@ test('hydrateEmbeddedDiagrams supports GraphViz renderString API', async () => {
   assert.equal(graphviz.outputElement.innerHTML, '<svg data-source="digraph { A -> B }"></svg>')
 })
 
+
+test('hydrateEmbeddedDiagrams supports D2 libraries.d2.render API', async () => {
+  const d2 = diagram('d2', 'x -> y')
+  d2.element.dataset.diagramOptions = '{"sketch":true}'
+  const root = {
+    querySelectorAll() {
+      return [d2.element]
+    },
+  }
+  const calls = []
+
+  const results = await hydrateEmbeddedDiagrams(root, {
+    libraries: {
+      d2: {
+        render(source, options) {
+          calls.push({ source, options })
+          return `<svg data-source="${source}" data-sketch="${options.sketch}"></svg>`
+        },
+      },
+    },
+  })
+
+  assert.equal(results[0].ok, true)
+  assert.deepEqual(calls, [{ source: 'x -> y', options: { sketch: true } }])
+  assert.equal(d2.outputElement.innerHTML, '<svg data-source="x -> y" data-sketch="true"></svg>')
+})
+
+test('hydrateEmbeddedDiagrams supports D2 lazy loading with libraries.loadD2', async () => {
+  const d2 = diagram('d2', 'a -> b')
+  const root = {
+    querySelectorAll() {
+      return [d2.element]
+    },
+  }
+  let loadCount = 0
+
+  const results = await hydrateEmbeddedDiagrams(root, {
+    libraries: {
+      async loadD2() {
+        loadCount += 1
+        return (source, options) => {
+          assert.deepEqual(options, {})
+          return `<svg data-source="${source}"></svg>`
+        }
+      },
+    },
+  })
+
+  assert.equal(results[0].ok, true)
+  assert.equal(loadCount, 1)
+  assert.equal(d2.outputElement.innerHTML, '<svg data-source="a -> b"></svg>')
+})
+
+test('hydrateEmbeddedDiagrams reports missing D2 renderer', async () => {
+  const d2 = diagram('d2', 'x -> y')
+  const root = {
+    querySelectorAll() {
+      return [d2.element]
+    },
+  }
+
+  const results = await hydrateEmbeddedDiagrams(root)
+
+  assert.equal(results[0].ok, false)
+  assert.equal(d2.outputElement.textContent, 'D2 renderer is not available.')
+})
+
+test('hydrateEmbeddedDiagrams supports D2 object SVG return value', async () => {
+  const d2 = diagram('d2', 'x -> y')
+  const root = {
+    querySelectorAll() {
+      return [d2.element]
+    },
+  }
+
+  const results = await hydrateEmbeddedDiagrams(root, {
+    libraries: {
+      d2: {
+        render() {
+          return { svg: '<svg data-renderer="d2"></svg>' }
+        },
+      },
+    },
+  })
+
+  assert.equal(results[0].ok, true)
+  assert.equal(d2.outputElement.innerHTML, '<svg data-renderer="d2"></svg>')
+})
+
 test('hydrateEmbeddedDiagrams reports renderer failures in the output node', async () => {
   const plantuml = diagram('plantuml', 'Alice -> Bob')
   const root = {

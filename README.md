@@ -82,6 +82,10 @@ await hydrateEmbeddedDiagrams(document, {
     vegaInterpreter: window.vegaInterpreter,
     WaveDrom: window.WaveDrom,
     bitfield: window.bitfield,
+    svgbob: window.svgbob,
+    loadPikchr: window.loadPikchr,
+    graphviz: window.graphviz,
+    loadD2: window.loadD2,
     JSON5: window.JSON5,
   },
   renderers: {
@@ -92,7 +96,7 @@ await hydrateEmbeddedDiagrams(document, {
 })
 ```
 
-Built-in hydration support covers Mermaid, Nomnoml, Vega, Vega-Lite, WaveDrom, and Bytefield when those libraries are already loaded by the host page. PlantUML and C4PlantUML use an injected renderer because browser PlantUML implementations expose different APIs.
+Built-in hydration support covers Mermaid, Nomnoml, Vega, Vega-Lite, WaveDrom, Bytefield, SvgBob, Pikchr, GraphViz, and D2 when the host page provides the matching local libraries or lazy loaders. PlantUML and C4PlantUML can use an injected renderer because browser PlantUML implementations expose different APIs.
 
 The package includes a small optional stylesheet:
 
@@ -121,7 +125,7 @@ Kroki server support is based on the official Kroki project README and documenta
 | BPMN | Yes | Yes | No | No |
 | Bytefield | Yes | Yes | Yes | Yes |
 | C4PlantUML | Yes | Yes | Injected PlantUML renderer | No |
-| D2 | Yes | Yes | No | No |
+| D2 | Yes | Yes | Yes | No |
 | DBML | Yes | Yes | No | No |
 | diagrams.net | Yes | Yes | No | No |
 | Ditaa | Yes | Yes | No | No |
@@ -147,14 +151,13 @@ Kroki server support is based on the official Kroki project README and documenta
 | WaveDrom | Yes | Yes | Yes | Yes |
 | WireViz | Yes | Yes | No | No |
 
-This package never falls back to the Kroki server for unsupported local renderers. Hosts that need local rendering for additional diagram types should load their own renderer and pass a custom `renderer` during registration or a custom browser renderer during hydration.
-D2 remains an embedded-target-only diagram type for now because the browser WASM package is significantly larger and needs a separate initialization review.
+This package never falls back to the Kroki server for unsupported local renderers. Hosts that need local rendering for additional diagram types should load their own renderer and pass a custom `renderer` during registration or a custom browser renderer during hydration. D2 hydration expects the host to provide a local `d2`/`D2` renderer or a `loadD2` lazy loader; the D2 renderer library itself is not bundled with this package.
 
 ## VS Code Validation Harness
 
 This repository includes a sample VS Code extension under `examples/vscode-preview`.
-It converts `fixtures/sample.adoc` with this package and hydrates Mermaid, PlantUML, Nomnoml, Vega, Vega-Lite, WaveDrom, and Bytefield diagrams in a Webview using bundled local libraries.
-The fixture covers inline blocks and local diagram macros for every bundled renderer, plus local image rendering and blocked remote images.
+It converts `fixtures/sample.adoc` with this package and hydrates Mermaid, PlantUML, Nomnoml, Vega, Vega-Lite, WaveDrom, Bytefield, SvgBob, Pikchr, and GraphViz diagrams in a Webview using bundled local libraries.
+The fixture covers inline blocks and local diagram macros for every bundled renderer, includes a D2 inline sample for hosts that provide a D2 renderer, and covers local image rendering and blocked remote images.
 
 ```sh
 cd examples/vscode-preview

@@ -82,6 +82,10 @@ await hydrateEmbeddedDiagrams(document, {
     vegaInterpreter: window.vegaInterpreter,
     WaveDrom: window.WaveDrom,
     bitfield: window.bitfield,
+    svgbob: window.svgbob,
+    loadPikchr: window.loadPikchr,
+    graphviz: window.graphviz,
+    loadD2: window.loadD2,
     JSON5: window.JSON5,
   },
   renderers: {
@@ -92,7 +96,7 @@ await hydrateEmbeddedDiagrams(document, {
 })
 ```
 
-組み込みのハイドレーションは、ホストページが対応するローカルレンダラーライブラリをすでに読み込んでいる場合に、Mermaid、Nomnoml、Vega、Vega-Lite、WaveDrom、Bytefield をサポートします。PlantUML と C4PlantUML は、ブラウザー向け PlantUML 実装の API がそれぞれ異なるため、注入されたレンダラーを使用します。
+組み込みのハイドレーションは、ホストページが対応するローカルレンダラーライブラリまたは lazy loader を提供している場合に、Mermaid、Nomnoml、Vega、Vega-Lite、WaveDrom、Bytefield、SvgBob、Pikchr、GraphViz、D2 をサポートします。PlantUML と C4PlantUML は、ブラウザー向け PlantUML 実装の API がそれぞれ異なるため、注入されたレンダラーを使用できます。
 
 このパッケージには、小さな任意のスタイルシートも含まれています。
 
@@ -121,7 +125,7 @@ Kroki サーバーのサポート状況は、公式 Kroki プロジェクトの 
 | BPMN | Yes | Yes | No | No |
 | Bytefield | Yes | Yes | Yes | Yes |
 | C4PlantUML | Yes | Yes | Injected PlantUML renderer | No |
-| D2 | Yes | Yes | No | No |
+| D2 | Yes | Yes | Yes | No |
 | DBML | Yes | Yes | No | No |
 | diagrams.net | Yes | Yes | No | No |
 | Ditaa | Yes | Yes | No | No |
@@ -147,14 +151,13 @@ Kroki サーバーのサポート状況は、公式 Kroki プロジェクトの 
 | WaveDrom | Yes | Yes | Yes | Yes |
 | WireViz | Yes | Yes | No | No |
 
-このパッケージは、ローカルレンダラーが未対応の場合でも Kroki サーバーへフォールバックしません。追加の図種別をローカルレンダリングしたいホストは、独自のレンダラーを読み込み、登録時のカスタム `renderer` またはハイドレーション時のカスタムブラウザーレンダラーとして渡してください。
-D2 は、ブラウザー向け WASM パッケージが大きく初期化方式の追加検証が必要なため、現時点では埋め込みターゲットのみの対応です。
+このパッケージは、ローカルレンダラーが未対応の場合でも Kroki サーバーへフォールバックしません。追加の図種別をローカルレンダリングしたいホストは、独自のレンダラーを読み込み、登録時のカスタム `renderer` またはハイドレーション時のカスタムブラウザーレンダラーとして渡してください。D2 のハイドレーションでは、ホストがローカルの `d2`/`D2` レンダラーまたは `loadD2` lazy loader を提供する必要があります。D2 レンダラーライブラリ自体はこのパッケージにはバンドルされません。
 
 ## VS Code 検証ハーネス
 
 このリポジトリには、`examples/vscode-preview` 配下に VS Code 拡張のサンプルが含まれています。
-このサンプルは `fixtures/sample.adoc` をこのパッケージで変換し、バンドルされたローカルライブラリを使って、Webview 内で Mermaid、PlantUML、Nomnoml、Vega、Vega-Lite、WaveDrom、Bytefield の図をハイドレートします。
-フィクスチャは、バンドル済みレンダラーごとのインラインブロックとローカル図マクロに加え、ローカル画像レンダリングとブロックされたリモート画像をカバーしています。
+このサンプルは `fixtures/sample.adoc` をこのパッケージで変換し、バンドルされたローカルライブラリを使って、Webview 内で Mermaid、PlantUML、Nomnoml、Vega、Vega-Lite、WaveDrom、Bytefield、SvgBob、Pikchr、GraphViz の図をハイドレートします。
+フィクスチャは、バンドル済みレンダラーごとのインラインブロックとローカル図マクロに加え、D2 レンダラーを提供するホスト向けの D2 インラインサンプル、ローカル画像レンダリング、ブロックされたリモート画像をカバーしています。
 
 ```sh
 cd examples/vscode-preview
