@@ -56,6 +56,7 @@ const serializedAsciidoc = JSON.stringify(asciidoc)
       import mermaid from 'mermaid'
       import nomnoml from 'nomnoml'
       import { renderToString } from '@plantuml/core'
+      import plantUmlVizUrl from '@plantuml/core/viz-global.js?url'
       import loadPikchr from 'pikchr-js'
       import { instance as createGraphviz } from '@viz-js/viz'
       import * as vega from 'vega'
@@ -80,6 +81,30 @@ const serializedAsciidoc = JSON.stringify(asciidoc)
         securityLevel: 'strict',
         theme: 'default',
       })
+
+      function loadClassicScript(src) {
+        return new Promise((resolve, reject) => {
+          const existing = document.querySelector(`script[src="${src}"]`)
+          if (existing?.dataset.loaded === 'true') {
+            resolve()
+            return
+          }
+          const script = existing || document.createElement('script')
+          script.src = src
+          script.dataset.loaded = 'false'
+          script.addEventListener('load', () => {
+            script.dataset.loaded = 'true'
+            resolve()
+          }, { once: true })
+          script.addEventListener('error', () => reject(new Error(`Failed to load ${src}`)), { once: true })
+          if (!existing) document.head.append(script)
+        })
+      }
+
+      function loadPlantUmlGraphviz() {
+        if (globalThis.Viz) return Promise.resolve()
+        return loadClassicScript(plantUmlVizUrl)
+      }
 
       function renderPlantUml(sourceText) {
         const renderTimeoutMs = 10000
@@ -156,6 +181,8 @@ const serializedAsciidoc = JSON.stringify(asciidoc)
               'allow-uri-read': false,
             },
           }))
+
+          await loadPlantUmlGraphviz()
 
           const results = await hydrateEmbeddedDiagrams(output, {
             libraries: {
