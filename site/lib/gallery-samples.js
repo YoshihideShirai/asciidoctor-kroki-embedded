@@ -200,6 +200,16 @@ Project starts 2026-06-01
 [Review diagrams] starts at [Render gallery]'s end and lasts 2 days
 [Publish] happens at [Review diagrams]'s end
 @endgantt` },
+  { type: 'd2', title: 'D2 サービス構成', description: 'サービスや利用者の関係を、読みやすい宣言的な記法で表現できます。', source: `direction: right
+user: Developer
+docs: AsciiDoc
+renderer: Local renderer
+svg: SVG preview
+
+user -> docs: writes diagram block
+docs -> renderer: hydrate locally
+renderer -> svg: render
+svg -> user: review` },
   { type: 'graphviz', title: 'Graphviz 依存関係', description: 'ノード間の関係や依存方向を、DOT のレイアウトエンジンで整えます。', source: `digraph G {
   rankdir=LR
   node [shape=box, style="rounded,filled", fillcolor="#ecfeff"]

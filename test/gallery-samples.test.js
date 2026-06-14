@@ -25,6 +25,7 @@ const englishLabels = [
   ['PlantUML object', 'Snapshot runtime instances, values, and references with a PlantUML object diagram.'],
   ['PlantUML mind map', 'Expand requirements or document sections hierarchically with a PlantUML mind map.'],
   ['PlantUML Gantt', 'Show release work, review steps, and publish milestones with a PlantUML Gantt chart.'],
+  ['D2 service map', 'Describe service and user relationships with readable declarative D2 syntax.'],
   ['Graphviz dependencies', 'Arrange relationships and dependency direction with the DOT layout engine.'],
   ['Vega-Lite small chart', 'Visualize metrics and comparisons in documents with declarative JSON.'],
   ['WaveDrom timing', 'Draw hardware or protocol signal timing compactly.'],
@@ -43,6 +44,7 @@ const englishSamples = samples.map((sample, index) => ({
 
 const rendererLabels = {
   bytefield: 'Bytefield',
+  d2: 'D2',
   graphviz: 'Graphviz',
   mermaid: 'Mermaid',
   nomnoml: 'Nomnoml',

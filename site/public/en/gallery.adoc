@@ -365,6 +365,24 @@ Project starts 2026-06-01
 @endgantt
 ----
 
+== D2 service map
+
+Describe service and user relationships with readable declarative D2 syntax.
+
+[d2]
+----
+direction: right
+user: Developer
+docs: AsciiDoc
+renderer: Local renderer
+svg: SVG preview
+
+user -> docs: writes diagram block
+docs -> renderer: hydrate locally
+renderer -> svg: render
+svg -> user: review
+----
+
 == Graphviz dependencies
 
 Arrange relationships and dependency direction with the DOT layout engine.

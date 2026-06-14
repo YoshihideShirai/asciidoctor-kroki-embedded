@@ -365,6 +365,24 @@ Project starts 2026-06-01
 @endgantt
 ----
 
+== D2 サービス構成
+
+サービスや利用者の関係を、読みやすい宣言的な記法で表現できます。
+
+[d2]
+----
+direction: right
+user: Developer
+docs: AsciiDoc
+renderer: Local renderer
+svg: SVG preview
+
+user -> docs: writes diagram block
+docs -> renderer: hydrate locally
+renderer -> svg: render
+svg -> user: review
+----
+
 == Graphviz 依存関係
 
 ノード間の関係や依存方向を、DOT のレイアウトエンジンで整えます。
