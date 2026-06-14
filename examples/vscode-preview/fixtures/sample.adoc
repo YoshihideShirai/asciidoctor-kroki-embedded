@@ -161,6 +161,14 @@ digraph {
 }
 ----
 
+== D2
+
+[d2]
+----
+direction: right
+AsciiDoc -> Embedded Target -> Local Renderer -> SVG
+----
+
 == Local Diagram Macros
 
 mermaid::diagrams/macro.mmd[]
