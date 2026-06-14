@@ -90,6 +90,116 @@ export const samples = [
   Preview -->|yes| Publish[GitHub Pages]
   Preview -->|no| Edit[Edit locally]
   Edit --> Draft` },
+  { type: 'plantuml', title: 'PlantUML シーケンス', description: 'サービス間の要求と応答を、PlantUML のシーケンス図で順序立てて表現できます。', source: `@startuml
+actor User
+participant "Docs site" as Site
+participant "Local renderer" as Renderer
+User -> Site: open gallery
+Site -> Renderer: hydrate PlantUML block
+Renderer --> Site: SVG diagram
+Site --> User: rendered preview
+@enduml` },
+  { type: 'plantuml', title: 'PlantUML ユースケース', description: '利用者、システム境界、主要な操作を PlantUML のユースケース図で整理できます。', source: `@startuml
+left to right direction
+actor Author
+actor Reviewer
+rectangle "Documentation site" {
+  usecase "Write AsciiDoc" as Write
+  usecase "Preview diagrams" as Preview
+  usecase "Publish pages" as Publish
+}
+Author --> Write
+Author --> Preview
+Reviewer --> Preview
+Preview --> Publish
+@enduml` },
+  { type: 'plantuml', title: 'PlantUML クラス', description: 'クラス、インターフェイス、継承、依存関係を PlantUML のクラス図として残せます。', source: `@startuml
+interface DiagramRenderer {
+  +render(source)
+}
+class PlantUmlRenderer {
+  +render(source)
+}
+class GalleryCard {
+  +type
+  +source
+  +hydrate()
+}
+DiagramRenderer <|.. PlantUmlRenderer
+GalleryCard --> DiagramRenderer
+@enduml` },
+  { type: 'plantuml', title: 'PlantUML アクティビティ', description: '処理手順、条件分岐、終了条件を PlantUML のアクティビティ図で表現できます。', source: `@startuml
+start
+:Load AsciiDoc block;
+if (diagram type supported?) then (yes)
+  :Render SVG locally;
+  :Insert preview;
+else (no)
+  :Show readable error;
+endif
+stop
+@enduml` },
+  { type: 'plantuml', title: 'PlantUML 状態遷移', description: '画面やジョブの状態とイベントによる遷移を PlantUML の状態図で確認できます。', source: `@startuml
+[*] --> Editing
+Editing --> Previewing : save
+Previewing --> Editing : fix source
+Previewing --> Published : approve
+Published --> Editing : revise
+Published --> [*]
+@enduml` },
+  { type: 'plantuml', title: 'PlantUML コンポーネント', description: 'モジュール、提供インターフェイス、依存方向を PlantUML のコンポーネント図で俯瞰できます。', source: `@startuml
+component "AsciiDoc parser" as Parser
+component "Embedded diagram" as Embedded
+component "Hydrator" as Hydrator
+component "Local renderer" as Renderer
+interface "SVG output" as Svg
+Parser --> Embedded
+Embedded --> Hydrator
+Hydrator --> Renderer
+Renderer --> Svg
+@enduml` },
+  { type: 'plantuml', title: 'PlantUML 配置', description: 'ノード、実行環境、静的アセットの配置を PlantUML の配置図で説明できます。', source: `@startuml
+node "Developer browser" {
+  artifact "gallery page" as Page
+  component "local renderer" as Renderer
+}
+node "GitHub Pages" {
+  artifact "static assets" as Assets
+}
+Page --> Renderer
+Assets --> Page
+@enduml` },
+  { type: 'plantuml', title: 'PlantUML オブジェクト', description: '実行時のインスタンス、値、参照関係を PlantUML のオブジェクト図でスナップショット化できます。', source: `@startuml
+object galleryPage {
+  lang = "ja"
+  status = "rendered"
+}
+object plantumlSample {
+  type = "plantuml"
+  format = "svg"
+}
+galleryPage --> plantumlSample : contains
+@enduml` },
+  { type: 'plantuml', title: 'PlantUML マインドマップ', description: '要件や章立てを PlantUML のマインドマップで階層的に広げられます。', source: `@startmindmap
+* PlantUML
+** UML
+*** Sequence
+*** Class
+*** State
+** Planning
+*** Mind map
+*** Gantt
+** Operations
+*** Deployment
+*** Component
+@endmindmap` },
+  { type: 'plantuml', title: 'PlantUML ガントチャート', description: 'リリース作業、レビュー、公開マイルストーンを PlantUML のガントチャートで示せます。', source: `@startgantt
+Project starts 2026-06-01
+[Collect examples] lasts 3 days
+[Render gallery] starts at [Collect examples]'s end and lasts 4 days
+[Review diagrams] starts at [Render gallery]'s end and lasts 2 days
+[Publish] happens at [Review diagrams]'s end
+@endgantt` },
   { type: 'graphviz', title: '依存関係', description: 'ノード間の関係や依存方向を、DOT のレイアウトエンジンで整えます。', source: `digraph G {
   rankdir=LR
   node [shape=box, style="rounded,filled", fillcolor="#ecfeff"]
