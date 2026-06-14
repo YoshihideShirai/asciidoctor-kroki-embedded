@@ -9,7 +9,7 @@
 ## インストール
 
 ```sh
-npm install asciidoctor-kroki-embedded @asciidoctor/core
+npm install github:YoshihideShirai/asciidoctor-kroki-embedded @asciidoctor/core
 ```
 
 ## 使い方
