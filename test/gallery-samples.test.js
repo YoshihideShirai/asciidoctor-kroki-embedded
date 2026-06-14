@@ -33,6 +33,7 @@ const englishLabels = [
   ['Nomnoml class sketch', 'Sketch conceptual models and responsibility boundaries with lightweight text.'],
   ['Pikchr block diagram', 'Create simple box-and-arrow diagrams that fit well in README files.'],
   ['SvgBob ASCII art', 'Render existing text diagrams as readable SVG in HTML.'],
+  ['Excalidraw sketch', 'Share early ideas and rough review flows with hand-drawn boxes and arrows.'],
   ['Vega', 'Handle lower-level visualization specifications with local rendering.'],
 ]
 
@@ -45,6 +46,7 @@ const englishSamples = samples.map((sample, index) => ({
 const rendererLabels = {
   bytefield: 'Bytefield',
   d2: 'D2',
+  excalidraw: 'Excalidraw',
   graphviz: 'Graphviz',
   mermaid: 'Mermaid',
   nomnoml: 'Nomnoml',

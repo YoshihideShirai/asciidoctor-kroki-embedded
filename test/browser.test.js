@@ -246,6 +246,40 @@ test('hydrateEmbeddedDiagrams supports GraphViz renderString API', async () => {
 })
 
 
+
+test('hydrateEmbeddedDiagrams supports Excalidraw exportToSvg API with a local fake library', async () => {
+  const excalidraw = diagram('excalidraw', JSON.stringify({
+    elements: [{ id: 'shape-1', type: 'rectangle' }],
+    appState: { viewBackgroundColor: '#ffffff' },
+    files: {},
+  }))
+  excalidraw.element.dataset.diagramOptions = '{"appState":{"exportBackground":false}}'
+  const root = {
+    querySelectorAll() {
+      return [excalidraw.element]
+    },
+  }
+  const calls = []
+
+  const results = await hydrateEmbeddedDiagrams(root, {
+    libraries: {
+      excalidraw: {
+        exportToSvg(options) {
+          calls.push(options)
+          return { svg: `<svg data-elements="${options.elements.length}" data-background="${options.appState.exportBackground}"></svg>` }
+        },
+      },
+    },
+  })
+
+  assert.equal(results[0].ok, true)
+  assert.equal(calls.length, 1)
+  assert.deepEqual(calls[0].elements, [{ id: 'shape-1', type: 'rectangle' }])
+  assert.equal(calls[0].appState.viewBackgroundColor, '#ffffff')
+  assert.equal(calls[0].appState.exportBackground, false)
+  assert.equal(excalidraw.outputElement.innerHTML, '<svg data-elements="1" data-background="false"></svg>')
+})
+
 test('hydrateEmbeddedDiagrams supports D2 libraries.d2.render API', async () => {
   const d2 = diagram('d2', 'x -> y')
   d2.element.dataset.diagramOptions = '{"sketch":true}'

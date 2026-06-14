@@ -256,6 +256,38 @@ async function renderPikchr({ source, output, libraries }) {
 }
 
 
+async function renderExcalidraw({ source, output, libraries, diagramOptions }) {
+  let excalidraw =
+    libraries.excalidraw ||
+    libraries.Excalidraw ||
+    getGlobal('excalidraw') ||
+    getGlobal('Excalidraw')
+  const loadExcalidraw = libraries.loadExcalidraw || getGlobal('loadExcalidraw')
+
+  if (!excalidraw && typeof loadExcalidraw === 'function') {
+    excalidraw = await loadExcalidraw()
+  }
+
+  const exportToSvg =
+    typeof excalidraw === 'function'
+      ? excalidraw
+      : excalidraw?.exportToSvg || excalidraw?.exportToSVG || excalidraw?.renderSvg || excalidraw?.renderSVG || excalidraw?.render
+  if (typeof exportToSvg !== 'function') {
+    throw new Error('Excalidraw renderer is not available.')
+  }
+
+  const scene = JSON.parse(source)
+  const result = await exportToSvg.call(excalidraw, {
+    ...diagramOptions,
+    elements: scene.elements || [],
+    appState: { ...(scene.appState || {}), ...(diagramOptions.appState || {}) },
+    files: scene.files || {},
+  })
+
+  output.innerHTML = getSvgString(result?.outerHTML ? result.outerHTML : result, 'Excalidraw')
+}
+
+
 async function renderD2({ source, output, libraries, diagramOptions }) {
   let d2 =
     libraries.d2 ||
@@ -313,6 +345,7 @@ const DEFAULT_RENDERERS = {
   pikchr: renderPikchr,
   graphviz: renderGraphviz,
   d2: renderD2,
+  excalidraw: renderExcalidraw,
 }
 
 export async function hydrateEmbeddedDiagrams(root = globalThis.document, options = {}) {
