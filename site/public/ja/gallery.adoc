@@ -1,0 +1,304 @@
+= ダイアグラムギャラリー
+:toc: left
+:source-highlighter: highlight.js
+
+AsciiDoc の図ブロック例を、単独の AsciiDoc として列挙しています。README や設計メモに必要なブロックをコピーして使えます。
+
+== シーケンス
+
+登場人物の会話や処理の順序を、レビューで追いやすい図にします。
+
+[mermaid]
+----
+sequenceDiagram
+  actor User
+  participant Doc as AsciiDoc
+  participant Renderer as Local renderer
+  User->>Doc: write diagram block
+  Doc->>Renderer: embedded target
+  Renderer-->>User: SVG preview
+----
+
+== ユースケース
+
+利用者とシステムの境界、主要な機能、外部サービスとの関係を整理できます。
+
+[mermaid]
+----
+flowchart LR
+  Author([Author])
+  Reviewer([Reviewer])
+  subgraph Site[Documentation site]
+    Write([Write AsciiDoc])
+    Preview([Preview diagrams])
+    Publish([Publish pages])
+  end
+  Author --> Write
+  Author --> Preview
+  Reviewer --> Preview
+  Preview -. approve .-> Publish
+----
+
+== クラス
+
+クラスやインターフェイスの責務、属性、メソッド、関連を設計メモに残せます。
+
+[mermaid]
+----
+classDiagram
+  class DiagramRenderer {
+    +render(source)
+  }
+  class MermaidRenderer {
+    +render(source)
+  }
+  class GalleryCard {
+    +type
+    +source
+    +hydrate()
+  }
+  DiagramRenderer <|.. MermaidRenderer
+  GalleryCard --> DiagramRenderer
+----
+
+== アクティビティ
+
+処理手順、分岐、並列作業をフローチャートとして表現できます。
+
+[mermaid]
+----
+flowchart TD
+  Start([Start]) --> Load[Load AsciiDoc block]
+  Load --> Supported{diagram type supported?}
+  Supported -->|yes| Render[Render SVG locally]
+  Render --> Insert[Insert preview]
+  Supported -->|no| Error[Show readable error]
+  Insert --> Stop([Stop])
+  Error --> Stop
+----
+
+== 状態遷移
+
+画面、ジョブ、接続などの状態とイベントによる遷移を確認できます。
+
+[mermaid]
+----
+stateDiagram-v2
+  [*] --> Editing
+  Editing --> Previewing: save
+  Previewing --> Editing: fix source
+  Previewing --> Published: approve
+  Published --> Editing: revise
+  Published --> [*]
+----
+
+== コンポーネント
+
+モジュール間の依存や提供インターフェイスを俯瞰できます。
+
+[mermaid]
+----
+flowchart LR
+  subgraph BrowserPreview[Browser preview]
+    Parser[AsciiDoc parser] --> Embedded[Embedded diagram]
+    Embedded --> Hydrator[Hydrator]
+    Hydrator --> Renderer[Local renderer]
+  end
+  Renderer --> Svg[SVG output]
+----
+
+== 配置
+
+ノード、実行環境、成果物の配置関係をインフラ説明に使えます。
+
+[mermaid]
+----
+flowchart LR
+  subgraph Browser["Developer browser"]
+    Page[gallery page]
+    Renderer[local renderer]
+  end
+  subgraph Pages["GitHub Pages"]
+    Assets[static assets]
+  end
+  Page --> Renderer
+  Assets --> Page
+----
+
+== マインドマップ
+
+アイデア、要件、章立てをツリー状に広げて整理できます。
+
+[mermaid]
+----
+mindmap
+  root((Mermaid))
+    UML
+      Sequence
+      Class
+      State
+    Planning
+      Mind map
+      Gantt
+    Operations
+      Deployment
+      Component
+----
+
+== ガントチャート
+
+リリース作業やレビュー工程の日程、依存関係を簡潔に示せます。
+
+[mermaid]
+----
+gantt
+  title Gallery release plan
+  dateFormat  YYYY-MM-DD
+  section Release
+  Collect examples :done, collect, 2026-06-01, 3d
+  Render gallery   :active, render, after collect, 4d
+  Review diagrams  :review, after render, 2d
+  Publish          :milestone, after review, 0d
+----
+
+== フロー
+
+分岐、パイプライン、状態の流れを短い記法で表現できます。
+
+[mermaid]
+----
+flowchart LR
+  Idea[Idea] --> Draft[AsciiDoc]
+  Draft --> Preview{Preview OK?}
+  Preview -->|yes| Publish[GitHub Pages]
+  Preview -->|no| Edit[Edit locally]
+  Edit --> Draft
+----
+
+== 依存関係
+
+ノード間の関係や依存方向を、DOT のレイアウトエンジンで整えます。
+
+[graphviz]
+----
+digraph G {
+  rankdir=LR
+  node [shape=box, style="rounded,filled", fillcolor="#ecfeff"]
+  README -> AsciiDoc
+  AsciiDoc -> EmbeddedHTML
+  EmbeddedHTML -> BrowserHydrator
+  BrowserHydrator -> SVG
+}
+----
+
+== 小さなチャート
+
+文書中のメトリクスや比較を、宣言的な JSON で可視化します。
+
+[vegalite]
+----
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "data": { "values": [
+    { "diagram": "Mermaid", "uses": 8 },
+    { "diagram": "PlantUML", "uses": 7 },
+    { "diagram": "Vega-Lite", "uses": 5 }
+  ] },
+  "mark": { "type": "bar", "cornerRadiusEnd": 4 },
+  "encoding": {
+    "x": { "field": "uses", "type": "quantitative" },
+    "y": { "field": "diagram", "type": "nominal", "sort": "-x" },
+    "color": { "value": "#0f766e" }
+  }
+}
+----
+
+== タイミング
+
+ハードウェアやプロトコルの信号タイミングをコンパクトに描けます。
+
+[wavedrom]
+----
+{ signal: [
+  { name: "clk", wave: "p....." },
+  { name: "req", wave: "01.0.." },
+  { name: "ack", wave: "0.10.." },
+  { name: "data", wave: "x.345x", data: ["A", "B", "C"] }
+]}
+----
+
+== ビットフィールド
+
+レジスタやパケットフォーマットを、仕様書向けの見た目で示します。
+
+[bytefield]
+----
+{
+  reg: [
+    { bits: 4, name: "version" },
+    { bits: 4, name: "flags" },
+    { bits: 8, name: "type" },
+    { bits: 16, name: "length" }
+  ]
+}
+----
+
+== クラス図
+
+軽量なテキストで概念モデルや責務の境界をスケッチできます。
+
+[nomnoml]
+----
+[Document] -> [Embedded target]
+[Embedded target] -> [Hydrator]
+[Hydrator] -> [SVG]
+[Host policy] -> [Hydrator]
+----
+
+== ブロック図
+
+README に置きやすい、シンプルな箱と矢印の図を作れます。
+
+[pikchr]
+----
+box "AsciiDoc" fit
+arrow
+box "Embedded" fit
+arrow
+box "Local SVG" fit
+----
+
+== ASCII アート
+
+既存のテキスト図を、HTML 上で見やすい SVG として表示できます。
+
+[svgbob]
+----
+       .------.
+Input -->|local| Render
+       '------'
+----
+
+== Vega
+
+より低レベルな指定が必要な可視化も、ローカルレンダラーで扱えます。
+
+[vega]
+----
+{
+  "$schema": "https://vega.github.io/schema/vega/v6.json",
+  "width": 260,
+  "height": 120,
+  "padding": 8,
+  "data": [{ "name": "table", "values": [
+    { "x": 0, "y": 22 }, { "x": 1, "y": 58 }, { "x": 2, "y": 40 }, { "x": 3, "y": 82 }
+  ] }],
+  "scales": [
+    { "name": "x", "type": "point", "domain": { "data": "table", "field": "x" }, "range": "width" },
+    { "name": "y", "type": "linear", "domain": { "data": "table", "field": "y" }, "range": "height" }
+  ],
+  "marks": [{ "type": "line", "from": { "data": "table" }, "encode": { "enter": {
+    "x": { "scale": "x", "field": "x" }, "y": { "scale": "y", "field": "y" }, "stroke": { "value": "#0f766e" }, "strokeWidth": { "value": 3 }
+  } } }]
+}
+----

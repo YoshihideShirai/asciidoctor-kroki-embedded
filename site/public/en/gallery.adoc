@@ -1,0 +1,304 @@
+= Diagram gallery
+:toc: left
+:source-highlighter: highlight.js
+
+AsciiDoc diagram block examples are listed as one standalone AsciiDoc document. Copy the blocks you need into a README or design note.
+
+== Sequence
+
+Show conversations and processing order in a diagram that is easy to review.
+
+[mermaid]
+----
+sequenceDiagram
+  actor User
+  participant Doc as AsciiDoc
+  participant Renderer as Local renderer
+  User->>Doc: write diagram block
+  Doc->>Renderer: embedded target
+  Renderer-->>User: SVG preview
+----
+
+== Use case
+
+Map actors, system boundaries, core capabilities, and external services.
+
+[mermaid]
+----
+flowchart LR
+  Author([Author])
+  Reviewer([Reviewer])
+  subgraph Site[Documentation site]
+    Write([Write AsciiDoc])
+    Preview([Preview diagrams])
+    Publish([Publish pages])
+  end
+  Author --> Write
+  Author --> Preview
+  Reviewer --> Preview
+  Preview -. approve .-> Publish
+----
+
+== Class
+
+Document responsibilities, attributes, methods, and relationships for design notes.
+
+[mermaid]
+----
+classDiagram
+  class DiagramRenderer {
+    +render(source)
+  }
+  class MermaidRenderer {
+    +render(source)
+  }
+  class GalleryCard {
+    +type
+    +source
+    +hydrate()
+  }
+  DiagramRenderer <|.. MermaidRenderer
+  GalleryCard --> DiagramRenderer
+----
+
+== Activity
+
+Show procedures, decisions, and work steps as a flowchart.
+
+[mermaid]
+----
+flowchart TD
+  Start([Start]) --> Load[Load AsciiDoc block]
+  Load --> Supported{diagram type supported?}
+  Supported -->|yes| Render[Render SVG locally]
+  Render --> Insert[Insert preview]
+  Supported -->|no| Error[Show readable error]
+  Insert --> Stop([Stop])
+  Error --> Stop
+----
+
+== State
+
+Review states and event-driven transitions for screens, jobs, or connections.
+
+[mermaid]
+----
+stateDiagram-v2
+  [*] --> Editing
+  Editing --> Previewing: save
+  Previewing --> Editing: fix source
+  Previewing --> Published: approve
+  Published --> Editing: revise
+  Published --> [*]
+----
+
+== Component
+
+Outline module dependencies and provided interfaces at a glance.
+
+[mermaid]
+----
+flowchart LR
+  subgraph BrowserPreview[Browser preview]
+    Parser[AsciiDoc parser] --> Embedded[Embedded diagram]
+    Embedded --> Hydrator[Hydrator]
+    Hydrator --> Renderer[Local renderer]
+  end
+  Renderer --> Svg[SVG output]
+----
+
+== Deployment
+
+Explain where nodes, runtimes, and artifacts are placed.
+
+[mermaid]
+----
+flowchart LR
+  subgraph Browser["Developer browser"]
+    Page[gallery page]
+    Renderer[local renderer]
+  end
+  subgraph Pages["GitHub Pages"]
+    Assets[static assets]
+  end
+  Page --> Renderer
+  Assets --> Page
+----
+
+== Mind map
+
+Organize ideas, requirements, or document sections as an expanding tree.
+
+[mermaid]
+----
+mindmap
+  root((Mermaid))
+    UML
+      Sequence
+      Class
+      State
+    Planning
+      Mind map
+      Gantt
+    Operations
+      Deployment
+      Component
+----
+
+== Gantt
+
+Summarize release work, review steps, dates, and dependencies.
+
+[mermaid]
+----
+gantt
+  title Gallery release plan
+  dateFormat  YYYY-MM-DD
+  section Release
+  Collect examples :done, collect, 2026-06-01, 3d
+  Render gallery   :active, render, after collect, 4d
+  Review diagrams  :review, after render, 2d
+  Publish          :milestone, after review, 0d
+----
+
+== Flow
+
+Describe branches, pipelines, and state transitions with concise syntax.
+
+[mermaid]
+----
+flowchart LR
+  Idea[Idea] --> Draft[AsciiDoc]
+  Draft --> Preview{Preview OK?}
+  Preview -->|yes| Publish[GitHub Pages]
+  Preview -->|no| Edit[Edit locally]
+  Edit --> Draft
+----
+
+== Dependencies
+
+Arrange relationships and dependency direction with the DOT layout engine.
+
+[graphviz]
+----
+digraph G {
+  rankdir=LR
+  node [shape=box, style="rounded,filled", fillcolor="#ecfeff"]
+  README -> AsciiDoc
+  AsciiDoc -> EmbeddedHTML
+  EmbeddedHTML -> BrowserHydrator
+  BrowserHydrator -> SVG
+}
+----
+
+== Small chart
+
+Visualize metrics and comparisons in documents with declarative JSON.
+
+[vegalite]
+----
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "data": { "values": [
+    { "diagram": "Mermaid", "uses": 8 },
+    { "diagram": "PlantUML", "uses": 7 },
+    { "diagram": "Vega-Lite", "uses": 5 }
+  ] },
+  "mark": { "type": "bar", "cornerRadiusEnd": 4 },
+  "encoding": {
+    "x": { "field": "uses", "type": "quantitative" },
+    "y": { "field": "diagram", "type": "nominal", "sort": "-x" },
+    "color": { "value": "#0f766e" }
+  }
+}
+----
+
+== Timing
+
+Draw hardware or protocol signal timing compactly.
+
+[wavedrom]
+----
+{ signal: [
+  { name: "clk", wave: "p....." },
+  { name: "req", wave: "01.0.." },
+  { name: "ack", wave: "0.10.." },
+  { name: "data", wave: "x.345x", data: ["A", "B", "C"] }
+]}
+----
+
+== Bit field
+
+Present register and packet formats with a specification-friendly look.
+
+[bytefield]
+----
+{
+  reg: [
+    { bits: 4, name: "version" },
+    { bits: 4, name: "flags" },
+    { bits: 8, name: "type" },
+    { bits: 16, name: "length" }
+  ]
+}
+----
+
+== Class sketch
+
+Sketch conceptual models and responsibility boundaries with lightweight text.
+
+[nomnoml]
+----
+[Document] -> [Embedded target]
+[Embedded target] -> [Hydrator]
+[Hydrator] -> [SVG]
+[Host policy] -> [Hydrator]
+----
+
+== Block diagram
+
+Create simple box-and-arrow diagrams that fit well in README files.
+
+[pikchr]
+----
+box "AsciiDoc" fit
+arrow
+box "Embedded" fit
+arrow
+box "Local SVG" fit
+----
+
+== ASCII art
+
+Render existing text diagrams as readable SVG in HTML.
+
+[svgbob]
+----
+       .------.
+Input -->|local| Render
+       '------'
+----
+
+== Vega
+
+Handle lower-level visualization specifications with local rendering.
+
+[vega]
+----
+{
+  "$schema": "https://vega.github.io/schema/vega/v6.json",
+  "width": 260,
+  "height": 120,
+  "padding": 8,
+  "data": [{ "name": "table", "values": [
+    { "x": 0, "y": 22 }, { "x": 1, "y": 58 }, { "x": 2, "y": 40 }, { "x": 3, "y": 82 }
+  ] }],
+  "scales": [
+    { "name": "x", "type": "point", "domain": { "data": "table", "field": "x" }, "range": "width" },
+    { "name": "y", "type": "linear", "domain": { "data": "table", "field": "y" }, "range": "height" }
+  ],
+  "marks": [{ "type": "line", "from": { "data": "table" }, "encode": { "enter": {
+    "x": { "scale": "x", "field": "x" }, "y": { "scale": "y", "field": "y" }, "stroke": { "value": "#0f766e" }, "strokeWidth": { "value": 3 }
+  } } }]
+}
+----
