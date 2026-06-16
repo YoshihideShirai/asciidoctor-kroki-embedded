@@ -99,6 +99,29 @@ test('hydrateEmbeddedDiagrams runs an injected renderer', async () => {
   assert.equal(mermaid.element.dataset.rendered, 'true')
 })
 
+test('hydrateEmbeddedDiagrams skips diagrams already rendered from cache', async () => {
+  const mermaid = diagram('mermaid', 'graph TD\nA --> B')
+  mermaid.element.dataset.rendered = 'true'
+  mermaid.element.dataset.cacheHit = 'true'
+  const root = {
+    querySelectorAll() {
+      return [mermaid.element]
+    },
+  }
+
+  const results = await hydrateEmbeddedDiagrams(root, {
+    renderers: {
+      mermaid() {
+        throw new Error('renderer should not run')
+      },
+    },
+  })
+
+  assert.equal(results.length, 1)
+  assert.equal(results[0].ok, true)
+  assert.equal(results[0].cached, true)
+})
+
 test('hydrateEmbeddedDiagrams can use the built-in Mermaid renderer with a local library', async () => {
   const mermaid = diagram('mermaid', 'graph TD\nA --> B')
   const root = {

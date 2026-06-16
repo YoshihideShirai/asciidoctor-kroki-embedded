@@ -106,6 +106,27 @@ import 'asciidoctor-kroki-embedded/style.css'
 
 ソースペイロードの非表示、SVG 出力のサイズ調整、レンダラーエラーの表示の出発点として使えます。
 
+## Antora キャッシュアダプター
+
+Antora 拡張では、任意のキャッシュアダプターを使って、サイトローカルのキャッシュディレクトリに
+すでに存在する SVG ファイルを再利用できます。
+
+```js
+// antora-kroki-embedded-extension.mjs
+import { createAntoraExtension } from 'asciidoctor-kroki-embedded/antora'
+
+export default createAntoraExtension({
+  defaultFormat: 'svg',
+  diagramNames: ['mermaid', 'plantuml', 'graphviz'],
+  cacheDir: '.asciidoc-local-preview-cache/diagrams',
+  publicPath: '.asciidoc-local-preview-cache/diagrams',
+})
+```
+
+`cacheDir` は Antora の変換中に読むディレクトリです。`publicPath` は、一致するキャッシュ済み SVG
+ファイルが存在した場合に生成 HTML へ出力する URI prefix です。Antora のパイプラインでキャッシュ図を
+別の場所に公開する場合は、`resolveCachedUri` でキャッシュファイルから最終的なサイト URI へ変換できます。
+
 ## Kroki とのサポート比較
 
 Kroki サーバーのサポート状況は、公式 Kroki プロジェクトの README とドキュメントを基にしています。

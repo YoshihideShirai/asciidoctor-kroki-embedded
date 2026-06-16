@@ -60,6 +60,9 @@ function openPreview(context) {
     panel.webview.onDidReceiveMessage((message) => {
       if (message?.type === 'render-result') {
         outputChannel?.appendLine(`[${new Date().toISOString()}] render-result ${JSON.stringify(message.result)}`)
+        writeDiagramCacheEntries(activeDocument, message.result?.diagrams).catch((error) => {
+          outputChannel?.appendLine(`[${new Date().toISOString()}] cache-write-error ${formatError(error)}`)
+        })
       }
     })
     panel.onDidDispose(() => {
@@ -69,13 +72,17 @@ function openPreview(context) {
     })
   }
 
-  updatePreview(context, editor.document)
+  updatePreview(context, editor.document).catch((error) => {
+    outputChannel?.appendLine(`[${new Date().toISOString()}] preview-error ${formatError(error)}`)
+  })
   panel.reveal(vscode.ViewColumn.Beside)
 }
 
 function refreshPreview(context) {
   if (activeDocument) {
-    updatePreview(context, activeDocument)
+    updatePreview(context, activeDocument).catch((error) => {
+      outputChannel?.appendLine(`[${new Date().toISOString()}] preview-error ${formatError(error)}`)
+    })
     return
   }
   openPreview(context)
@@ -86,18 +93,20 @@ function schedulePreviewUpdate(context, document) {
   clearPendingUpdate()
   pendingUpdate = setTimeout(() => {
     pendingUpdate = undefined
-    updatePreview(context, document)
+    updatePreview(context, document).catch((error) => {
+      outputChannel?.appendLine(`[${new Date().toISOString()}] preview-error ${formatError(error)}`)
+    })
   }, livePreviewDelayMs)
 }
 
-function updatePreview(context, document) {
+async function updatePreview(context, document) {
   if (!panel) {
     return
   }
 
   activeDocument = document
   panel.title = `Preview: ${path.basename(document.fileName)}`
-  panel.webview.html = renderPreview(context, panel.webview, document)
+  panel.webview.html = await renderPreview(context, panel.webview, document)
 }
 
 function clearPendingUpdate() {
@@ -111,11 +120,12 @@ function isAsciiDoc(document) {
   return document.languageId === 'asciidoc' || /\.(?:adoc|asciidoc|asc)$/i.test(document.fileName)
 }
 
-function renderPreview(context, webview, document) {
+async function renderPreview(context, webview, document) {
   const nonce = createNonce()
   const allowedPreviewHosts = getAllowedPreviewHosts()
   const baseDir = getBaseDir(document)
-  const html = rewritePreviewImages(convertAsciiDoc(document), {
+  const cacheEntries = await readDiagramCacheEntries(document)
+  const html = rewritePreviewImages(convertAsciiDoc(document, cacheEntries), {
     allowedPreviewHosts,
     localImageResolver: baseDir ? (src) => rewriteLocalImageSrc(src, baseDir, (imagePath, rootDir) => {
       const decodedPath = decodeURIComponent(imagePath)
@@ -217,6 +227,10 @@ function getLocalResourceRoots(extensionUri, document) {
   if (baseDir) {
     roots.push(vscode.Uri.file(baseDir))
   }
+  const cacheDir = getPreviewCacheDir(document)
+  if (cacheDir) {
+    roots.push(cacheDir)
+  }
 
   return uniqueUris(roots)
 }
@@ -234,11 +248,12 @@ function uniqueUris(uris) {
   })
 }
 
-function convertAsciiDoc(document) {
+function convertAsciiDoc(document, cacheEntries) {
   const asciidoctor = asciidoctorFactory()
   const registry = asciidoctor.Extensions.create()
   krokiEmbedded.register(registry, {
     defaultFormat: 'svg',
+    diagramCache: createDiagramCache(document, cacheEntries),
     diagramNames: [
       'mermaid',
       'plantuml',
@@ -267,6 +282,76 @@ function convertAsciiDoc(document) {
   }))
 }
 
+function createDiagramCache(document, cacheEntries = new Set()) {
+  const cacheDir = getPreviewCacheDir(document)
+  if (!cacheDir) {
+    return undefined
+  }
+
+  return {
+    rendererVersion: 'vscode-preview-local-svg-v1',
+    getCachedUri({ diagramType, format, cacheKey }) {
+      const cacheUri = getDiagramCacheUri(cacheDir, diagramType, format, cacheKey)
+      if (!cacheEntries.has(cacheUri.toString())) {
+        return undefined
+      }
+
+      return panel?.webview.asWebviewUri(cacheUri).toString()
+    },
+  }
+}
+
+async function writeDiagramCacheEntries(document, diagrams = []) {
+  const cacheDir = getPreviewCacheDir(document)
+  if (!cacheDir || !Array.isArray(diagrams)) {
+    return
+  }
+
+  for (const diagram of diagrams) {
+    if (
+      !diagram?.cacheKey ||
+      diagram.format !== 'svg' ||
+      typeof diagram.outputHtml !== 'string' ||
+      !diagram.outputHtml.trim().startsWith('<svg')
+    ) {
+      continue
+    }
+
+    const cacheUri = getDiagramCacheUri(cacheDir, diagram.type, diagram.format, diagram.cacheKey)
+    await vscode.workspace.fs.createDirectory(cacheDir)
+    await vscode.workspace.fs.writeFile(cacheUri, new TextEncoder().encode(diagram.outputHtml))
+  }
+}
+
+async function readDiagramCacheEntries(document) {
+  const cacheDir = getPreviewCacheDir(document)
+  if (!cacheDir) {
+    return new Set()
+  }
+
+  try {
+    const entries = await vscode.workspace.fs.readDirectory(cacheDir)
+    return new Set(entries.map(([name]) => vscode.Uri.joinPath(cacheDir, name).toString()))
+  } catch {
+    return new Set()
+  }
+}
+
+function getPreviewCacheDir(document) {
+  if (!document || document.uri.scheme !== 'file') {
+    return undefined
+  }
+
+  const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri)
+  const rootUri = workspaceFolder?.uri || vscode.Uri.file(getBaseDir(document))
+  return vscode.Uri.joinPath(rootUri, '.asciidoc-local-preview-cache', 'diagrams')
+}
+
+function getDiagramCacheUri(cacheDir, diagramType, format, cacheKey) {
+  const safeType = String(diagramType || 'diagram').replace(/[^a-z0-9_-]/gi, '-').toLowerCase()
+  return vscode.Uri.joinPath(cacheDir, `${safeType}-${cacheKey}.${format}`)
+}
+
 function escapeHtml(value) {
   return String(value)
     .replace(/&/g, '&amp;')
@@ -283,4 +368,8 @@ function createNonce() {
     value += chars[Math.floor(Math.random() * chars.length)]
   }
   return value
+}
+
+function formatError(error) {
+  return error instanceof Error ? error.message : String(error)
 }
