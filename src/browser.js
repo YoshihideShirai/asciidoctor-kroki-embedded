@@ -27,6 +27,18 @@ function getDiagramOptions(diagram) {
   return JSON.parse(value)
 }
 
+function getDiagramFormat(diagram) {
+  return diagram.dataset?.diagramFormat || diagram.getAttribute('data-diagram-format') || 'svg'
+}
+
+function getCacheKey(diagram) {
+  return diagram.dataset?.cacheKey || diagram.getAttribute('data-cache-key')
+}
+
+function isRendered(diagram) {
+  return (diagram.dataset?.rendered || diagram.getAttribute('data-rendered')) === 'true'
+}
+
 function markRendered(diagram) {
   if (diagram.dataset) {
     diagram.dataset.rendered = 'true'
@@ -368,6 +380,16 @@ export async function hydrateEmbeddedDiagrams(root = globalThis.document, option
       continue
     }
 
+    if (isRendered(diagram)) {
+      results.push({
+        diagram,
+        diagramType,
+        ok: true,
+        cached: (diagram.dataset?.cacheHit || diagram.getAttribute('data-cache-hit')) === 'true',
+      })
+      continue
+    }
+
     try {
       await renderer({
         diagram,
@@ -379,7 +401,14 @@ export async function hydrateEmbeddedDiagrams(root = globalThis.document, option
         index,
       })
       markRendered(diagram)
-      results.push({ diagram, diagramType, ok: true })
+      results.push({
+        diagram,
+        diagramType,
+        ok: true,
+        cacheKey: getCacheKey(diagram),
+        format: getDiagramFormat(diagram),
+        outputHtml: output.innerHTML,
+      })
     } catch (error) {
       markError(diagram, output, error)
       results.push({ diagram, diagramType, ok: false, error })

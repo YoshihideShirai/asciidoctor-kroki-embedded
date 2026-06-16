@@ -118,6 +118,15 @@ async function renderAll() {
   const summary = {
     total: results.length,
     rendered: results.filter((result) => result.ok).length,
+    cacheHits: results.filter((result) => result.cached).length,
+    diagrams: results
+      .filter((result) => result.ok && result.cacheKey && result.outputHtml)
+      .map((result) => ({
+        type: result.diagramType,
+        format: result.format,
+        cacheKey: result.cacheKey,
+        outputHtml: result.outputHtml,
+      })),
     failed: results
       .filter((result) => !result.ok)
       .map((result) => ({

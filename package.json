@@ -6,6 +6,7 @@
   "main": "src/index.js",
   "exports": {
     ".": "./src/index.js",
+    "./antora": "./src/antora.js",
     "./browser": "./src/browser.js",
     "./html": "./src/html.js",
     "./style.css": "./src/style.css"

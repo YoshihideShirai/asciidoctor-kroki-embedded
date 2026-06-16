@@ -107,6 +107,27 @@ import 'asciidoctor-kroki-embedded/style.css'
 
 Use it as a starting point for hiding source payloads, sizing SVG output, and presenting renderer errors.
 
+## Antora Cache Adapter
+
+Antora extensions can use the optional cache adapter to reuse SVG files that already exist in a site-local cache
+directory.
+
+```js
+// antora-kroki-embedded-extension.mjs
+import { createAntoraExtension } from 'asciidoctor-kroki-embedded/antora'
+
+export default createAntoraExtension({
+  defaultFormat: 'svg',
+  diagramNames: ['mermaid', 'plantuml', 'graphviz'],
+  cacheDir: '.asciidoc-local-preview-cache/diagrams',
+  publicPath: '.asciidoc-local-preview-cache/diagrams',
+})
+```
+
+`cacheDir` is the directory Antora reads during conversion. `publicPath` is the URI prefix emitted into generated
+HTML when a matching cached SVG file is present. If your Antora pipeline publishes cached diagrams somewhere else,
+provide `resolveCachedUri` to map the cache file to the final site URI.
+
 ## Support Compared With Kroki
 
 Kroki server support is based on the official Kroki project README and documentation:

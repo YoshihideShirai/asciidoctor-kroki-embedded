@@ -88,5 +88,6 @@ export function register(registry, options = {}) {
 }
 
 export { DEFAULT_DIAGRAM_NAMES, defaultRenderer, errorRenderer }
+export { createDiagramCacheKey } from './html.js'
 
 export default { register }

@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { collectDiagramOptions, defaultRenderer, normalizePlantUmlSource } from '../src/html.js'
+import { collectDiagramOptions, createDiagramCacheKey, defaultRenderer, normalizePlantUmlSource } from '../src/html.js'
 
 test('default renderer emits escaped embedded diagram target', () => {
   const html = defaultRenderer({
@@ -69,6 +69,35 @@ test('default renderer uses extension defaultFormat as fallback', () => {
 
   assert.match(html, /data-diagram-format="png"/)
   assert.match(html, /kroki-format-png/)
+})
+
+test('default renderer emits cached svg image when cache has a matching entry', () => {
+  const source = 'graph TD\nA --> B'
+  const cacheKey = createDiagramCacheKey({
+    diagramType: 'mermaid',
+    source,
+    format: 'svg',
+    diagramOptions: {},
+    rendererVersion: 'test-renderer',
+  })
+  const html = defaultRenderer({
+    diagramType: 'mermaid',
+    source,
+    attrs: { format: 'svg' },
+    options: {
+      diagramCache: {
+        rendererVersion: 'test-renderer',
+        getCachedUri({ cacheKey: key }) {
+          return key === cacheKey ? 'vscode-resource:/cache/mermaid.svg' : undefined
+        },
+      },
+    },
+  })
+
+  assert.match(html, new RegExp(`data-cache-key="${cacheKey}"`))
+  assert.match(html, /data-rendered="true"/)
+  assert.match(html, /data-cache-hit="true"/)
+  assert.match(html, /<img class="kroki-embedded-cached-image" src="vscode-resource:\/cache\/mermaid.svg"/)
 })
 
 test('plantuml source is wrapped when start marker is missing', () => {
