@@ -106,26 +106,50 @@ import 'asciidoctor-kroki-embedded/style.css'
 
 ソースペイロードの非表示、SVG 出力のサイズ調整、レンダラーエラーの表示の出発点として使えます。
 
-## Antora キャッシュアダプター
+## Antora での使い方
 
-Antora 拡張では、任意のキャッシュアダプターを使って、サイトローカルのキャッシュディレクトリに
-すでに存在する SVG ファイルを再利用できます。
+Antora では、playbook の `asciidoc.extensions` にこのパッケージ用の Asciidoctor 拡張を登録して使います。
+playbook の近くに拡張モジュールを作り、`createAntoraExtension` が返すアダプターを呼び出してください。
 
 ```js
 // antora-kroki-embedded-extension.mjs
 import { createAntoraExtension } from 'asciidoctor-kroki-embedded/antora'
 
-export default createAntoraExtension({
+const extension = createAntoraExtension({
   defaultFormat: 'svg',
   diagramNames: ['mermaid', 'plantuml', 'graphviz'],
-  cacheDir: '.asciidoc-local-preview-cache/diagrams',
-  publicPath: '.asciidoc-local-preview-cache/diagrams',
+  cacheDir: './supplemental-ui/diagram-cache',
+  publicPath: '../_/diagram-cache',
 })
+
+export function register(registry, context) {
+  extension.register(registry, context)
+}
 ```
 
-`cacheDir` は Antora の変換中に読むディレクトリです。`publicPath` は、一致するキャッシュ済み SVG
-ファイルが存在した場合に生成 HTML へ出力する URI prefix です。Antora のパイプラインでキャッシュ図を
-別の場所に公開する場合は、`resolveCachedUri` でキャッシュファイルから最終的なサイト URI へ変換できます。
+作成したモジュールを `antora-playbook.yml` に登録します。
+
+```yaml
+asciidoc:
+  extensions:
+    - ./antora-kroki-embedded-extension.mjs
+```
+
+Antora のページでは、通常の Kroki 互換図ブロックとして記述できます。
+
+```asciidoc
+[mermaid]
+----
+graph TD
+  A[Antora page] --> B[asciidoctor-kroki-embedded]
+----
+```
+
+Antora アダプターは、サイトローカルのキャッシュディレクトリにすでに存在する SVG ファイルを再利用します。
+`cacheDir` は Antora の変換中に読むディレクトリです。`publicPath` は、一致するキャッシュ済み SVG ファイルが
+存在した場合に生成 HTML へ出力する URI prefix です。Antora のパイプラインでキャッシュ図を別の場所に公開する
+場合は、`resolveCachedUri` でキャッシュファイルから最終的なサイト URI へ変換できます。完全な playbook と
+拡張モジュールの例は `examples/antora-demo` を参照してください。
 
 ## Kroki とのサポート比較
 

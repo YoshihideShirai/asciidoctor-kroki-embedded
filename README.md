@@ -107,26 +107,49 @@ import 'asciidoctor-kroki-embedded/style.css'
 
 Use it as a starting point for hiding source payloads, sizing SVG output, and presenting renderer errors.
 
-## Antora Cache Adapter
+## Antora Usage
 
-Antora extensions can use the optional cache adapter to reuse SVG files that already exist in a site-local cache
-directory.
+Antora can load this package as an Asciidoctor extension through the playbook's `asciidoc.extensions` list.
+Create an extension module next to your playbook and export the adapter returned by `createAntoraExtension`.
 
 ```js
 // antora-kroki-embedded-extension.mjs
 import { createAntoraExtension } from 'asciidoctor-kroki-embedded/antora'
 
-export default createAntoraExtension({
+const extension = createAntoraExtension({
   defaultFormat: 'svg',
   diagramNames: ['mermaid', 'plantuml', 'graphviz'],
-  cacheDir: '.asciidoc-local-preview-cache/diagrams',
-  publicPath: '.asciidoc-local-preview-cache/diagrams',
+  cacheDir: './supplemental-ui/diagram-cache',
+  publicPath: '../_/diagram-cache',
 })
+
+export function register(registry, context) {
+  extension.register(registry, context)
+}
 ```
 
-`cacheDir` is the directory Antora reads during conversion. `publicPath` is the URI prefix emitted into generated
-HTML when a matching cached SVG file is present. If your Antora pipeline publishes cached diagrams somewhere else,
-provide `resolveCachedUri` to map the cache file to the final site URI.
+Register the module in `antora-playbook.yml`.
+
+```yaml
+asciidoc:
+  extensions:
+    - ./antora-kroki-embedded-extension.mjs
+```
+
+Then use Kroki-compatible diagram blocks in Antora pages as usual.
+
+```asciidoc
+[mermaid]
+----
+graph TD
+  A[Antora page] --> B[asciidoctor-kroki-embedded]
+----
+```
+
+The Antora adapter reuses SVG files that already exist in a site-local cache directory. `cacheDir` is the directory
+Antora reads during conversion. `publicPath` is the URI prefix emitted into generated HTML when a matching cached SVG
+file is present. If your Antora pipeline publishes cached diagrams somewhere else, provide `resolveCachedUri` to map
+the cache file to the final site URI. See `examples/antora-demo` for a complete playbook and extension module.
 
 ## Support Compared With Kroki
 
