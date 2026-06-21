@@ -18,3 +18,17 @@
   margin: 0;
   white-space: pre-wrap;
 }
+
+.kroki-embedded[data-cache-hit="true"]::before {
+  content: "Cached Kroki diagram: " attr(data-diagram-type);
+}
+
+.kroki-embedded[data-cache-hit="true"] .kroki-embedded-source {
+  display: none;
+}
+
+.kroki-embedded-cached-image {
+  display: block;
+  height: auto;
+  max-width: 100%;
+}

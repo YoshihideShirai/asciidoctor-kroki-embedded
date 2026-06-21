@@ -19,7 +19,8 @@
     "site:dev": "astro dev",
     "site:build": "npm run antora:build && astro build",
     "site:preview": "astro preview",
-    "antora:build": "cd examples/antora-demo && antora generate antora-playbook.yml --clean"
+    "antora:cache": "node scripts/generate-antora-diagram-cache.mjs",
+    "antora:build": "npm run antora:cache && cd examples/antora-demo && antora generate antora-playbook.yml --clean"
   },
   "peerDependencies": {
     "@asciidoctor/core": ">=2 <5"
