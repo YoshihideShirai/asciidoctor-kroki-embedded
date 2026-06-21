@@ -1,0 +1,91 @@
+= asciidoctor-kroki-embedded Antora Demo
+:kroki-default-format: svg
+
+This Antora page is generated with the local `asciidoctor-kroki-embedded` extension registered through `asciidoc.extensions` in the playbook.
+The extension accepts Kroki-compatible diagram blocks and emits safe, inert HTML targets that an Antora UI or host application can hydrate with local renderers.
+
+== Mermaid block
+
+[mermaid]
+----
+flowchart LR
+  A[Antora page] --> B[Asciidoctor.js]
+  B --> C[asciidoctor-kroki-embedded]
+  C --> D[Embedded diagram target]
+----
+
+== PlantUML block
+
+[plantuml]
+----
+@startuml
+skinparam backgroundColor transparent
+actor Author
+participant Antora
+participant "Kroki embedded extension" as Extension
+participant "Static site" as Site
+
+Author -> Antora: antora generate
+Antora -> Extension: convert diagram block
+Extension --> Antora: inert HTML target
+Antora --> Site: publish page
+@enduml
+----
+
+== GraphViz block
+
+[graphviz]
+----
+digraph antora_demo {
+  rankdir=LR;
+  source [label="AsciiDoc"];
+  extension [label="Extension"];
+  page [label="Antora HTML"];
+  source -> extension -> page;
+}
+----
+
+== Vega-Lite block
+
+[vegalite]
+----
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "description": "Antora demo signal counts.",
+  "data": {
+    "values": [
+      { "step": "AsciiDoc", "count": 1 },
+      { "step": "Extension", "count": 1 },
+      { "step": "Antora page", "count": 1 }
+    ]
+  },
+  "mark": "bar",
+  "encoding": {
+    "x": { "field": "step", "type": "nominal" },
+    "y": { "field": "count", "type": "quantitative" }
+  }
+}
+----
+
+== How this demo is wired
+
+[source,yaml]
+----
+asciidoc:
+  extensions:
+    - ./antora-kroki-embedded-extension.mjs
+----
+
+[source,js]
+----
+import { createAntoraExtension } from '../../src/antora.js'
+
+const extension = createAntoraExtension({
+  defaultFormat: 'svg',
+  diagramNames: ['mermaid', 'plantuml', 'graphviz', 'vegalite'],
+})
+
+export function register(registry, context) {
+  extension.register(registry, context)
+}
+----

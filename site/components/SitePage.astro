@@ -10,6 +10,8 @@ const {
   primaryAction,
   galleryHref,
   galleryAction,
+  antoraHref,
+  antoraAction,
   sections,
   heroVisualPolicy,
   valueAria,
@@ -45,6 +47,7 @@ const {
         <a href="#overview">{sections.overview}</a>
         <a href="#playground">{sections.renderer}</a>
         <a href="#asciidoctor-preview">{sections.asciidoctor}</a>
+        <a href={antoraHref}>{sections.antora}</a>
       </nav>
 
       <section id="overview" class="hero page-panel" aria-labelledby="title">
@@ -55,6 +58,7 @@ const {
           <div class="hero-actions" aria-label="Primary actions">
             <a href="#playground">{primaryAction}</a>
             <a class="secondary-action" href={galleryHref}>{galleryAction}</a>
+            <a class="secondary-action" href={antoraHref}>{antoraAction}</a>
             <code>npm install asciidoctor-kroki-embedded</code>
           </div>
         </div>

@@ -1,0 +1,8 @@
+:root { color-scheme: light; font-family: system-ui, sans-serif; }
+body { margin: 0; color: #17202a; background: #f7f9fb; }
+.site-header { background: #273444; padding: 1rem 1.5rem; }
+.site-header a { color: white; font-weight: 700; text-decoration: none; }
+.doc { background: white; border: 1px solid #d9e1ea; border-radius: 0.75rem; margin: 2rem auto; max-width: 58rem; padding: 2rem; }
+pre { overflow-x: auto; }
+code, pre { background: #f2f5f8; border-radius: 0.25rem; }
+pre code { background: transparent; }

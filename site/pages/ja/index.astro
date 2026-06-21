@@ -10,10 +10,13 @@ const copy = {
   primaryAction: 'レンダラーを試す',
   galleryHref: 'gallery/',
   galleryAction: 'ギャラリーを見る',
+  antoraHref: '../antora-demo/',
+  antoraAction: 'Antora デモを見る',
   sections: {
     overview: '概要',
     renderer: 'レンダラー',
     asciidoctor: 'AsciiDoc プレビュー',
+    antora: 'Antora デモ',
   },
   heroVisualPolicy: 'No Kroki server. No remote fallback. The host chooses the renderer and policy.',
   valueAria: 'asciidoctor-kroki-embedded の良さ',
@@ -48,7 +51,7 @@ const copy = {
     },
     {
       title: 'GitHub Pages Ready',
-      body: 'Astro は静的 HTML と JavaScript として出力されます。GitHub Actions の Pages workflow で <code>dist</code> を公開するだけで、試用ページとして配布できます。',
+      body: 'Astro は静的 HTML と JavaScript として出力され、ビルド時に生成した Antora デモも <code>/antora-demo/</code> へコピーされます。GitHub Actions の Pages workflow で <code>dist</code> を公開するだけで、試用ページとして配布できます。',
     },
   ],
 }

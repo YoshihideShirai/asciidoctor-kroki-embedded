@@ -10,10 +10,13 @@ const copy = {
   primaryAction: 'Try the renderers',
   galleryHref: 'gallery/',
   galleryAction: 'Open gallery',
+  antoraHref: '../antora-demo/',
+  antoraAction: 'Open Antora demo',
   sections: {
     overview: 'Overview',
     renderer: 'Renderers',
     asciidoctor: 'AsciiDoc preview',
+    antora: 'Antora demo',
   },
   heroVisualPolicy: 'No Kroki server. No remote fallback. The host chooses the renderer and policy.',
   valueAria: 'Why asciidoctor-kroki-embedded is useful',
@@ -48,7 +51,7 @@ const copy = {
     },
     {
       title: 'GitHub Pages Ready',
-      body: 'Astro builds the site as static HTML and JavaScript. The Pages workflow can publish <code>dist</code> directly as a live project site.',
+      body: 'Astro builds the site as static HTML and JavaScript, and the build also copies a generated Antora demo to <code>/antora-demo/</code>. The Pages workflow can publish <code>dist</code> directly as a live project site.',
     },
   ],
 }

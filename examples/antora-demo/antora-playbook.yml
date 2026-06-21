@@ -1,0 +1,20 @@
+site:
+  title: asciidoctor-kroki-embedded Antora Demo
+  start_page: kroki-embedded-demo::index.adoc
+content:
+  sources:
+    - url: ../..
+      branches: HEAD
+      start_path: examples/antora-demo/docs
+ui:
+  bundle:
+    url: ./ui-bundle-src
+    snapshot: true
+  supplemental_files: ./supplemental-ui
+asciidoc:
+  extensions:
+    - ./antora-kroki-embedded-extension.mjs
+output:
+  dir: ../../site/public/antora-demo
+runtime:
+  fetch: true
