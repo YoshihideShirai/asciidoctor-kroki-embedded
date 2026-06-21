@@ -17,8 +17,9 @@
   "scripts": {
     "test": "node --test test/*.test.js",
     "site:dev": "astro dev",
-    "site:build": "astro build",
-    "site:preview": "astro preview"
+    "site:build": "npm run antora:build && astro build",
+    "site:preview": "astro preview",
+    "antora:build": "cd examples/antora-demo && antora generate antora-playbook.yml --clean"
   },
   "peerDependencies": {
     "@asciidoctor/core": ">=2 <5"
@@ -35,6 +36,8 @@
     "node": ">=18"
   },
   "devDependencies": {
+    "@antora/cli": "^3.1.15",
+    "@antora/site-generator": "^3.1.15",
     "@asciidoctor/core": "^3.0.4",
     "@plantuml/core": "^1.2026.6",
     "@terrastruct/d2": "^0.1.33",

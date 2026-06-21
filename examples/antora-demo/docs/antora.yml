@@ -1,0 +1,5 @@
+name: kroki-embedded-demo
+title: Kroki Embedded Antora Demo
+version: ~
+nav:
+  - modules/ROOT/nav.adoc
