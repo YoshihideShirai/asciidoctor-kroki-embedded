@@ -3,6 +3,10 @@ import path from 'node:path'
 import { DEFAULT_DIAGRAM_NAMES } from './diagram-names.js'
 import { defaultRenderer, errorRenderer } from './html.js'
 
+function isPromiseLike(value) {
+  return value && typeof value.then === 'function'
+}
+
 function applySubs(parent, value, subs) {
   if (!subs || typeof parent.applySubs !== 'function') {
     return value
@@ -14,6 +18,13 @@ export function normalizeMacroTarget(parent, target) {
   const substituted = typeof parent.applySubs === 'function'
     ? parent.applySubs(target, ['attributes'])
     : target
+  if (isPromiseLike(substituted)) {
+    return substituted.then((resolved) => normalizeSubstitutedMacroTarget(parent, resolved))
+  }
+  return normalizeSubstitutedMacroTarget(parent, substituted)
+}
+
+function normalizeSubstitutedMacroTarget(parent, substituted) {
   if (/^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(substituted)) {
     throw new Error(`Remote diagram macro targets are disabled: ${substituted}`)
   }
@@ -34,15 +45,29 @@ export function normalizeMacroTarget(parent, target) {
   return resolvedTarget
 }
 
+function createPassBlock(processor, parent, html, attrs) {
+  return processor.createBlock(parent, 'pass', html, attrs)
+}
+
 function renderPass(processor, parent, diagramType, source, attrs, renderer, options) {
-  const html = renderer({
+  const render = (resolvedSource) => renderer({
     diagramType,
-    source: applySubs(parent, source, attrs.subs),
+    source: resolvedSource,
     attrs,
     document: parent.getDocument(),
     options,
   })
-  return processor.createBlock(parent, 'pass', html, attrs)
+  const substitutedSource = applySubs(parent, source, attrs.subs)
+  if (isPromiseLike(substitutedSource)) {
+    return substitutedSource
+      .then(render)
+      .then((html) => createPassBlock(processor, parent, html, attrs))
+  }
+  const html = render(substitutedSource)
+  if (isPromiseLike(html)) {
+    return html.then((resolvedHtml) => createPassBlock(processor, parent, resolvedHtml, attrs))
+  }
+  return createPassBlock(processor, parent, html, attrs)
 }
 
 function registerDiagramBlock(registry, diagramType, renderer, options) {
@@ -50,7 +75,11 @@ function registerDiagramBlock(registry, diagramType, renderer, options) {
     this.onContext(['listing', 'literal'])
     this.positionalAttributes(['target', 'format'])
     this.process(function (parent, reader, attrs) {
-      return renderPass(this, parent, diagramType, reader.read(), attrs, renderer, options)
+      const source = reader.read()
+      if (isPromiseLike(source)) {
+        return source.then((resolvedSource) => renderPass(this, parent, diagramType, resolvedSource, attrs, renderer, options))
+      }
+      return renderPass(this, parent, diagramType, source, attrs, renderer, options)
     })
   })
 }
@@ -60,7 +89,22 @@ function registerDiagramMacro(registry, diagramType, renderer, options) {
     this.positionalAttributes(['format'])
     this.process(function (parent, target, attrs) {
       try {
-        const source = fs.readFileSync(normalizeMacroTarget(parent, target), 'utf8')
+        const normalizedTarget = normalizeMacroTarget(parent, target)
+        if (isPromiseLike(normalizedTarget)) {
+          return normalizedTarget
+            .then((resolvedTarget) => fs.readFileSync(resolvedTarget, 'utf8'))
+            .then((source) => renderPass(this, parent, diagramType, source, attrs, renderer, options))
+            .catch((error) => {
+              const message = error instanceof Error ? error.message : String(error)
+              return this.createBlock(
+                parent,
+                'pass',
+                errorRenderer({ diagramType, message }),
+                attrs,
+              )
+            })
+        }
+        const source = fs.readFileSync(normalizedTarget, 'utf8')
         return renderPass(this, parent, diagramType, source, attrs, renderer, options)
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error)

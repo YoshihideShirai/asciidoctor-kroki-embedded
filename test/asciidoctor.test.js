@@ -3,25 +3,25 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import asciidoctorFactory from '@asciidoctor/core'
+import * as asciidoctor from '@asciidoctor/core'
 import krokiEmbedded from '../src/index.js'
 
-function convert(input, options = {}) {
-  const asciidoctor = asciidoctorFactory()
+async function convert(input, options = {}) {
   const registry = asciidoctor.Extensions.create()
   krokiEmbedded.register(registry, options.extensionOptions)
 
-  return String(asciidoctor.convert(input, {
+  return String(await asciidoctor.convert(input, {
     safe: 'safe',
     backend: 'html5',
     standalone: false,
+    to_file: false,
     extension_registry: registry,
     ...options.convertOptions,
   }))
 }
 
-test('converts a Kroki-compatible listing block to an embedded target', () => {
-  const html = convert(`
+test('converts a Kroki-compatible listing block to an embedded target', async () => {
+  const html = await convert(`
 [mermaid]
 ----
 graph TD
@@ -36,8 +36,8 @@ graph TD
   assert.doesNotMatch(html, /kroki\.io/)
 })
 
-test('converts a Kroki-compatible literal block to an embedded target', () => {
-  const html = convert(`
+test('converts a Kroki-compatible literal block to an embedded target', async () => {
+  const html = await convert(`
 [plantuml]
 ....
 Alice -> Bob
@@ -49,8 +49,8 @@ Alice -> Bob
   assert.match(html, /Alice -&gt; Bob/)
 })
 
-test('uses kroki-default-format document attribute', () => {
-  const html = convert(`
+test('uses kroki-default-format document attribute', async () => {
+  const html = await convert(`
 :kroki-default-format: png
 
 [mermaid]
@@ -64,8 +64,8 @@ graph TD
   assert.match(html, /kroki-format-png/)
 })
 
-test('uses extension defaultFormat when no document attribute is set', () => {
-  const html = convert(`
+test('uses extension defaultFormat when no document attribute is set', async () => {
+  const html = await convert(`
 [mermaid]
 ----
 graph TD
@@ -81,11 +81,11 @@ graph TD
   assert.match(html, /kroki-format-png/)
 })
 
-test('converts a Kroki-compatible block macro from a local file', () => {
+test('converts a Kroki-compatible block macro from a local file', async () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kroki-embedded-asciidoctor-'))
   fs.writeFileSync(path.join(tmpDir, 'diagram.mmd'), 'graph TD\n  A --> B\n')
 
-  const html = convert('mermaid::diagram.mmd[]', {
+  const html = await convert('mermaid::diagram.mmd[]', {
     convertOptions: {
       base_dir: tmpDir,
     },
@@ -95,7 +95,7 @@ test('converts a Kroki-compatible block macro from a local file', () => {
   assert.match(html, /A --&gt; B/)
 })
 
-test('converts multiple Kroki-compatible block macros from local files', () => {
+test('converts multiple Kroki-compatible block macros from local files', async () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kroki-embedded-asciidoctor-'))
   fs.mkdirSync(path.join(tmpDir, 'diagrams'))
   fs.writeFileSync(path.join(tmpDir, 'diagrams', 'sequence.puml'), 'Alice -> Bob\n')
@@ -105,7 +105,7 @@ test('converts multiple Kroki-compatible block macros from local files', () => {
   fs.writeFileSync(path.join(tmpDir, 'diagrams', 'timing.wavedrom'), '{ signal: [{ name: "clk", wave: "p." }] }\n')
   fs.writeFileSync(path.join(tmpDir, 'diagrams', 'register.bytefield'), '{ reg: [{ bits: 8, name: "opcode" }] }\n')
 
-  const html = convert(`
+  const html = await convert(`
 plantuml::diagrams/sequence.puml[]
 
 nomnoml::diagrams/model.nomnoml[]
@@ -136,10 +136,10 @@ bytefield::diagrams/register.bytefield[]
   assert.match(html, /opcode/)
 })
 
-test('renders a local file boundary error for unsafe block macro targets', () => {
+test('renders a local file boundary error for unsafe block macro targets', async () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kroki-embedded-asciidoctor-'))
 
-  const html = convert('plantuml::../outside.puml[]', {
+  const html = await convert('plantuml::../outside.puml[]', {
     convertOptions: {
       base_dir: tmpDir,
     },

@@ -170,7 +170,7 @@ Alice -> Bob: hello
     </main>
 
     <script>
-      import asciidoctorFactory from '@asciidoctor/core'
+      import * as asciidoctor from '@asciidoctor/core'
       import { renderToString } from '@plantuml/core'
       import bitfield from 'bit-field'
       import JSON5 from 'json5'
@@ -318,7 +318,6 @@ flowchart LR
       const asciidocSource = document.querySelector('#asciidoc-source')
       const asciidocPreview = document.querySelector('#asciidoc-preview-output')
       const asciidocStatus = document.querySelector('#asciidoc-status')
-      const asciidoctor = asciidoctorFactory()
       const graphviz = createGraphviz()
       const pikchr = loadPikchr()
 
@@ -412,10 +411,11 @@ ${sourceText}
         preview.textContent = ''
 
         try {
-          preview.innerHTML = String(asciidoctor.convert(createAsciiDoc(type, source.value), {
+          preview.innerHTML = String(await asciidoctor.convert(createAsciiDoc(type, source.value), {
             safe: 'safe',
             backend: 'html5',
             standalone: false,
+            to_file: false,
             extension_registry: createRegistry(),
             attributes: {
               'allow-uri-read': false,
@@ -438,10 +438,11 @@ ${sourceText}
         asciidocPreview.textContent = ''
 
         try {
-          asciidocPreview.innerHTML = String(asciidoctor.convert(asciidocSource.value, {
+          asciidocPreview.innerHTML = String(await asciidoctor.convert(asciidocSource.value, {
             safe: 'safe',
             backend: 'html5',
             standalone: false,
+            to_file: false,
             extension_registry: createRegistry(),
             attributes: {
               'allow-uri-read': false,
