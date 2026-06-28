@@ -54,7 +54,6 @@
     "verify": "npm run verify:no-network && npm test && npm run build && npm run generate:preview && npm run smoke:preview"
   },
   "dependencies": {
-    "@asciidoctor/core": "^3.0.4",
     "@plantuml/core": "^1.2026.6",
     "@terrastruct/d2": "^0.1.33",
     "@viz-js/viz": "^3.28.0",
@@ -70,6 +69,7 @@
     "wavedrom": "^3.6.1"
   },
   "devDependencies": {
+    "@asciidoctor/core": "^4.0.0",
     "@playwright/test": "^1.57.0",
     "esbuild": "^0.28.1"
   }

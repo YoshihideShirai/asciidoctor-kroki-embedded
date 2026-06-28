@@ -50,7 +50,7 @@ const serializedAsciidoc = JSON.stringify(asciidoc)
     </main>
 
     <script>
-      import asciidoctorFactory from '@asciidoctor/core'
+      import * as asciidoctor from '@asciidoctor/core'
       import bitfield from 'bit-field'
       import JSON5 from 'json5'
       import mermaid from 'mermaid'
@@ -71,7 +71,6 @@ const serializedAsciidoc = JSON.stringify(asciidoc)
       const asciidoc = JSON.parse(document.querySelector('#gallery-asciidoc').textContent)
       const output = document.querySelector('#gallery-rendered-output')
       const status = document.querySelector('#gallery-render-status')
-      const asciidoctor = asciidoctorFactory()
       const graphviz = createGraphviz()
       const pikchr = loadPikchr()
       const d2 = new D2()
@@ -200,10 +199,11 @@ const serializedAsciidoc = JSON.stringify(asciidoc)
         output.textContent = ''
 
         try {
-          output.innerHTML = String(asciidoctor.convert(asciidoc, {
+          output.innerHTML = String(await asciidoctor.convert(asciidoc, {
             safe: 'safe',
             backend: 'html5',
             standalone: false,
+            to_file: false,
             extension_registry: createRegistry(),
             attributes: {
               'allow-uri-read': false,

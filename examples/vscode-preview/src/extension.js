@@ -1,6 +1,6 @@
 import path from 'node:path'
 import * as vscode from 'vscode'
-import asciidoctorFactory from '@asciidoctor/core'
+import * as asciidoctor from '@asciidoctor/core'
 import krokiEmbedded from 'asciidoctor-kroki-embedded'
 import { networkGuardScript } from './network-guard-html.js'
 import {
@@ -125,7 +125,7 @@ async function renderPreview(context, webview, document) {
   const allowedPreviewHosts = getAllowedPreviewHosts()
   const baseDir = getBaseDir(document)
   const cacheEntries = await readDiagramCacheEntries(document)
-  const html = rewritePreviewImages(convertAsciiDoc(document, cacheEntries), {
+  const html = rewritePreviewImages(await convertAsciiDoc(document, cacheEntries), {
     allowedPreviewHosts,
     localImageResolver: baseDir ? (src) => rewriteLocalImageSrc(src, baseDir, (imagePath, rootDir) => {
       const decodedPath = decodeURIComponent(imagePath)
@@ -248,8 +248,7 @@ function uniqueUris(uris) {
   })
 }
 
-function convertAsciiDoc(document, cacheEntries) {
-  const asciidoctor = asciidoctorFactory()
+async function convertAsciiDoc(document, cacheEntries) {
   const registry = asciidoctor.Extensions.create()
   krokiEmbedded.register(registry, {
     defaultFormat: 'svg',
@@ -269,10 +268,11 @@ function convertAsciiDoc(document, cacheEntries) {
     ],
   })
 
-  return String(asciidoctor.convert(document.getText(), {
+  return String(await asciidoctor.convert(document.getText(), {
     safe: 'safe',
     backend: 'html5',
     standalone: false,
+    to_file: false,
     base_dir: getBaseDir(document),
     attributes: {
       'allow-uri-read': false,

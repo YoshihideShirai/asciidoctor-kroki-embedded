@@ -15,16 +15,15 @@ npm install github:YoshihideShirai/asciidoctor-kroki-embedded @asciidoctor/core
 ## Usage
 
 ```js
-import asciidoctorFactory from '@asciidoctor/core'
+import * as asciidoctor from '@asciidoctor/core'
 import krokiEmbedded from 'asciidoctor-kroki-embedded'
 
-const asciidoctor = asciidoctorFactory()
 const registry = asciidoctor.Extensions.create()
 krokiEmbedded.register(registry, {
   defaultFormat: 'svg',
 })
 
-const html = asciidoctor.convert(`
+const html = await asciidoctor.convert(`
 :kroki-default-format: svg
 
 [mermaid]
@@ -36,6 +35,7 @@ graph TD
   safe: 'safe',
   backend: 'html5',
   standalone: false,
+  to_file: false,
   extension_registry: registry,
 })
 ```

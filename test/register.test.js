@@ -61,7 +61,7 @@ test('register wires selected diagram blocks and macros', () => {
   assert.deepEqual([...registry.macros.keys()], ['mermaid', 'plantuml'])
 })
 
-test('block macro reads relative files under document base dir', () => {
+test('block macro reads relative files under document base dir', async () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kroki-embedded-'))
   fs.writeFileSync(path.join(tmpDir, 'diagram.mmd'), 'graph TD\nA --> B\n')
   const registry = createRegistry()
@@ -69,21 +69,21 @@ test('block macro reads relative files under document base dir', () => {
 
   const processor = createProcessor()
   registry.macros.get('mermaid').call(processor)
-  const block = processor.callback(createParent(tmpDir), 'diagram.mmd', {})
+  const block = await processor.callback(createParent(tmpDir), 'diagram.mmd', {})
 
   assert.equal(block.context, 'pass')
   assert.match(block.content, /data-diagram-type="mermaid"/)
   assert.match(block.content, /A --&gt; B/)
 })
 
-test('block macro rejects traversal outside document base dir', () => {
+test('block macro rejects traversal outside document base dir', async () => {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kroki-embedded-'))
   const registry = createRegistry()
   register(registry, { diagramNames: ['plantuml'] })
 
   const processor = createProcessor()
   registry.macros.get('plantuml').call(processor)
-  const block = processor.callback(createParent(tmpDir), '../outside.puml', {})
+  const block = await processor.callback(createParent(tmpDir), '../outside.puml', {})
 
   assert.equal(block.context, 'pass')
   assert.match(block.content, /outside the document directory/)
