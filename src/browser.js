@@ -323,6 +323,37 @@ async function renderD2({ source, output, libraries, diagramOptions }) {
   output.innerHTML = getSvgString(await render.call(d2, source, diagramOptions), 'D2')
 }
 
+async function renderLini({ source, output, libraries, diagramOptions }) {
+  let lini = libraries.lini || getGlobal('lini')
+  const loadLini = libraries.loadLini || getGlobal('loadLini')
+  if (!lini && typeof loadLini === 'function') {
+    lini = await loadLini()
+  }
+
+  if (diagramOptions.theme && diagramOptions.theme !== 'default') {
+    throw new Error('Lini theme options are not supported by the WASM API.')
+  }
+  const staticOption = diagramOptions.static
+  if (staticOption !== undefined && ![true, false, '', 'true', 'false'].includes(staticOption)) {
+    throw new Error('Lini static option must be true or false.')
+  }
+  const staticMode = staticOption === true || staticOption === '' || staticOption === 'true'
+  const compile = staticMode ? lini?.compile_static : lini?.compile
+  if (typeof compile !== 'function') {
+    throw new Error(staticMode
+      ? 'Lini static compiler is not available.'
+      : 'Lini renderer is not available.')
+  }
+
+  const svg = getSvgString(await compile.call(lini, source), 'Lini')
+  // Lini emits image URLs unchanged. Reject image nodes before inserting SVG
+  // into the live DOM so even browser resource loads stay offline.
+  if (/<image\b/i.test(svg)) {
+    throw new Error('Lini image nodes are not supported for local embedded rendering.')
+  }
+  output.innerHTML = svg
+}
+
 async function renderGraphviz({ source, output, libraries }) {
   const graphviz =
     libraries.graphviz ||
@@ -357,6 +388,7 @@ const DEFAULT_RENDERERS = {
   pikchr: renderPikchr,
   graphviz: renderGraphviz,
   dot: renderGraphviz,
+  lini: renderLini,
   d2: renderD2,
   excalidraw: renderExcalidraw,
 }

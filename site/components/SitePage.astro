@@ -116,6 +116,7 @@ Alice -> Bob: hello
                 <option value="svgbob">SvgBob</option>
                 <option value="pikchr">Pikchr</option>
                 <option value="graphviz">GraphViz</option>
+                <option value="lini">Lini</option>
               </select>
             </label>
             <button id="render-button" type="submit">Render</button>
@@ -177,6 +178,7 @@ Alice -> Bob: hello
       import mermaid from 'mermaid'
       import nomnoml from 'nomnoml'
       import loadPikchr from 'pikchr-js'
+      import { loadLini } from '../lib/load-lini.js'
       import { instance as createGraphviz } from '@viz-js/viz'
       import * as vega from 'vega'
       import * as vegaInterpreter from 'vega-interpreter'
@@ -199,6 +201,11 @@ Doc -> Target: inert HTML
 Target -> Renderer: hydrate in browser
 Renderer --> Writer: SVG preview
 @enduml`,
+        lini: `{ direction: row; gap: 40; }
+|box#source| "AsciiDoc"
+|box#compiler| "Lini WASM"
+|box#svg| "Local SVG"
+source -> compiler -> svg`,
         mermaid: `flowchart LR
   A[AsciiDoc source] --> B{Kroki block?}
   B -->|yes| C[Embedded HTML target]
@@ -395,6 +402,7 @@ ${sourceText}
             bitfield,
             svgbob: renderTextDiagramSvg,
             pikchr: await pikchr,
+            loadLini,
             graphviz: renderGraphviz,
           },
           renderers: {

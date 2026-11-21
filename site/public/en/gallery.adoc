@@ -534,3 +534,145 @@ Handle lower-level visualization specifications with local rendering.
   } } }]
 }
 ----
+
+== Lini service flow
+
+Compile text into an SVG flow diagram with a local WASM compiler.
+
+[lini]
+----
+{ direction: row; gap: 40; }
+|box#source| "AsciiDoc"
+|box#compiler| "Lini WASM"
+|box#svg| "Local SVG"
+source -> compiler -> svg
+----
+
+== Lini Sequence
+
+Show requests, responses, and processing order between services.
+
+[lini]
+----
+{ layout: sequence; }
+|box#user| "User"
+|box#api| "API"
+|box#db| "Database"
+user -> api "save document"
+api -> db "insert"
+db --> api "saved"
+api --> user "201 Created"
+----
+
+== Lini Mind map
+
+Organize a release plan into branching topics.
+
+[lini]
+----
+|mindmap| "Release plan" [
+  |topic| "Build" [
+    |topic| "Compiler"
+    |topic| "Preview"
+  ]
+  |topic| "Quality" [
+    |topic| "Tests"
+    |topic| "Review"
+  ]
+  |topic| "Publish" [
+    |topic| "Package"
+    |topic| "Docs"
+  ]
+]
+----
+
+== Lini Organization tree
+
+Show team hierarchy and responsibilities with a tree layout.
+
+[lini]
+----
+|column| "Team structure" { layout: tree; } [
+  |topic#engineering| "Engineering" [
+    |topic#platform| "Platform" [
+      |topic#api| "API"
+      |topic#infra| "Infrastructure"
+    ]
+    |topic#experience| "Experience" [
+      |topic#web| "Web"
+      |topic#docs| "Documentation"
+    ]
+  ]
+]
+----
+
+== Lini Entity relationship
+
+Describe table fields and one-to-many relationships.
+
+[lini]
+----
+{ direction: row; gap: 80; }
+|entity#users| "Users" { columns: auto, auto, auto; } [
+  "PK"
+  |cell#id| "id"
+  "int"
+  ""
+  "name"
+  "varchar"
+]
+|entity#posts| "Posts" { columns: auto, auto, auto; } [
+  "PK"
+  "id"
+  "int"
+  "FK"
+  |cell#user_id| "user_id"
+  "int"
+  ""
+  "title"
+  "varchar"
+]
+users.id -o< posts.user_id:left
+----
+
+== Lini Bar chart
+
+Compare quarterly results with a bar chart.
+
+[lini]
+----
+|chart| "Documents published" {
+  width: 440; height: 260; categories: "Q1", "Q2", "Q3", "Q4";
+} [
+  |bars| "Guides" { data: 12, 19, 15, 25; fill: --teal-soft; }
+  |bars| "References" { data: 8, 14, 18, 22; fill: --sky-soft; }
+]
+----
+
+== Lini Line chart
+
+Compare trends across multiple time series.
+
+[lini]
+----
+|chart| "Weekly preview usage" {
+  width: 440; height: 260; categories: "Mon", "Tue", "Wed", "Thu", "Fri";
+} [
+  |line| "Desktop" { data: 18, 24, 22, 31, 38; marker: dot; stroke: --teal; }
+  |line| "Web" { data: 10, 14, 19, 23, 29; marker: dot; stroke: --purple; }
+]
+----
+
+== Lini Pie chart
+
+Visualize the proportion of each document category.
+
+[lini]
+----
+|pie| "Documentation mix" { width: 380; height: 260; } [
+  |slice| "Guides" { value: 40; }
+  |slice| "API" { value: 30; }
+  |slice| "Tutorials" { value: 20; }
+  |slice| "Notes" { value: 10; }
+]
+----

@@ -1,0 +1,4 @@
+{ direction: row; gap: 40; }
+|box#input| "Input"
+|box#output| "SVG"
+input -> output

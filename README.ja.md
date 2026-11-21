@@ -86,6 +86,7 @@ await hydrateEmbeddedDiagrams(document, {
     loadPikchr: window.loadPikchr,
     graphviz: window.graphviz,
     loadD2: window.loadD2,
+    loadLini: window.loadLini,
     JSON5: window.JSON5,
   },
   renderers: {
@@ -96,7 +97,7 @@ await hydrateEmbeddedDiagrams(document, {
 })
 ```
 
-組み込みのハイドレーションは、ホストページが対応するローカルレンダラーライブラリまたは lazy loader を提供している場合に、Mermaid、Nomnoml、Vega、Vega-Lite、WaveDrom、Bytefield、SvgBob、Pikchr、GraphViz、D2 をサポートします。PlantUML と C4PlantUML は、ブラウザー向け PlantUML 実装の API がそれぞれ異なるため、注入されたレンダラーを使用できます。
+組み込みのハイドレーションは、ホストページが対応するローカルレンダラーライブラリまたは lazy loader を提供している場合に、Mermaid、Nomnoml、Vega、Vega-Lite、WaveDrom、Bytefield、SvgBob、Pikchr、GraphViz、Lini、D2 をサポートします。PlantUML と C4PlantUML は、ブラウザー向け PlantUML 実装の API がそれぞれ異なるため、注入されたレンダラーを使用できます。
 
 このパッケージには、小さな任意のスタイルシートも含まれています。
 
@@ -105,6 +106,26 @@ import 'asciidoctor-kroki-embedded/style.css'
 ```
 
 ソースペイロードの非表示、SVG 出力のサイズ調整、レンダラーエラーの表示の出発点として使えます。
+
+## Lini
+
+Lini は公式の [`lini-wasm`](https://github.com/monfa-red/lini/tree/main/crates/lini-wasm) コンパイラーを使用します。ホストが初期化済みモジュールを `libraries.lini` に渡すか、そのモジュールを返す非同期ローダーを `libraries.loadLini` に渡してください。モジュールは `compile(source)`、`static=true` の場合は `compile_static(source)` を提供する必要があります。複数の図で初期化を共有できるよう、ローダーで初期化結果をキャッシュします。
+
+```asciidoc
+[lini,static=true]
+----
+{ direction: row; gap: 40; }
+|box#input| "AsciiDoc"
+|box#output| "SVG"
+input -> output
+----
+
+lini::diagrams/flow.lini[]
+```
+
+WASM をローカルに同梱し、`lini-wasm/web` を `await init({ module_or_path: wasmBytes })` で初期化します。`wasmBytes` は同梱した `Uint8Array` です。引数なしの `init()` は fetch を試みるため、ネットワークガードと併用できません。[VS Code ローダー](examples/vscode-preview/src/load-lini.js) (esbuild binary loader) と[サイトのローダー](site/lib/load-lini.js) (Vite inline asset) に実装例があります。レンダラーライブラリはホスト側の依存関係で、このパッケージ自体にはバンドルしません。
+
+`static=true` は CSS 変数を解決したコンパイラーの static 出力を選択します。文字のパス化はコンパイラーのフォント対応に依存します。現行 WASM API にない `default` 以外の Kroki `theme` オプションはエラーになります。外部リソースの読み込みを防ぐため、画像ノードは data 画像も含め DOM 挿入前に拒否します。ホストからの asset map は未対応です。
 
 ## Antora での使い方
 
@@ -179,6 +200,7 @@ Kroki サーバーのサポート状況は、公式 Kroki プロジェクトの 
 | GoAT | Yes | No | No | No |
 | GraphViz | Yes | Yes | Yes | Yes |
 | GraphViz alias (`dot`) | Yes | Yes | Yes | No |
+| Lini | Yes | Yes | Yes | Yes |
 | Mermaid | Yes | Yes | Yes | Yes |
 | Nomnoml | Yes | Yes | Yes | Yes |
 | NwDiag | Yes | Yes | No | No |
@@ -204,7 +226,7 @@ Kroki サーバーのサポート状況は、公式 Kroki プロジェクトの 
 ## VS Code 検証ハーネス
 
 このリポジトリには、`examples/vscode-preview` 配下に VS Code 拡張のサンプルが含まれています。
-このサンプルは `fixtures/sample.adoc` をこのパッケージで変換し、バンドルされたローカルライブラリを使って、Webview 内で Mermaid、PlantUML、Nomnoml、Vega、Vega-Lite、WaveDrom、Bytefield、SvgBob、Pikchr、GraphViz の図をハイドレートします。
+このサンプルは `fixtures/sample.adoc` をこのパッケージで変換し、バンドルされたローカルライブラリを使って、Webview 内で Mermaid、PlantUML、Nomnoml、Vega、Vega-Lite、WaveDrom、Bytefield、SvgBob、Pikchr、GraphViz、Lini の図をハイドレートします。
 フィクスチャは、バンドル済みレンダラーごとのインラインブロックとローカル図マクロに加え、D2 レンダラーを提供するホスト向けの D2 インラインサンプル、ローカル画像レンダリング、ブロックされたリモート画像をカバーしています。
 
 ```sh

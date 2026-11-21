@@ -448,3 +448,57 @@ test('installNetworkGuards disables browser network APIs', () => {
   }
   assert.throws(() => target.navigator.sendBeacon(), /disabled/)
 })
+
+for (const staticValue of [undefined, false, 'false', true, '', 'true']) {
+  test(`hydrates Lini with the real WASM compiler (static=${JSON.stringify(staticValue)})`, async () => {
+    const lini = await import('lini-wasm')
+    const target = diagram('lini', '|box| "Local compiler"')
+    if (staticValue !== undefined) target.element.dataset.diagramOptions = JSON.stringify({ static: staticValue })
+    const results = await hydrateEmbeddedDiagrams({ querySelectorAll: () => [target.element] }, { libraries: { lini } })
+    assert.equal(results[0].ok, true)
+    assert.match(target.outputElement.innerHTML, /^<svg /)
+    if ([true, '', 'true'].includes(staticValue)) {
+      assert.equal(target.outputElement.innerHTML, lini.compile_static('|box| "Local compiler"'))
+      assert.doesNotMatch(target.outputElement.innerHTML, /var\(/)
+    } else {
+      assert.match(target.outputElement.innerHTML, /Local compiler/)
+    }
+  })
+}
+
+test('Lini lazy loader initializes once for multiple diagrams in the host', async () => {
+  let loads = 0
+  let compiler
+  const targets = [diagram('lini', '|box| "First"'), diagram('lini', '|box| "Second"')]
+  const results = await hydrateEmbeddedDiagrams({ querySelectorAll: () => targets.map(t => t.element) }, {
+    libraries: {
+      loadLini() {
+        compiler ||= import('lini-wasm').then(lini => { loads++; return lini })
+        return compiler
+      },
+    },
+  })
+  assert.equal(loads, 1)
+  assert.deepEqual(results.map(result => result.ok), [true, true])
+})
+
+for (const [name, source, libraries, options, message] of [
+  ['missing library', '|box| "Hello"', {}, {}, /Lini renderer is not available/],
+  ['invalid source', '|unknown|', null, {}, /unknown/],
+  ['remote image', '|image| { src: "https://example.invalid/image.png"; width: 100; height: 100; }', null, {}, /image nodes are not supported/],
+  ['unsupported theme', '|box| "Hello"', null, { theme: 'blueprint' }, /theme options are not supported/],
+  ['invalid static', '|box| "Hello"', null, { static: 'invalid' }, /static option must be true or false/],
+  ['missing static compiler', '|box| "Hello"', { lini: { compile() { throw new Error('must not run') } } }, { static: true }, /static compiler is not available/],
+  ['invalid output', '|box| "Hello"', { lini: { compile: () => null } }, {}, /did not return SVG output/],
+]) {
+  test(`Lini reports ${name} without inserting output`, async () => {
+    const target = diagram('lini', source)
+    target.element.dataset.diagramOptions = JSON.stringify(options)
+    const results = await hydrateEmbeddedDiagrams({ querySelectorAll: () => [target.element] }, {
+      libraries: libraries || { lini: await import('lini-wasm') },
+    })
+    assert.equal(results[0].ok, false)
+    assert.match(target.outputElement.textContent, message)
+    assert.equal(target.outputElement.innerHTML, '')
+  })
+}

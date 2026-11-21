@@ -13,6 +13,8 @@ import waveSkin from 'wavedrom/skins/default.js'
 import bitfield from 'bit-field'
 import { D2 as D2Renderer } from '@terrastruct/d2'
 
+import { loadLini } from './load-lini.js'
+
 globalThis.WaveSkin = waveSkin
 installNetworkGuards(globalThis)
 
@@ -99,6 +101,7 @@ async function renderAll() {
       bitfield,
       svgbob: renderTextDiagramSvg,
       loadPikchr,
+      loadLini,
       graphviz: renderGraphviz,
       D2: d2RendererLibrary,
       excalidraw: { exportToSvg: renderExcalidrawSceneSvg },

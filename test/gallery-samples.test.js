@@ -35,6 +35,14 @@ const englishLabels = [
   ['SvgBob ASCII art', 'Render existing text diagrams as readable SVG in HTML.'],
   ['Excalidraw sketch', 'Share early ideas and rough review flows with hand-drawn boxes and arrows.'],
   ['Vega', 'Handle lower-level visualization specifications with local rendering.'],
+  ['Lini service flow', 'Compile text into an SVG flow diagram with a local WASM compiler.'],
+  ["Lini Sequence", "Show requests, responses, and processing order between services."],
+  ["Lini Mind map", "Organize a release plan into branching topics."],
+  ["Lini Organization tree", "Show team hierarchy and responsibilities with a tree layout."],
+  ["Lini Entity relationship", "Describe table fields and one-to-many relationships."],
+  ["Lini Bar chart", "Compare quarterly results with a bar chart."],
+  ["Lini Line chart", "Compare trends across multiple time series."],
+  ["Lini Pie chart", "Visualize the proportion of each document category."],
 ]
 
 const englishSamples = samples.map((sample, index) => ({
@@ -48,6 +56,7 @@ const rendererLabels = {
   d2: 'D2',
   excalidraw: 'Excalidraw',
   graphviz: 'Graphviz',
+  lini: 'Lini',
   mermaid: 'Mermaid',
   nomnoml: 'Nomnoml',
   pikchr: 'Pikchr',
