@@ -15,6 +15,8 @@ code .
 
 Use the `Run Kroki Embedded Preview` launch configuration. It builds the harness and opens an Extension Development Host with `fixtures/sample.adoc`.
 
+You can also open the repository root and select the same configuration after installing dependencies in both directories. All scripts in this directory are available in **Run and Debug**, with the `vscode-preview:` prefix from the repository root or the `npm:` prefix when opening this directory alone. Use F5 to debug or **Run Without Debugging** to run them in the integrated terminal. Use `verify` for the full validation sequence; individual generation and smoke scripts require existing build output.
+
 In the Extension Development Host, run:
 
 ```text
