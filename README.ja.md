@@ -178,6 +178,7 @@ Kroki サーバーのサポート状況は、公式 Kroki プロジェクトの 
 | Excalidraw | Yes | Yes | No | No |
 | GoAT | Yes | No | No | No |
 | GraphViz | Yes | Yes | Yes | Yes |
+| GraphViz alias (`dot`) | Yes | Yes | Yes | No |
 | Mermaid | Yes | Yes | Yes | Yes |
 | Nomnoml | Yes | Yes | Yes | Yes |
 | NwDiag | Yes | Yes | No | No |
@@ -195,6 +196,8 @@ Kroki サーバーのサポート状況は、公式 Kroki プロジェクトの 
 | Vega-Lite | Yes | Yes | Yes | Yes |
 | WaveDrom | Yes | Yes | Yes | Yes |
 | WireViz | Yes | Yes | No | No |
+
+`dot` は GraphViz の別名として、ブロック (`[dot]`) とローカルファイルマクロ (`dot::diagram.dot[]`) で使用できます。ブラウザー描画は `graphviz` と同じ `libraries.graphviz` を使用します。`diagramNames` を限定する場合や独自の `renderers` を渡す場合は、`dot` も明示的に指定してください。
 
 このパッケージは、ローカルレンダラーが未対応の場合でも Kroki サーバーへフォールバックしません。追加の図種別をローカルレンダリングしたいホストは、独自のレンダラーを読み込み、登録時のカスタム `renderer` またはハイドレーション時のカスタムブラウザーレンダラーとして渡してください。D2 のハイドレーションでは、ホストがローカルの `d2`/`D2` レンダラーまたは `loadD2` lazy loader を提供する必要があります。D2 レンダラーライブラリ自体はこのパッケージにはバンドルされません。
 

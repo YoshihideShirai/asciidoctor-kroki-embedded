@@ -35,3 +35,14 @@ test('browser extension resolves substitutions before rendering PlantUML', async
   assert.match(html, /Alice -&gt; Bob/)
   assert.doesNotMatch(html, /\[object Promise\]/)
 })
+
+
+test('browser extension recognizes the dot alias by default', async () => {
+  const registry = asciidoctor.Extensions.create()
+  registerBrowserDiagrams(registry)
+  const html = await asciidoctor.convert('[dot]\n----\ndigraph { A -> B }\n----', {
+    extension_registry: registry,
+  })
+  assert.match(html, /data-diagram-type="dot"/)
+  assert.match(html, /A -&gt; B/)
+})

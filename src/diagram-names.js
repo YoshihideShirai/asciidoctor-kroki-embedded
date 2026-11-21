@@ -10,6 +10,7 @@ export const DEFAULT_DIAGRAM_NAMES = [
   'erd',
   'excalidraw',
   'graphviz',
+  'dot',
   'mermaid',
   'nomnoml',
   'nwdiag',

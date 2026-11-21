@@ -148,3 +148,18 @@ test('renders a local file boundary error for unsafe block macro targets', async
   assert.match(html, /kroki-embedded-error/)
   assert.match(html, /outside the document directory/)
 })
+
+
+test('converts dot blocks and local macros using the default registration', async (t) => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kroki-embedded-dot-'))
+  t.after(() => fs.rmSync(tmpDir, { recursive: true, force: true }))
+  const source = 'digraph { A -> B }'
+  fs.writeFileSync(path.join(tmpDir, 'diagram.dot'), source)
+
+  for (const input of [`[dot]\n----\n${source}\n----`, 'dot::diagram.dot[]']) {
+    const html = await convert(input, { convertOptions: { base_dir: tmpDir } })
+    assert.match(html, /data-diagram-type="dot"/)
+    assert.match(html, /digraph \{ A -&gt; B \}/)
+    assert.doesNotMatch(html, /kroki-embedded-error/)
+  }
+})

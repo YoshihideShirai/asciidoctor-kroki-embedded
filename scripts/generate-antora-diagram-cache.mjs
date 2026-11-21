@@ -12,7 +12,7 @@ const demoRoot = path.join(repoRoot, 'examples/antora-demo')
 const pagePath = path.join(demoRoot, 'docs/modules/ROOT/pages/index.adoc')
 const cacheDir = path.join(demoRoot, 'supplemental-ui/diagram-cache')
 const rendererVersion = 'antora-demo-cache-v1'
-const supportedTypes = new Set(['mermaid', 'plantuml', 'graphviz', 'vegalite'])
+const supportedTypes = new Set(['mermaid', 'plantuml', 'graphviz', 'dot', 'vegalite'])
 
 function extractBlocks(source) {
   const lines = source.split(/\r?\n/)
@@ -103,7 +103,7 @@ function renderVegaLite(source) {
 async function renderDiagram({ diagramType, source }) {
   if (diagramType === 'mermaid') return renderFlowchart(source)
   if (diagramType === 'plantuml') return renderSequence(source)
-  if (diagramType === 'graphviz') return renderGraphviz(source)
+  if (diagramType === 'graphviz' || diagramType === 'dot') return renderGraphviz(source)
   if (diagramType === 'vegalite') return renderVegaLite(source)
   throw new Error(`Unsupported Antora demo diagram type: ${diagramType}`)
 }

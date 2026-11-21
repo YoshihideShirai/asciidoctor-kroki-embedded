@@ -264,6 +264,7 @@ async function convertAsciiDoc(document, cacheEntries) {
       'svgbob',
       'pikchr',
       'graphviz',
+      'dot',
       'd2',
     ],
   })
