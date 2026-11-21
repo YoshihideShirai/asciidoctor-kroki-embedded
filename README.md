@@ -130,6 +130,8 @@ Bundle the WASM locally and initialize `lini-wasm/web` with `await init({ module
 
 ## Antora Usage
 
+The Antora demo includes all 15 local renderer block names (including aliases), with expandable source examples. Run `npm run antora:build` to generate its gallery and bundle the same browser renderers used by the site gallery. Open `site/public/antora-demo/kroki-embedded-demo/index.html` through a local HTTP server.
+
 Antora can load this package as an Asciidoctor extension through the playbook's `asciidoc.extensions` list.
 Create an extension module next to your playbook and export the adapter returned by `createAntoraExtension`.
 
