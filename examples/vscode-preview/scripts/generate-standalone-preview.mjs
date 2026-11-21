@@ -27,6 +27,7 @@ krokiEmbedded.register(registry, {
     'bytefield',
     'svgbob',
     'pikchr',
+    'lini',
     'graphviz',
     'd2',
   ],

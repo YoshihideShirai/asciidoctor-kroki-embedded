@@ -21,7 +21,7 @@ In the Extension Development Host, run:
 AsciiDoc: Open Kroki Embedded Preview
 ```
 
-The preview should render Mermaid, PlantUML, Nomnoml, Vega, Vega-Lite, WaveDrom, Bytefield, SvgBob, Pikchr, GraphViz, and D2 without using a Kroki server. The fixture covers both inline diagram blocks, local diagram macros such as `mermaid::diagrams/macro.mmd[]`, and local/remote image boundaries. Edits to the active fixture refresh the preview automatically; `AsciiDoc: Refresh Kroki Embedded Preview` forces a redraw.
+The preview should render Mermaid, PlantUML, Nomnoml, Vega, Vega-Lite, WaveDrom, Bytefield, SvgBob, Pikchr, GraphViz, Lini, and D2 without using a Kroki server. The fixture covers both inline diagram blocks, local diagram macros such as `mermaid::diagrams/macro.mmd[]`, and local/remote image boundaries. Edits to the active fixture refresh the preview automatically; `AsciiDoc: Refresh Kroki Embedded Preview` forces a redraw.
 
 Remote images are blocked by default and replaced with an empty local data image before the Webview renders. To allow specific remote image hosts while testing the Webview CSP path, set:
 
@@ -43,3 +43,5 @@ npm run verify
 ```
 
 The verify command first runs a no-network audit over the harness source and manifest, then writes `dist/standalone-preview.html` plus desktop/narrow screenshots, opens the preview in Playwright Chromium, and fails if the pre-bundle network guards are inactive, the Webview render summary is missing, any diagram reports a renderer error, any diagram renders with an empty visual box, any browser warning/error is logged, or any `http`/`https` request is observed.
+
+Lini uses the official `lini-wasm` compiler. The esbuild binary loader embeds its WASM in the Webview bundle, and `loadLini` initializes it from bytes without a fetch. The fixture covers service flows, sequence diagrams, mind maps, organization trees, entity relationships, bar charts, line charts, pie charts, and a local file macro with `static=true`. Image nodes and non-default `theme` options are unsupported.

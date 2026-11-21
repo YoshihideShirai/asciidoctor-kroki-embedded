@@ -290,4 +290,82 @@ Input -->|local| Render
     "x": { "scale": "x", "field": "x" }, "y": { "scale": "y", "field": "y" }, "stroke": { "value": "#0f766e" }, "strokeWidth": { "value": 3 }
   } } }]
 }` },
+  { type: 'lini', title: 'Lini サービスフロー', description: 'ローカルの WASM コンパイラーで、テキストから SVG のフロー図を生成します。', source: `{ direction: row; gap: 40; }
+|box#source| "AsciiDoc"
+|box#compiler| "Lini WASM"
+|box#svg| "Local SVG"
+source -> compiler -> svg` },
+  { type: 'lini', title: 'Lini シーケンス', description: 'サービス間の要求・応答と処理順序を表現します。', source: `{ layout: sequence; }
+|box#user| "User"
+|box#api| "API"
+|box#db| "Database"
+user -> api "save document"
+api -> db "insert"
+db --> api "saved"
+api --> user "201 Created"` },
+  { type: 'lini', title: 'Lini マインドマップ', description: 'リリース計画を枝分かれするトピックで整理します。', source: `|mindmap| "Release plan" [
+  |topic| "Build" [
+    |topic| "Compiler"
+    |topic| "Preview"
+  ]
+  |topic| "Quality" [
+    |topic| "Tests"
+    |topic| "Review"
+  ]
+  |topic| "Publish" [
+    |topic| "Package"
+    |topic| "Docs"
+  ]
+]` },
+  { type: 'lini', title: 'Lini 組織図', description: 'チームの階層と役割をツリーレイアウトで示します。', source: `|column| "Team structure" { layout: tree; } [
+  |topic#engineering| "Engineering" [
+    |topic#platform| "Platform" [
+      |topic#api| "API"
+      |topic#infra| "Infrastructure"
+    ]
+    |topic#experience| "Experience" [
+      |topic#web| "Web"
+      |topic#docs| "Documentation"
+    ]
+  ]
+]` },
+  { type: 'lini', title: 'Lini ER 図', description: 'テーブルの項目と一対多の関連を示します。', source: `{ direction: row; gap: 80; }
+|entity#users| "Users" { columns: auto, auto, auto; } [
+  "PK"
+  |cell#id| "id"
+  "int"
+  ""
+  "name"
+  "varchar"
+]
+|entity#posts| "Posts" { columns: auto, auto, auto; } [
+  "PK"
+  "id"
+  "int"
+  "FK"
+  |cell#user_id| "user_id"
+  "int"
+  ""
+  "title"
+  "varchar"
+]
+users.id -o< posts.user_id:left` },
+  { type: 'lini', title: 'Lini 棒グラフ', description: '四半期ごとの実績を棒グラフで比較します。', source: `|chart| "Documents published" {
+  width: 440; height: 260; categories: "Q1", "Q2", "Q3", "Q4";
+} [
+  |bars| "Guides" { data: 12, 19, 15, 25; fill: --teal-soft; }
+  |bars| "References" { data: 8, 14, 18, 22; fill: --sky-soft; }
+]` },
+  { type: 'lini', title: 'Lini 折れ線グラフ', description: '時系列データの推移を複数の系列で比較します。', source: `|chart| "Weekly preview usage" {
+  width: 440; height: 260; categories: "Mon", "Tue", "Wed", "Thu", "Fri";
+} [
+  |line| "Desktop" { data: 18, 24, 22, 31, 38; marker: dot; stroke: --teal; }
+  |line| "Web" { data: 10, 14, 19, 23, 29; marker: dot; stroke: --purple; }
+]` },
+  { type: 'lini', title: 'Lini 円グラフ', description: 'ドキュメント種別の構成比を可視化します。', source: `|pie| "Documentation mix" { width: 380; height: 260; } [
+  |slice| "Guides" { value: 40; }
+  |slice| "API" { value: 30; }
+  |slice| "Tutorials" { value: 20; }
+  |slice| "Notes" { value: 10; }
+]` },
 ]

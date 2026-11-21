@@ -263,6 +263,7 @@ async function convertAsciiDoc(document, cacheEntries) {
       'bytefield',
       'svgbob',
       'pikchr',
+      'lini',
       'graphviz',
       'dot',
       'd2',

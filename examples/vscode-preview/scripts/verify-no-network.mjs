@@ -19,6 +19,7 @@ const allowedRuntimeDependencies = new Set([
   'asciidoctor-kroki-embedded',
   'bit-field',
   'json5',
+  'lini-wasm',
   'mermaid',
   'nomnoml',
   'pikchr-js',

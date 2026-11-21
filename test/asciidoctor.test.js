@@ -163,3 +163,17 @@ test('converts dot blocks and local macros using the default registration', asyn
     assert.doesNotMatch(html, /kroki-embedded-error/)
   }
 })
+
+test('converts Lini blocks and file macros with options and escaped source', async (t) => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kroki-embedded-lini-'))
+  t.after(() => fs.rmSync(tmpDir, { recursive: true, force: true }))
+  const source = '|box| "<Local SVG>"'
+  fs.writeFileSync(path.join(tmpDir, 'diagram.lini'), source)
+  for (const input of [`[lini,static=true]\n----\n${source}\n----`, 'lini::diagram.lini[static=true]']) {
+    const html = await convert(input, { convertOptions: { base_dir: tmpDir } })
+    assert.match(html, /data-diagram-type="lini"/)
+    assert.match(html, /&lt;Local SVG&gt;/)
+    assert.match(html, /data-diagram-options="\{&quot;static&quot;:&quot;true&quot;\}"/)
+    assert.doesNotMatch(html, /kroki-embedded-error/)
+  }
+})
