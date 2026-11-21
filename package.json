@@ -20,7 +20,7 @@
     "site:build": "npm run antora:build && astro build",
     "site:preview": "astro preview",
     "antora:cache": "node scripts/generate-antora-diagram-cache.mjs",
-    "antora:build": "npm run antora:cache && cd examples/antora-demo && antora generate antora-playbook.yml --clean"
+    "antora:build": "node scripts/build-antora-demo.mjs && cd examples/antora-demo && antora generate antora-playbook.yml --clean"
   },
   "peerDependencies": {
     "@asciidoctor/core": ">=4 <5"
@@ -45,6 +45,7 @@
     "@viz-js/viz": "^3.31.0",
     "astro": "^6.4.8",
     "bit-field": "^1.11.0",
+    "esbuild": "^0.27.7",
     "json5": "^2.2.3",
     "lini-wasm": "^1.1.1",
     "mermaid": "^11.17.2",

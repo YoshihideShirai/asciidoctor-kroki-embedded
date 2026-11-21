@@ -129,6 +129,8 @@ WASM をローカルに同梱し、`lini-wasm/web` を `await init({ module_or_p
 
 ## Antora での使い方
 
+Antora デモでは、別名を含むローカル描画対応の全15種類と、開閉できるソース例を確認できます。`npm run antora:build` でギャラリーを生成し、サイトのギャラリーと共通のブラウザーレンダラーをバンドルします。ローカル HTTP サーバー経由で `site/public/antora-demo/kroki-embedded-demo/index.html` を開いてください。
+
 Antora では、playbook の `asciidoc.extensions` にこのパッケージ用の Asciidoctor 拡張を登録して使います。
 playbook の近くに拡張モジュールを作り、`createAntoraExtension` が返すアダプターを呼び出してください。
 
