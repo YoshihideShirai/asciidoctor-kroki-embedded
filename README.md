@@ -225,6 +225,16 @@ Kroki server support is based on the official Kroki project README and documenta
 
 This package never falls back to the Kroki server for unsupported local renderers. Hosts that need local rendering for additional diagram types should load their own renderer and pass a custom `renderer` during registration or a custom browser renderer during hydration. D2 hydration expects the host to provide a local `d2`/`D2` renderer or a `loadD2` lazy loader; the VS Code validation harness bundles `@terrastruct/d2` as one example host renderer.
 
+## Run and Debug in VS Code
+
+Open the repository root in VS Code and run `npm install` first. Select a configuration in **Run and Debug**, then press F5 to debug or use **Run Without Debugging**.
+
+- `npm: …` runs any root npm script: tests, site development/build/preview, and Antora cache/build. Run `site:build` before `site:preview`.
+- `vscode-preview: …` runs any harness npm script. First run `npm --prefix examples/vscode-preview install`. The individual `generate:preview` and `smoke:preview` scripts use existing build output; use `verify` for the full verification sequence.
+- `Run Kroki Embedded Preview` builds the harness and opens the sample document in an Extension Development Host.
+
+Output appears in the integrated terminal. Use the stop button to end a development server. Opening only `examples/vscode-preview` also provides all harness npm scripts and the extension launch configuration.
+
 ## VS Code Validation Harness
 
 This repository includes a sample VS Code extension under `examples/vscode-preview`.

@@ -225,6 +225,16 @@ Kroki サーバーのサポート状況は、公式 Kroki プロジェクトの 
 
 このパッケージは、ローカルレンダラーが未対応の場合でも Kroki サーバーへフォールバックしません。追加の図種別をローカルレンダリングしたいホストは、独自のレンダラーを読み込み、登録時のカスタム `renderer` またはハイドレーション時のカスタムブラウザーレンダラーとして渡してください。D2 のハイドレーションでは、ホストがローカルの `d2`/`D2` レンダラーまたは `loadD2` lazy loader を提供する必要があります。D2 レンダラーライブラリ自体はこのパッケージにはバンドルされません。
 
+## VS Code からの実行とデバッグ
+
+リポジトリのルートを VS Code で開き、最初に `npm install` を実行してください。「実行とデバッグ」で構成を選び、F5 でデバッグ実行、Ctrl+F5 で通常実行できます。
+
+- `npm: …`: ルートの全 npm scripts（テスト、サイトの開発・ビルド・プレビュー、Antora のキャッシュ生成・ビルド）。`site:preview` は先に `site:build` を実行してください。
+- `vscode-preview: …`: 検証ハーネスの全 npm scripts。最初に `npm --prefix examples/vscode-preview install` を実行してください。個別の `generate:preview` と `smoke:preview` はビルド済みの成果物を使うため、一括検証には `verify` を使ってください。
+- `Run Kroki Embedded Preview`: ハーネスを自動ビルドし、サンプル文書を拡張機能開発ホストで開きます。
+
+コマンドの出力は統合ターミナルに表示されます。開発サーバーは停止ボタンで終了できます。`examples/vscode-preview` だけを開いた場合も、ハーネスの全 npm scripts と拡張機能開発ホストを選択できます。
+
 ## VS Code 検証ハーネス
 
 このリポジトリには、`examples/vscode-preview` 配下に VS Code 拡張のサンプルが含まれています。
