@@ -8,10 +8,10 @@ function applySubs(parent, value, subs) {
   return parent.applySubs(value, parent.resolveSubs(subs))
 }
 
-function renderPass(processor, parent, diagramType, source, attrs, renderer, options) {
-  const html = renderer({
+async function renderPass(processor, parent, diagramType, source, attrs, renderer, options) {
+  const html = await renderer({
     diagramType,
-    source: applySubs(parent, source, attrs.subs),
+    source: await applySubs(parent, source, attrs.subs),
     attrs,
     document: parent.getDocument(),
     options,
@@ -23,8 +23,8 @@ function registerDiagramBlock(registry, diagramType, renderer, options) {
   registry.block(diagramType, function () {
     this.onContext(['listing', 'literal'])
     this.positionalAttributes(['target', 'format'])
-    this.process(function (parent, reader, attrs) {
-      return renderPass(this, parent, diagramType, reader.read(), attrs, renderer, options)
+    this.process(async function (parent, reader, attrs) {
+      return renderPass(this, parent, diagramType, await reader.read(), attrs, renderer, options)
     })
   })
 }
