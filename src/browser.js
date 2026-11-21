@@ -356,6 +356,7 @@ const DEFAULT_RENDERERS = {
   svgbob: renderSvgBob,
   pikchr: renderPikchr,
   graphviz: renderGraphviz,
+  dot: renderGraphviz,
   d2: renderD2,
   excalidraw: renderExcalidraw,
 }

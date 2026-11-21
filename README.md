@@ -178,6 +178,7 @@ Kroki server support is based on the official Kroki project README and documenta
 | Excalidraw | Yes | Yes | Yes | No |
 | GoAT | Yes | No | No | No |
 | GraphViz | Yes | Yes | Yes | Yes |
+| GraphViz alias (`dot`) | Yes | Yes | Yes | No |
 | Mermaid | Yes | Yes | Yes | Yes |
 | Nomnoml | Yes | Yes | Yes | Yes |
 | NwDiag | Yes | Yes | No | No |
@@ -195,6 +196,8 @@ Kroki server support is based on the official Kroki project README and documenta
 | Vega-Lite | Yes | Yes | Yes | Yes |
 | WaveDrom | Yes | Yes | Yes | Yes |
 | WireViz | Yes | Yes | No | No |
+
+`dot` is supported as an alias for GraphViz in blocks (`[dot]`) and local file macros (`dot::diagram.dot[]`). Browser hydration uses the same `libraries.graphviz` renderer as `graphviz`. When restricting `diagramNames` or providing custom `renderers`, include `dot` explicitly to use the alias.
 
 This package never falls back to the Kroki server for unsupported local renderers. Hosts that need local rendering for additional diagram types should load their own renderer and pass a custom `renderer` during registration or a custom browser renderer during hydration. D2 hydration expects the host to provide a local `d2`/`D2` renderer or a `loadD2` lazy loader; the VS Code validation harness bundles `@terrastruct/d2` as one example host renderer.
 

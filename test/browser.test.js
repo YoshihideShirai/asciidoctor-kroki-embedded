@@ -246,27 +246,29 @@ test('hydrateEmbeddedDiagrams supports Pikchr loaded function API', async () => 
   assert.equal(pikchr.outputElement.innerHTML, '<svg data-source="box"></svg>')
 })
 
-test('hydrateEmbeddedDiagrams supports GraphViz renderString API', async () => {
-  const graphviz = diagram('graphviz', 'digraph { A -> B }')
-  const root = {
-    querySelectorAll() {
-      return [graphviz.element]
-    },
-  }
+for (const diagramType of ['graphviz', 'dot']) {
+  test(`hydrateEmbeddedDiagrams supports ${diagramType} with the GraphViz renderString API`, async () => {
+    const graphviz = diagram(diagramType, 'digraph { A -> B }')
+    const root = {
+      querySelectorAll() {
+        return [graphviz.element]
+      },
+    }
 
-  const results = await hydrateEmbeddedDiagrams(root, {
-    libraries: {
-      graphviz: {
-        renderString(source) {
-          return `<svg data-source="${source}"></svg>`
+    const results = await hydrateEmbeddedDiagrams(root, {
+      libraries: {
+        graphviz: {
+          renderString(source) {
+            return `<svg data-source="${source}"></svg>`
+          },
         },
       },
-    },
-  })
+    })
 
-  assert.equal(results[0].ok, true)
-  assert.equal(graphviz.outputElement.innerHTML, '<svg data-source="digraph { A -> B }"></svg>')
-})
+    assert.equal(results[0].ok, true)
+    assert.equal(graphviz.outputElement.innerHTML, '<svg data-source="digraph { A -> B }"></svg>')
+  })
+}
 
 
 
