@@ -40,12 +40,14 @@
     "@antora/cli": "^3.2.3",
     "@antora/site-generator": "^3.2.3",
     "@asciidoctor/core": "^4.3.0",
+    "astro": "^6.4.8",
+    "esbuild": "^0.27.7"
+  },
+  "dependencies": {
     "@plantuml/core": "^1.2026.10",
     "@terrastruct/d2": "^0.1.33",
     "@viz-js/viz": "^3.31.0",
-    "astro": "^6.4.8",
     "bit-field": "^1.11.0",
-    "esbuild": "^0.27.7",
     "json5": "^2.2.3",
     "lini-wasm": "^1.1.1",
     "mermaid": "^11.17.2",
